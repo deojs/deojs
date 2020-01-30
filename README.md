@@ -1,2 +1,2 @@
-# deojs
-JavaScript de-obfuscator
+# DeoJS - Javascript De-Obfuscator
+
