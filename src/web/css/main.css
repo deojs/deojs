@@ -1,3 +1,19 @@
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+#header {
+    /* height: 25px; */
+    background-color: #E1F5FE;
+    border-bottom: 1px solid #BDBDBD;
+    text-align: center;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+#header h1 {
+    margin: 0;
+    font-size: 1em;
+}
+
+#workPane {
+    height: calc(100vh - 25px);
+    width: calc(100vw);
+    background-color: #FAFAFA;
 }

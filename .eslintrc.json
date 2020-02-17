@@ -1,0 +1,26 @@
+{
+    "env": {
+        "browser": true,
+        "es6": true
+    },
+    "extends": [
+        "airbnb-base"
+    ],
+    "globals": {
+        "Atomics": "readonly",
+        "SharedArrayBuffer": "readonly"
+    },
+    "parserOptions": {
+        "ecmaVersion": 2018,
+        "sourceType": "module"
+    },
+    "rules": {
+        "comma-dangle": ["error", "never"],
+        "indent": ["error", 4],
+        "quotes": ["error", "double"],
+        "import/extensions": "off",
+        "no-restricted-globals": "off",
+        "no-console": "off",
+        "prefer-destructuring": "off"
+    }
+}

@@ -1,9 +1,43 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>DeoJS</title>
+        <title>Deo - De-obfuscator</title>
     </head>
     <body>
-        <h1>DeoJS</h1>
+        <div id="header">
+            <h1>DeoJS</h1>
+        </div>
+        <div id="workPane">
+            <div id="opPane">
+                <div class="paneHeader" id="opPaneHeader">
+                    <h2>Operations</h2>
+                </div>
+                <ul id="operationsList">
+                    <li>op 1</li>
+                    <li>op 2</li>
+                    <li>op 3</li>
+                    <li>op 4</li>
+                </ul>
+            </div>
+            <div id="ioPane">
+                <div id="flowPane">
+                    <div class="paneHeader" id="flowPaneHeader">
+                        <h2>Flow</h2>
+                    </div>
+                    <div id="inputContainer" class="flowItem">
+                        Input
+                    </div>
+                    <ul id="flowList">
+                        <li class="flowItem">op 1</li>
+                        <li class="flowItem">op 2</li>
+                    </ul>
+                </div>
+                <div id="outputPane">
+                    <div class="paneHeader" id="outputPaneHeader">
+                        <h2>Output</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
     </body>
 </html>

@@ -1,0 +1,28 @@
+#opPane {
+    float: left;
+}
+
+#ioPane {
+    float: right;
+    height: 100%;
+}
+
+#flowPane {
+    height: 100%;
+}
+
+#outputPane {
+    height: 100%;
+}
+
+.paneHeader {
+    height: 2.8em;
+    padding: 8px;
+    background-color: #EEEEEE;
+    border-bottom: 1px solid #E0E0E0;
+}
+
+.paneHeader h2 {
+    font-size: 1.1em;
+    line-height: 1.6em;
+}
