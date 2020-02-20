@@ -23,3 +23,8 @@
     border-left: 1px solid #F5F5F5;
     border-right: 1px solid #F5F5F5;
 }
+
+#flowContainer {
+    overflow: auto;
+    height: calc(100% - 2.8em);
+}
