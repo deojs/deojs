@@ -7,6 +7,7 @@ import InputHelper from "./helpers/InputHelper.mjs";
 
 import AppWorker from "./workers/App.worker.js";
 import InputWorker from "./workers/Input.worker.js";
+import OutputWorker from "./workers/Output.worker.js";
 
 class App {
     setupHelpers() {
@@ -26,6 +27,11 @@ class App {
         this.InputWorker.addEventListener("message", this.handleInputWorkerMessage.bind(this));
         this.InputWorkerCallbacks = {};
         this.InputWorkerCallbackId = 0;
+
+        this.OutputWorker = new OutputWorker();
+        this.OutputWorker.addEventListener("message", this.handleOutputWorkerMessage.bind(this));
+        this.OutputWorkerCallbacks = {};
+        this.OutputWorkerCallbackId = 0;
     }
 
     init() {
