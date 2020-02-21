@@ -15,7 +15,6 @@
 #workPane {
     height: calc(100vh - 25px);
     width: calc(100vw);
-    background-color: #FAFAFA;
 }
 
 .hidden {
