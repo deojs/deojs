@@ -30,7 +30,7 @@ self.addEventListener("message", (e) => {
         });
         break;
     default:
-        console.error(`Invalid command ${data.command}`);
+        console.error(`Invalid command "${data.command}"`);
     }
 });
 
