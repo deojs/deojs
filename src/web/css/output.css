@@ -1,0 +1,11 @@
+#outputTextArea {
+    font-family: 'Courier New', Courier, monospace;
+    width: calc(100% - 5px);
+    margin: 0;
+    padding: 5px;
+    resize: none;
+    border: 0;
+    background-color: #FAFAFA;
+    height: calc(100% - 2.8em - 5px);
+    overflow: auto;
+}

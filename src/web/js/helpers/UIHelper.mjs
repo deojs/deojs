@@ -35,7 +35,7 @@ class UIHelper {
     /**
      * Adds the "flowItem" class to a list item when added to the list
      *
-     * @param event - SortableJs onAdd event object
+     * @param {Event} event - SortableJs onAdd event object
      */
     onFunctionAdded(event) {
         event.item.classList.add("flowItem");
@@ -94,10 +94,16 @@ class UIHelper {
      *
      * @param {Event} event - Input event
      */
-    loadFiles(event) {
+    async loadFiles(event) {
         const element = event.target;
         if (element.files.length > 0) {
-            this.App.InputHelper.loadFile(element.files[0], this.App.InputHelper.inputFileLoaded.bind(this.App.InputHelper));
+            document.getElementById("inputFileName").innerText = "loading...";
+            document.getElementById("inputFileButton").setAttribute("disabled", true);
+            const fileObj = this.App.InputHelper.loadFile(element.files[0], this.App.InputHelper.inputFileLoaded.bind(this.App.InputHelper));
+            this.App.InputWorker.postMessage({
+                command: "newInputFile",
+                data: fileObj
+            });
         }
     }
 

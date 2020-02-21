@@ -27,12 +27,14 @@ self.addEventListener("message", (e) => {
  * @param {object} fileObj
  */
 self.loadFile = function (fileObj) {
-    const file = fileObj.file;
-    self.currentid = fileObj.id;
+    self.currentfile = {
+        file: fileObj.file,
+        id: fileObj.id
+    };
 
-    console.log(`Loading file (ID: ${self.currentid}, Name: "${file.name}", Size: ${file.size}, MIME: ${file.type})`);
+    console.log(`Loading file (ID: ${self.currentfile.id}, Name: "${self.currentfile.file.name}", Size: ${self.currentfile.file.size}, MIME: ${self.currentfile.file.type})`);
 
-    self.reader.readAsArrayBuffer(file);
+    self.reader.readAsArrayBuffer(self.currentfile.file);
 };
 
 /**
@@ -65,7 +67,7 @@ self.sendProgress = function (event) {
     self.postMessage({
         command: "progress",
         data: {
-            id: self.currentid,
+            id: self.currentfile.id,
             loaded: event.loaded,
             total: event.total
         }
@@ -84,12 +86,15 @@ self.sendResult = function (event) {
     self.postMessage({
         command: "fileLoaded",
         data: {
-            id: self.currentid,
-            data: target.result
+            id: self.currentfile.id,
+            data: {
+                file: self.currentfile,
+                data: target.result
+            }
         }
     }, [target.result]);
 
-    self.currentid = null;
+    self.currentfile = null;
 };
 
 /**
@@ -99,7 +104,7 @@ self.sendError = function () {
     self.postMessage({
         command: "error",
         data: {
-            id: self.currentid,
+            id: self.currentfile.id,
             data: self.reader.error
         }
     });

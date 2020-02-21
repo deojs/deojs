@@ -19,6 +19,7 @@ class InputHelper {
      *
      * @param {File} file The file object to be loaded
      * @param {object} cb Callback for when the file has finished loading
+     * @returns {object} File object containing the file and id
      */
     loadFile(file, cb) {
         const fileObj = {
@@ -31,6 +32,7 @@ class InputHelper {
         } else {
             this.loadNextFile(fileObj);
         }
+        return fileObj;
     }
 
     /**
@@ -69,7 +71,7 @@ class InputHelper {
     /**
      * Handle messages sent by the FileLoader
      *
-     * @param {MessageEvent} e
+     * @param {MessageEvent} e - The message object
      */
     handleLoaderMessage(e) {
         if (!e.data) return;
@@ -93,7 +95,7 @@ class InputHelper {
     /**
      * Fires when a file finsihes loading
      *
-     * @param {Object} data - The returned data object
+     * @param {object} data - The returned data object
      */
     fileLoaded(data) {
         console.log(`File ID ${data.id} loaded.`);
@@ -113,23 +115,30 @@ class InputHelper {
     /**
      * Fires when the input file finsihes loading (or errors)
      *
-     * @param {ArrayBuffer} data
+     * @param {ArrayBuffer} data - The data sent back by the FileLoader
      * @param {boolean} error - True if an error occurred
      */
-    inputFileLoaded(data, error) {
+    async inputFileLoaded(data, error) {
         if (error) {
             document.getElementById("inputErrorText").innerText = "An error occurred loading the input file. Check the console for more information.";
             document.getElementById("inputErrorAlert").classList.remove("hidden");
         } else {
-            const fileSelector = document.getElementById("inputFileSelector");
-            if (fileSelector.files.length > 0) {
-                const inputFile = fileSelector.files[0];
-                document.getElementById("inputFileName").innerText = inputFile.name;
-                document.getElementById("inputFileButton").innerText = "Change";
-                console.info("Yay!");
-            }
+            const file = data.file.file;
+            document.getElementById("inputFileName").innerText = file.name;
 
+            const inputFileButton = document.getElementById("inputFileButton");
+            inputFileButton.innerText = "Change";
+            inputFileButton.removeAttribute("disabled");
+
+            this.App.InputWorker.postMessage({
+                command: "inputFileLoaded",
+                data: data
+            }, [data.data]);
         }
+
+        const decoded = await this.getDecodedData();
+        console.log(decoded);
+        document.getElementById("outputTextArea").innerHTML = decoded;
     }
 
     /**
@@ -137,6 +146,25 @@ class InputHelper {
      */
     closeInputErrorAlert() {
         document.getElementById("inputErrorAlert").classList.add("hidden");
+    }
+
+    /**
+     * Requests decoded data from the inputWorker
+     *
+     * @param {string} encoding - The encoding type to use, defaults to "utf-8"
+     * @returns {string}
+     */
+    getDecodedData(encoding = "utf-8") {
+        return new Promise((resolve, reject) => {
+            const callbackid = this.App.addInputWorkerCallback(resolve);
+            this.App.InputWorker.postMessage({
+                command: "getDecodedData",
+                data: {
+                    callbackid: callbackid,
+                    encoding: encoding
+                }
+            });
+        });
     }
 }
 
