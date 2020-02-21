@@ -17,3 +17,7 @@
     width: calc(100vw);
     background-color: #FAFAFA;
 }
+
+.hidden {
+    display: none;
+}

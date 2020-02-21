@@ -27,9 +27,15 @@
     border: 1px solid #B3E5FC;
     padding: 10px;
     border-radius: 10px;
+    box-shadow: 5px 5px 5px #BBBBBB;
 }
 
 #inputContainer {
     margin-top: 5px;
     height: 250px;
+}
+
+#inputOptionsList {
+    list-style-type: none;
+    padding: 0;
 }

@@ -11,6 +11,11 @@ self.addEventListener("message", (e) => {
     case "loadFile":
         self.loadFile(data.data);
         break;
+    case "exit":
+        if (self.reader.readyState === 1) {
+            self.reader.abort();
+        }
+        break;
     default:
         console.warn(`Invalid command "${data.command}"`);
     }
@@ -42,6 +47,9 @@ self.handleReaderEvent = function (event) {
         break;
     case "load":
         self.sendResult(event);
+        break;
+    case "error":
+        self.sendError();
         break;
     default:
         console.info(`Invalid event type ${event.type}.`);
@@ -82,6 +90,19 @@ self.sendResult = function (event) {
     }, [target.result]);
 
     self.currentid = null;
+};
+
+/**
+ * Sends the details of the error back to the main thread
+ */
+self.sendError = function () {
+    self.postMessage({
+        command: "error",
+        data: {
+            id: self.currentid,
+            data: self.reader.error
+        }
+    });
 };
 
 self.currentid = null;

@@ -5,7 +5,7 @@ import Sortable from "sortablejs";
 
 class UIHelper {
     constructor(app) {
-        this.app = app;
+        this.App = app;
         this.opSplit = null;
         this.ioSplit = null;
     }
@@ -75,7 +75,9 @@ class UIHelper {
      */
     addEventListeners() {
         // Input
-        document.getElementById("inputFileButton").addEventListener("change", this.loadFiles.bind(this));
+        document.getElementById("inputFileButton").addEventListener("click", this.openFileClicked.bind(this));
+        document.getElementById("inputFileSelector").addEventListener("change", this.loadFiles.bind(this));
+        document.getElementById("inputErrorAlertClose").addEventListener("click", this.App.InputHelper.closeInputErrorAlert.bind(this.App.InputHelper));
     }
 
     /**
@@ -88,14 +90,6 @@ class UIHelper {
     }
 
     /**
-     *  test!
-     * @param file
-     */
-    testFileLoaded(file) {
-        console.log(file);
-    }
-
-    /**
      * Sends the selected input file to the InputHelper
      *
      * @param {Event} event - Input event
@@ -103,8 +97,15 @@ class UIHelper {
     loadFiles(event) {
         const element = event.target;
         if (element.files.length > 0) {
-            this.app.InputHelper.loadFile(element.files[0], this.testFileLoaded);
+            this.App.InputHelper.loadFile(element.files[0], this.App.InputHelper.inputFileLoaded.bind(this.App.InputHelper));
         }
+    }
+
+    /**
+     * Handles when the open file button is clicked
+     */
+    openFileClicked() {
+        document.getElementById("inputFileSelector").click();
     }
 }
 

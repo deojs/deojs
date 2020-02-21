@@ -26,8 +26,17 @@
                     </div>
                     <div id="flowContainer">
                         <div id="inputContainer" class="flowItem">
-                            Input
-                            <input type="file" id="inputFileButton">
+                            <h3>Input</h3>
+                            <div id="inputErrorAlert" class="alert alert-danger hidden" role="alert">
+                                <span id="inputErrorText"></span>
+                                <button id="inputErrorAlertClose" type="button" class="close" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <ul id="inputOptionsList">
+                                <li>Input File: <span id="inputFileName"></span>&nbsp;<button id="inputFileButton" type="button" class="btn btn-outline-primary">Open</button></li>
+                            </ul>
+                            <input type="file" id="inputFileSelector">
                         </div>
                         <ul id="flowList">
                         </ul>

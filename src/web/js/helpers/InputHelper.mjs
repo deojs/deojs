@@ -79,12 +79,64 @@ class InputHelper {
             console.log(`File ID ${message.data.id} load progress: ${message.data.loaded}/${message.data.total}`);
             break;
         case "fileLoaded":
-            console.log(`File ID ${message.data.id} loaded.`);
+            this.fileLoaded(message.data);
+            break;
+        case "error":
+            this.handleLoaderError(message.data);
             break;
         default:
             console.log(message);
             console.warn(`Invalid command ${message.command}`);
         }
+    }
+
+    /**
+     * Fires when a file finsihes loading
+     *
+     * @param {Object} data - The returned data object
+     */
+    fileLoaded(data) {
+        console.log(`File ID ${data.id} loaded.`);
+        this.callbacks[data.id](data.data, false);
+    }
+
+    /**
+     * Handles errors sent back by the FileLoader
+     *
+     * @param {object} data - Message data
+     */
+    handleLoaderError(data) {
+        console.error(`Error loading file ${data.id}: ${data.data}`);
+        this.callbacks[data.id](new ArrayBuffer(), true);
+    }
+
+    /**
+     * Fires when the input file finsihes loading (or errors)
+     *
+     * @param {ArrayBuffer} data
+     * @param {boolean} error - True if an error occurred
+     */
+    inputFileLoaded(data, error) {
+        if (error) {
+            document.getElementById("inputErrorText").innerText = "An error occurred loading the input file. Check the console for more information.";
+            document.getElementById("inputErrorAlert").classList.remove("hidden");
+        } else {
+            const fileSelector = document.getElementById("inputFileSelector");
+            if (fileSelector.files.length > 0) {
+                const inputFile = fileSelector.files[0];
+                document.getElementById("inputFileName").innerText = inputFile.name;
+                document.getElementById("inputFileButton").innerText = "Change";
+                console.info("Yay!");
+            }
+
+        }
+    }
+
+    /**
+     * Fires when the input error alert close button is clicked
+     */
+    closeInputErrorAlert() {
+        document.getElementById("inputErrorAlert").classList.add("hidden");
     }
 }
 
