@@ -137,8 +137,11 @@ class InputHelper {
         }
 
         const decoded = await this.getDecodedData();
-        console.log(decoded);
-        document.getElementById("outputTextArea").innerHTML = decoded;
+        this.App.OutputHelper.updateOutput(decoded, "powershell");
+
+        const output = await this.App.OutputHelper.getOutput(true);
+        console.log(output);
+        document.getElementById("outputArea").innerHTML = output;
     }
 
     /**

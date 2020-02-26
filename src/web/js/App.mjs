@@ -4,15 +4,16 @@
 
 import UIHelper from "./helpers/UIHelper.mjs";
 import InputHelper from "./helpers/InputHelper.mjs";
+import OutputHelper from "./helpers/OutputHelper.mjs";
 
 import AppWorker from "./workers/App.worker.js";
 import InputWorker from "./workers/Input.worker.js";
-import OutputWorker from "./workers/Output.worker.js";
 
 class App {
     setupHelpers() {
         this.UIHelper = new UIHelper(this);
         this.InputHelper = new InputHelper(this);
+        this.OutputHelper = new OutputHelper(this);
 
         this.UIHelper.setupUI();
     }
@@ -27,11 +28,6 @@ class App {
         this.InputWorker.addEventListener("message", this.handleInputWorkerMessage.bind(this));
         this.InputWorkerCallbacks = {};
         this.InputWorkerCallbackId = 0;
-
-        this.OutputWorker = new OutputWorker();
-        this.OutputWorker.addEventListener("message", this.handleOutputWorkerMessage.bind(this));
-        this.OutputWorkerCallbacks = {};
-        this.OutputWorkerCallbackId = 0;
     }
 
     init() {
@@ -42,6 +38,8 @@ class App {
     handleAppWorkerMessage(message) {
         console.log(message);
     }
+
+    // These should be in the separate InputHelper (maybe including the entire inputworker)
 
     handleInputWorkerMessage(message) {
         if (!message.data) return;
