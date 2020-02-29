@@ -53,7 +53,7 @@ self.getOutput = function (highlight) {
         return "";
     }
     if (highlight) {
-        return hljs.highlight("powershell", self.output.output).value;
+        return hljs.highlight(self.output.language, self.output.output).value;
     }
 
     return self.output.output;
