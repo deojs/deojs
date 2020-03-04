@@ -13,6 +13,7 @@ class LanguageHelper {
      * Gets a new instance of the class for the specified language
      *
      * @param {string} langName The name of the language
+     * @returns {object} language class
      */
     getLanguage(langName) {
         const Language = this.languages.getLanguage(langName);

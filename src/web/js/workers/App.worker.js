@@ -5,9 +5,66 @@
  */
 
 import LanguageHelper from "../helpers/LanguageHelper.mjs";
+import InputHelper from "../helpers/InputHelper.mjs";
+
+import InputWorker from "./Input.worker.js";
 
 self.createHelpers = function () {
     self.LanguageHelper = new LanguageHelper();
+    self.InputHelper = new InputHelper(self);
+};
+
+self.createWorkers = function () {
+    self.InputWorker = new InputWorker();
+    self.InputWorker.addEventListener("message", self.handleInputWorkerMessage.bind(self));
+    self.InputWorkerCallbacks = {};
+    self.InputWorkerCallbackId = 0;
+};
+
+self.handleInputWorkerMessage = function (message) {
+    if (!message.data) return;
+    const data = message.data;
+
+    if (!data.command) return;
+    switch (data.command) {
+    case "callback":
+        self.InputWorkerCallbacks[data.data.callbackid](data.data.data);
+        break;
+    default:
+        console.error(`Invalid command "${data.command}"`);
+    }
+};
+
+self.addInputWorkerCallback = function (callback) {
+    const id = self.InputWorkerCallbackId;
+    self.InputWorkerCallbackId += 1;
+    self.InputWorkerCallbacks[id] = callback;
+    return id;
+};
+
+self.loadFile = function (file) {
+    const fileObj = self.InputHelper.loadFile(file, self.inputFileLoaded.bind(self));
+    self.InputWorker.postMessage({
+        command: "newInputFile",
+        data: fileObj
+    });
+};
+
+self.inputFileLoaded = function (data, error) {
+    self.InputWorker.postMessage({
+        command: "inputFileLoaded",
+        data: {
+            data: data,
+            error: error
+        }
+    });
+    self.postMessage({
+        command: "inputFileLoaded",
+        data: {
+            data: data,
+            error: error
+        }
+    });
 };
 
 /**
@@ -15,15 +72,86 @@ self.createHelpers = function () {
  *
  * @param e - The message sent by the main thread
  */
-self.addEventListener("message", (e) => {
+self.addEventListener("message", async (e) => {
     if (!e.data) return;
     const data = e.data;
 
     if (!data.command) return;
-    console.log(data.command);
+
+    switch (data.command) {
+    case "run":
+        // Runs the deobfuscation
+        console.log("run");
+        break;
+    case "loadfile":
+        // Loads a new file using the InputWorker
+        self.loadFile(data.data);
+        break;
+    case "getDecodedInput":
+        self.postMessage({
+            command: "callback",
+            data: {
+                callbackid: data.data.callbackid,
+                data: await self.InputHelper.getDecodedData(data.data.encoding)
+            }
+        });
+        break;
+    case "getLanguage":
+        self.postMessage({
+            command: "callback",
+            data: {
+                callbackid: data.data.callbackid,
+                data: self.LanguageHelper.getLanguage(data.data.language)
+            }
+        });
+        break;
+    case "parseInput":
+        self.postMessage({
+            command: "callback",
+            data: {
+                callbackid: data.data.callbackid,
+                data: await self.parseInput(data.data.language, data.data.encoding)
+            }
+        });
+        break;
+    default:
+        console.warn(`Invalid command "${data.command}"`);
+    }
 });
 
-self.createHelpers();
+/**
+ * Parses the input
+ *
+ * @param {string} encoding - The encoding to use when decoding the input
+ * @param {string} language - The name of the language to parse
+ * @returns {object} - The parsed input
+ */
+self.parseInput = async function (language, encoding) {
+    try {
+        const input = await self.InputHelper.getDecodedData(encoding);
+        return self.parse(input, language);
+    } catch (error) {
+        console.error(error);
+        return [];
+    }
+};
 
-// const ps = self.LanguageHelper.getLanguage("PowerShell");
-// ps.lex("Get-ChildItem | Sort-Object -Property LastWriteTime, Name | Format-Table -Property LastWriteTime, Name");
+/**
+ * Parses the input with the specified language and encoding
+ *
+ * @param {string} input - The text to parse
+ * @param {string} language - The language to parse the input with
+ * @returns {object} - Parsed language
+ */
+self.parse = async function (input, language) {
+    try {
+        const languageObject = self.LanguageHelper.getLanguage(language);
+        return languageObject.parse(input);
+    } catch (error) {
+        console.error(error);
+        return [];
+    }
+};
+
+self.createHelpers();
+self.createWorkers();

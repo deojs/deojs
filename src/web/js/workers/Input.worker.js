@@ -18,7 +18,7 @@ self.addEventListener("message", (e) => {
         self.input = data.data;
         break;
     case "inputFileLoaded":
-        self.inputFileLoaded(data.data);
+        self.inputFileLoaded(data.data.data);
         break;
     case "getDecodedData":
         self.postMessage({

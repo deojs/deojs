@@ -14,6 +14,19 @@ class InputHelper {
     }
 
     /**
+     * Stores a callback function
+     *
+     * @param {object} cb Callback
+     * @returns {number} - Callback ID
+     */
+    addCallback(cb) {
+        const id = this.currentId;
+        this.currentId += 1;
+        this.callbacks[id] = cb;
+        return id;
+    }
+
+    /**
      * Sends file to be loaded to the FileLoader.
      * If FileLoader is currently loading a file, instead queue the file
      *
@@ -24,9 +37,8 @@ class InputHelper {
     loadFile(file, cb) {
         const fileObj = {
             file: file,
-            id: this.currentId += 1
+            id: this.addCallback(cb)
         };
-        this.callbacks[fileObj.id] = cb;
         if (this.loadingFile) {
             this.fileQueue.push(fileObj);
         } else {
@@ -110,45 +122,6 @@ class InputHelper {
     handleLoaderError(data) {
         console.error(`Error loading file ${data.id}: ${data.data}`);
         this.callbacks[data.id](new ArrayBuffer(), true);
-    }
-
-    /**
-     * Fires when the input file finsihes loading (or errors)
-     *
-     * @param {ArrayBuffer} data - The data sent back by the FileLoader
-     * @param {boolean} error - True if an error occurred
-     */
-    async inputFileLoaded(data, error) {
-        if (error) {
-            document.getElementById("inputErrorText").innerText = "An error occurred loading the input file. Check the console for more information.";
-            document.getElementById("inputErrorAlert").classList.remove("hidden");
-        } else {
-            const file = data.file.file;
-            document.getElementById("inputFileName").innerText = file.name;
-
-            const inputFileButton = document.getElementById("inputFileButton");
-            inputFileButton.innerText = "Change";
-            inputFileButton.removeAttribute("disabled");
-
-            this.App.InputWorker.postMessage({
-                command: "inputFileLoaded",
-                data: data
-            }, [data.data]);
-        }
-
-        const decoded = await this.getDecodedData();
-        this.App.OutputHelper.updateOutput(decoded, "powershell");
-
-        const output = await this.App.OutputHelper.getOutput(true);
-        console.log(output);
-        document.getElementById("outputArea").innerHTML = output;
-    }
-
-    /**
-     * Fires when the input error alert close button is clicked
-     */
-    closeInputErrorAlert() {
-        document.getElementById("inputErrorAlert").classList.add("hidden");
     }
 
     /**

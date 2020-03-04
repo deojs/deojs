@@ -77,7 +77,7 @@ class UIHelper {
         // Input
         document.getElementById("inputFileButton").addEventListener("click", this.openFileClicked.bind(this));
         document.getElementById("inputFileSelector").addEventListener("change", this.loadFiles.bind(this));
-        document.getElementById("inputErrorAlertClose").addEventListener("click", this.App.InputHelper.closeInputErrorAlert.bind(this.App.InputHelper));
+        document.getElementById("inputErrorAlertClose").addEventListener("click", this.closeInputErrorAlert.bind(this));
     }
 
     /**
@@ -99,10 +99,14 @@ class UIHelper {
         if (element.files.length > 0) {
             document.getElementById("inputFileName").innerText = "loading...";
             document.getElementById("inputFileButton").setAttribute("disabled", true);
-            const fileObj = this.App.InputHelper.loadFile(element.files[0], this.App.InputHelper.inputFileLoaded.bind(this.App.InputHelper));
-            this.App.InputWorker.postMessage({
-                command: "newInputFile",
-                data: fileObj
+            // const fileObj = this.App.InputHelper.loadFile(element.files[0], this.App.InputHelper.inputFileLoaded.bind(this.App.InputHelper));
+            // this.App.InputWorker.postMessage({
+            //     command: "newInputFile",
+            //     data: fileObj
+            // });
+            this.App.AppWorker.postMessage({
+                command: "loadfile",
+                data: element.files[0]
             });
         }
     }
@@ -112,6 +116,58 @@ class UIHelper {
      */
     openFileClicked() {
         document.getElementById("inputFileSelector").click();
+    }
+
+    /**
+     * Fires when the input error alert close button is clicked
+     */
+    closeInputErrorAlert() {
+        document.getElementById("inputErrorAlert").classList.add("hidden");
+    }
+
+    /**
+     * Fires when the input file finsihes loading (or errors)
+     *
+     * @param {ArrayBuffer} data - The data sent back by the FileLoader
+     * @param {boolean} error - True if an error occurred
+     */
+    async inputFileLoaded(data, error) {
+        if (error) {
+            document.getElementById("inputErrorText").innerText = "An error occurred loading the input file. Check the console for more information.";
+            document.getElementById("inputErrorAlert").classList.remove("hidden");
+            return;
+        }
+
+        const file = data.file.file;
+        document.getElementById("inputFileName").innerText = file.name;
+
+        const inputFileButton = document.getElementById("inputFileButton");
+        inputFileButton.innerText = "Change";
+        inputFileButton.removeAttribute("disabled");
+
+        const decoded = await this.App.getDecodedInput();
+
+        try {
+            const parsed = await new Promise((resolve, reject) => {
+                this.App.AppWorker.postMessage({
+                    command: "parseInput",
+                    data: {
+                        callbackid: this.App.addAppWorkerCallback(resolve),
+                        language: "powershell",
+                        encoding: "utf-8"
+                    }
+                });
+            });
+
+            console.log(parsed);
+        } catch (e) {
+            console.error(e);
+        }
+
+        this.App.OutputHelper.updateOutput(decoded, "powershell");
+
+        const output = await this.App.OutputHelper.getOutput(true);
+        document.getElementById("outputArea").innerHTML = output;
     }
 }
 

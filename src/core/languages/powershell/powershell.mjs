@@ -1,5 +1,6 @@
-import tokens from "./tokens.mjs";
 import moo from "moo";
+
+import tokens from "./tokens.mjs";
 
 /**
  * Class for handling PowerShell code.
@@ -12,6 +13,8 @@ class PowerShellLanguage {
 
     /**
      * Gets the tokens object for this instance
+     *
+     * @returns {object} - The tokens for the language
      */
     getTokens() {
         return this.tokens;
@@ -21,9 +24,10 @@ class PowerShellLanguage {
      * Lexes and parses inCode
      *
      * @param {string} inCode The code to be parsed
-     * @returns {object}
+     * @returns {object} - Parsed code
      */
     parse(inCode) {
+        this.lex(inCode);
         return inCode;
     }
 
@@ -33,7 +37,7 @@ class PowerShellLanguage {
      * @param {string} inCode Input code to be parsed
      */
     lex(inCode) {
-        const lexer = moo.compile(this.getTokens());
+        const lexer = moo.states(this.getTokens());
         lexer.reset(inCode);
 
         let token = lexer.next();
