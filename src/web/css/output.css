@@ -1,8 +1,9 @@
-#outputTextArea {
+#outputArea {
     font-family: 'Courier New', Courier, monospace;
     width: calc(100% - 5px);
     margin: 0;
     padding: 5px;
+    padding-right: 0px;
     resize: none;
     border: 0;
     height: calc(100% - 2.8em - 5px);
