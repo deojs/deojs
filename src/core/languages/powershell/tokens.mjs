@@ -14,11 +14,28 @@ export default {
             match: /#/,
             push: "comment"
         },
-        CmdletNameToken: {
-            match: /[^$0-9(@\n][^ \t\n]*/,
+        DataTypeToken: {
+            match: /\[[^ \t\r\n]+\]/,
             push: "cmdlet"
         },
-        WhiteSpaceToken: /[ \t]+/
+        VariableToken: {
+            match: /\$[0-9A-Za-z]+|\${.+}/,
+            push: "cmdlet"
+        },
+        WhiteSpaceToken: /[ \t]+/,
+        ConditionalToken: {
+            match: /[Ii][Ff]|[Ee][Ll][Ss][Ee][Ii][Ff]|[Ee][Ll][Ss][Ee]/,
+            push: "cmdlet"
+        },
+        CmdletNameToken: {
+            match: /[^$0-9(@\r\n][^ \t\r\n(]*/,
+            push: "cmdlet"
+        },
+        StatementSeparatorToken: {
+            match: /;|&&|\|\||[\r\n]+/,
+            pop: true,
+            lineBreaks: true
+        }
     },
     cmdlet: {
         MultilineCommentToken: {
@@ -33,7 +50,21 @@ export default {
             match: / \|/,
             pop: true
         },
+        OpenBracketToken: {
+            match: /\(/,
+            pop: true
+        },
+        CloseBracketToken: /\)/,
+        OpenCurlyBracketToken: {
+            match: /\{/,
+            pop: true
+        },
+        CloseCurlyBracketToken: {
+            match: /\}/,
+            pop: true
+        },
         CommaToken: / \|/,
+        DataTypeToken: /\[[^ \t\r\n]+\]/,
         WhiteSpaceToken: /[ \t]+/,
         ComparisonOperatorToken: /-eq|-ne|-ge|-gt|-lt|-le|-ieq|-ine|-ige|-igt|-ilt|-ile|-ceq|-cne|-cge|-cgt|-clt|-cle|-like|-notlike|-match|-notmatch|-ilike|-inotlike|-imatch|-inotmatch|-clike|-cnotlike|-cmatch|-cnotmatch|-contains|-notcontains|-icontains|-inotcontains|-ccontains|-cnotcontains|-isnot|-is|-as|-replace|-ireplace|-creplace/,
         AssignmentOperatorToken: /=|\+=|-=|\*=|\/=|%=/,
@@ -42,32 +73,38 @@ export default {
         RedirectionOperatorToken: /2>&1|>>|>|<<|<|>\||2>|2>>|1>>/,
         FunctionDeclarationToken: ["function", "filter"],
         ExpandableStringToken: {
-            match: /".*"/
+            match: /"/,
+            push: "ExpandableString"
         },
-        StringToken: {
-            match: /'.*'/
-        },
-        VariableToken: /\$[0-9A-Za-z]+ | \${.+}/,
+        StringToken: /'.*'/,
+        VariableToken: /\$[0-9A-Za-z]+|\${.+}/,
         ParameterToken: /-[A-Za-z]+[:]?/,
         MinusMinusToken: /--/,
         RangeOperatorToken: /\.\./,
         NumberToken: /\d+\.?\d*/,
         ReferenceOperatorToken: /\.|::|\[/,
         // ParameterArgumentToken: /[^-($0-9].*[^ \t]/,
-        ParameterArgumentToken: /[^-($0-9|][^\r\n\t;}\]() |]*[^ \t|]/,
+        ParameterArgumentToken: /[^-($0-9|][^\r\n\t;}\]() |]*[^ \t\r\n|]/,
         UnaryOperatorToken: /!|-not|\+|-|-bnot| \[..*\]/,
         FormatOperatorToken: /-f/,
         LoopLabelToken: /[A-Za-z][0-9A-Za-z]*/,
-        ParamToken: /param/,
         PrePostfixOperatorToken: /\+\+ | --/,
-        MultiplyOperatorToken: /\* | \/ | %/,
+        MultiplyOperatorToken: /\*|\/|%/,
         AdditionOperatorToken: /\+ | -/,
         AttributeSpecificationToken: /\[..*\]/,
         StatementSeparatorToken: {
-            match: / ; | && | \|\| | [\r\n]+/,
+            match: /;|&&|\|\||[\r\n]+/,
             pop: true,
             lineBreaks: true
         }
+    },
+    ExpandableString: {
+        ExpandableStringToken: {
+            match: /"/,
+            pop: true
+        },
+        VariableToken: /\$[0-9A-Za-z]+|\${.+}/,
+        StringText: /[^"\r\n$]+/
     },
     comment: {
         CommentText: /[^\r\n]+/,
