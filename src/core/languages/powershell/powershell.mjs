@@ -1,4 +1,5 @@
 import moo from "moo";
+import nearley from "nearley";
 
 import tokens from "./tokens.mjs";
 
