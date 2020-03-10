@@ -35,7 +35,9 @@ export default {
             match: /;|&&|\|\||[\r\n]+/,
             pop: true,
             lineBreaks: true
-        }
+        },
+        OpenBracketToken: /\(/,
+        CloseBracketToken: /\)/
     },
     cmdlet: {
         MultilineCommentToken: {
@@ -45,10 +47,6 @@ export default {
         CommentToken: {
             match: /#/,
             push: "comment"
-        },
-        CallArgumentSeparatorToken: {
-            match: / \|/,
-            pop: true
         },
         OpenBracketToken: {
             match: /\(/,
@@ -63,7 +61,16 @@ export default {
             match: /\}/,
             pop: true
         },
-        CommaToken: / \|/,
+        StatementSeparatorToken: {
+            match: /;|&&|\|\||[\r\n]+/,
+            pop: true,
+            lineBreaks: true
+        },
+        CallArgumentSeparatorToken: {
+            match: /\|/,
+            pop: true
+        },
+        CommaToken: /,/,
         DataTypeToken: /\[[^ \t\r\n]+\]/,
         WhiteSpaceToken: /[ \t]+/,
         ComparisonOperatorToken: /-eq|-ne|-ge|-gt|-lt|-le|-ieq|-ine|-ige|-igt|-ilt|-ile|-ceq|-cne|-cge|-cgt|-clt|-cle|-like|-notlike|-match|-notmatch|-ilike|-inotlike|-imatch|-inotmatch|-clike|-cnotlike|-cmatch|-cnotmatch|-contains|-notcontains|-icontains|-inotcontains|-ccontains|-cnotcontains|-isnot|-is|-as|-replace|-ireplace|-creplace/,
@@ -91,12 +98,7 @@ export default {
         PrePostfixOperatorToken: /\+\+ | --/,
         MultiplyOperatorToken: /\*|\/|%/,
         AdditionOperatorToken: /\+ | -/,
-        AttributeSpecificationToken: /\[..*\]/,
-        StatementSeparatorToken: {
-            match: /;|&&|\|\||[\r\n]+/,
-            pop: true,
-            lineBreaks: true
-        }
+        AttributeSpecificationToken: /\[..*\]/
     },
     ExpandableString: {
         ExpandableStringToken: {
