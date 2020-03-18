@@ -6,7 +6,7 @@
 @include "../../unicode/categories/unicode_Zp.ne"
 @include "../../unicode/categories/unicode_Llu.ne"
 @include "../../unicode/categories/unicode_Lm.ne"
-@include "../../unicode/categories/unicode_Lo.ne"
+# @include "../../unicode/categories/unicode_Lo.ne" # Can't import this as it's too big!
 @include "../../unicode/categories/unicode_Nd.ne"
 
 # Syntactic grammar
