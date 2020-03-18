@@ -1,26 +1,12 @@
-import moo from "moo";
 import nearley from "nearley";
 
-import tokens from "./tokens.mjs";
+import grammar from "./parsing/grammar.js";
 
 /**
  * Class for handling PowerShell code.
  * This includes, lexing, parsing, and pretty-printing
  */
 class PowerShellLanguage {
-    constructor() {
-        this.tokens = tokens;
-    }
-
-    /**
-     * Gets the tokens object for this instance
-     *
-     * @returns {object} - The tokens for the language
-     */
-    getTokens() {
-        return this.tokens;
-    }
-
     /**
      * Lexes and parses inCode
      *
@@ -28,24 +14,21 @@ class PowerShellLanguage {
      * @returns {object} - Parsed code
      */
     parse(inCode) {
-        this.lex(inCode);
-        return inCode;
-    }
+        // const lexer = moo.states(this.getTokens());
+        // const parser = new nearley.Parser(nearley.Grammar.fromCompiled(grammar));
+        // lexer.reset(inCode);
 
-    /**
-     * Lexes the provided code
-     *
-     * @param {string} inCode Input code to be parsed
-     */
-    lex(inCode) {
-        const lexer = moo.states(this.getTokens());
-        lexer.reset(inCode);
+        // let token = lexer.next();
+        // while (token !== undefined) {
+        //     console.log(token);
+        //     token = lexer.next();
+        // }
 
-        let token = lexer.next();
-        while (token !== undefined) {
-            console.log(token);
-            token = lexer.next();
-        }
+        // return inCode;
+        const parser = new nearley.Parser(nearley.Grammar.fromCompiled(grammar));
+        parser.feed(inCode);
+        console.log(parser.results);
+        return {};
     }
 
     // parse function
