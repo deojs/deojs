@@ -19,7 +19,7 @@ scriptBlock ->
     paramBlock:? statementTerminators:? scriptBlockBody:?
 
 paramBlock ->
-    newLines:? attributeList:? newLines:? param newLines:?
+    newLines:? attributeList:? newLines:? "param" newLines:?
         "(" parameterList:? newLines:? ")"
 
 parameterList ->
@@ -89,6 +89,9 @@ elseifClause ->
 
 elseClause ->
     newLines:? "else"i statementBlock
+
+label ->
+    colon labelExpression
 
 labeledStatement ->
     switchStatement |
@@ -486,8 +489,7 @@ memberName ->
     value
 
 stringLiteralWithSubexpression ->
-    expandableStringLiteralWithSubexpression |
-    expandableHereStringLiteralWithSubexpression
+    expandableStringLiteralWithSubexpression
 
 expandableStringLiteralWithSubexpression ->
     expandableStringWithSubexpressionStart statementList:? ")" expandableStringWithSubexpressionChars expandableStringWithSubexpressionEnd |
@@ -608,7 +610,7 @@ inputCharacter ->
     [^\r\n]
 
 requiresComment ->
-    "#requires" whitespace commandArguments
+    "#requires" whitespace commandArgument # Docs says commandArguments but might be a typo?
 
 dash ->
     "\u002D" |
@@ -653,7 +655,7 @@ token ->
     variable |
     command |
     commandParameter |
-    commandArgumentToken |
+    # commandArgumentToken |
     integerLiteral |
     realLiteral |
     stringLiteral |
@@ -696,12 +698,316 @@ variableCharacters ->
     variableCharacters variableCharacter
 
 variableCharacter ->
-    # [\p{Lu}\p{Ll}\p{Lt}\p{Lm}\p{Lo}\p{Nd}\u005F?]
-    [A-Za-z]
-
+    # This should include the unicode category 'Lo', however this has >120,000 characters so is too big
+    Llu |
+    Lm |
+    Nd |
+    "\u005F" |
+    "?"
 bracedVariableCharacters ->
     bracedVariableCharacter |
     bracedVariableCharacters bracedVariableCharacter
 
 bracedVariableCharacter ->
-    [^\u007D\u0060]
+    [^\u007D\u0060] |
+    escapedCharacter
+
+escapedCharacter ->
+    "\u0060" . # Any character
+
+# Commands
+genericToken ->
+    genericTokenParts
+
+genericTokenParts ->
+    genericTokenPart |
+    genericTokenParts genericTokenPart
+
+genericTokenPart ->
+    expandableStringLiteral |
+    verbatimHereStringLiteral |
+    variable |
+    genericTokenCharacter
+
+genericTokenCharacter ->
+    [^{}();,|&$\u0060'"\r\n] |
+    escapedCharacter
+
+genericTokenWithSubexpressionStart ->
+    genericTokenParts "$("
+
+commandParameter ->
+    dash firstParameterChar parameterChars colon:?
+
+firstParameterChar ->
+    Llu |
+    Lm |
+    "\u005F" |
+    "?"
+
+parameterChars ->
+    parameterChar |
+    parameterChars parameterChar
+
+parameterChar ->
+    [^{}();,|&.[\u003A\r\n\s]
+
+colon ->
+    "\u003A"
+
+verbatimCommandArgumentChars ->
+    verbatimCommandArgumentPart |
+    verbatimCommandArgumentChars verbatimCommandArgumentPart
+
+verbatimCommandArgumentPart ->
+    verbatimCommandString |
+    "&" nonAmpersandCharacter |
+    [^|\r\n]
+
+nonAmpersandCharacter ->
+    [^&]
+
+verbatimCommandString ->
+    doubleQuoteCharacter nonDoubleQuoteCharacters doubleQuoteCharacter
+
+nonDoubleQuoteCharacters ->
+    nonDoubleQuoteCharacter |
+    nonDoubleQuoteCharacters nonDoubleQuoteCharacter
+
+nonDoubleQuoteCharacter ->
+    [^\u0022\u201C\u201D\u201E]
+
+# Literals
+literal ->
+    integerLiteral |
+    realLiteral |
+    stringLiteral
+
+integerLiteral ->
+    decimalIntegerLiteral |
+    hexadecimalIntegerLiteral
+
+decimalIntegerLiteral ->
+    decimalDigits numericTypeSuffix:? numericMultiplier:?
+
+decimalDigits ->
+    decimalDigit |
+    decimalDigit decimalDigits
+
+decimalDigit ->
+    [0-9]
+
+numericTypeSuffix ->
+    longTypeSuffix |
+    decimalTypeSuffix
+
+hexadecimalIntegerLiteral ->
+    "0x" hexadecimalDigits longTypeSuffix:? numericMultiplier:?
+
+hexadecimalDigits ->
+    hexadecimalDigit |
+    hexadecimalDigit decimalDigits
+
+hexadecimalDigit ->
+    [0-9A-Fa-f]
+
+longTypeSuffix ->
+    "l"
+
+numericMultiplier ->
+    "kb" |
+    "mb" |
+    "gb" |
+    "tb" |
+    "pb"
+
+realLiteral ->
+    decimalDigits "." decimalDigits exponentPart:? decimalTypeSuffix:? numericMultiplier:? |
+    "." decimalDigits exponentPart:? decimalTypeSuffix:? numericMultiplier:? |
+    decimalDigits exponentPart decimalTypeSuffix:? numericMultiplier:?
+
+exponentPart ->
+    "e" sign:? decimalDigits
+
+sign ->
+    "+" |
+    dash
+
+decimalTypeSuffix ->
+    "d" |
+    "l"
+
+stringLiteral ->
+    expandableStringLiteral |
+    expandableHereStringLiteral |
+    verbatimStringLiteral |
+    verbatimHereStringLiteral
+
+expandableStringLiteral ->
+    doubleQuoteCharacter expandableStringCharacters:? dollars:? doubleQuoteCharacter
+
+doubleQuoteCharacter ->
+    "\u0022" |
+    "\u201C" |
+    "\u201D" |
+    "\u201E"
+
+expandableStringCharacters ->
+    expandableStringPart |
+    expandableStringCharacters expandableStringPart
+
+expandableStringPart ->
+    [^$\u0022\u201C\u201D\u201E\u0060] |
+    bracedVariable |
+    "$" [^({\u0022\u201C\u201D\u201E\u0060] |
+    "$" escapedCharacter |
+    escapedCharacter |
+    doubleQuoteCharacter doubleQuoteCharacter
+
+dollars ->
+    "$" |
+    dollars "$"
+
+expandableHereStringLiteral ->
+    "@" doubleQuoteCharacter whitespace:? newLineCharacter expandableHereStringCharacters:? newLineCharacter doubleQuoteCharacter "@"
+
+expandableHereStringCharacters ->
+    expandableHereStringPart |
+    expandableHereStringCharacters expandableHereStringPart
+
+expandableHereStringPart ->
+    [^$\r\n] |
+    bracedVariable |
+    "$" [^(\r\n] |
+    "$" newLineCharacter nonDoubleQuoteCharacter |
+    "$" newLineCharacter doubleQuoteCharacter [^@] |
+    newLineCharacter nonDoubleQuoteCharacter |
+    newLineCharacter doubleQuoteCharacter [^@]
+
+expandableStringWithSubexpressionStart ->
+    doubleQuoteCharacter expandableStringCharacters:? "$("
+
+expandableStringWithSubexpressionEnd ->
+    doubleQuoteCharacter
+
+expandableHereStringWithSubexpressionStart ->
+    "@" doubleQuoteCharacter whitespace:? newLineCharacter expandableHereStringCharacters:? "$("
+
+expandableHereStringWithSubexpressionEnd ->
+    newLineCharacter doubleQuoteCharacter "@"
+
+verbatimStringLiteral ->
+    singleQuoteCharacter verbatimStringCharacters:? singleQuoteCharacter
+
+singleQuoteCharacter ->
+    "\u0027" |
+    "\u2018" |
+    "\u2019" |
+    "\u201A" |
+    "\u201B"
+
+nonSingleQuoteCharacter ->
+    [^\u0027\u2018\u2019\u201A\u201B]
+
+verbatimStringCharacters ->
+    verbatimStringPart |
+    verbatimStringCharacters verbatimStringPart
+
+verbatimStringPart ->
+    nonSingleQuoteCharacter |
+    singleQuoteCharacter singleQuoteCharacter
+
+verbatimHereStringLiteral ->
+    "@" singleQuoteCharacter whitespace:? newLineCharacter verbatimHereStringCharacters:? newLineCharacter singleQuoteCharacter "@"
+
+verbatimHereStringCharacters ->
+    verbatimHereStringPart |
+    verbatimHereStringCharacters verbatimHereStringPart
+
+verbatimHereStringPart ->
+    [^\r\n] |
+    newLineCharacter nonSingleQuoteCharacter |
+    newLineCharacter singleQuoteCharacter [^@]
+
+simpleName ->
+    simpleNameFirstChar simpleNameChars
+
+simpleNameFirstChar ->
+    Llu |
+    Lm |
+    "\u005F"
+
+simpleNameChars ->
+    simpleNameChar |
+    simpleNameChars simpleNameChar
+
+simpleNameChar ->
+    Llu |
+    Lm |
+    Nd |
+    "\u005F"
+
+typeName ->
+    typeIdentifier |
+    typeName "." typeIdentifier
+
+typeIdentifier ->
+    typeCharacters
+
+typeCharacters ->
+    typeCharacter |
+    typeCharacters typeCharacter
+
+typeCharacter ->
+    Llu |
+    Nd |
+    "\u005F"
+
+arrayTypeName ->
+    typeName "["
+
+genericTypeName ->
+    typeName "["
+
+operatorOrPunctuator ->
+    "{" | "}" | "[" | "]" | "(" | ")" | "@(" | "@{" | "$(" | ";" |
+    "&&" | "||" | "&" | "|" | "," | "++" | ".." | "::" | "." | "!" |
+    "*" | "/" | "%" | "+" |
+    dash | dashdash | dash "and" | dash "band" | dash "bnot" |
+    dash "bor" | dash "bxor" | dash "not" | dash "or" | dash "xor" |
+    assignmentOperator |
+    mergingRedirectionOperator |
+    fileRedirectionOperator |
+    comparisonOperator |
+    formatOperator
+
+assignmentOperator ->
+    "=" |
+    dash "=" |
+    "+=" |
+    "*=" |
+    "/=" |
+    "%="
+
+mergingRedirectionOperator ->
+    "*>&1" | "2>&1" | "3>&1" | "4>&1" | "5>&1" | "6>&1" |
+    "*>&2" | "1>&2" | "3>&2" | "4>&2" | "5>&2" | "6>&2"
+
+fileRedirectionOperator ->
+    ">" | ">>" | "2>" | "2>>" | "3>" | "3>>" | "4>" | "4>>" |
+    "5>" | "5>>" | "6>" | "6>>" | "*>" | "*>>" | "<"
+
+comparisonOperator ->
+    dash comparisonKeyword
+
+comparisonKeyword ->
+    "as" | "ccontains" | "ceq" | "cge" | "cgt" | "cle" | "clike" | "clt" |
+    "cmatch" | "cne"| "cnotcontains" | "cnotlike" | "cnotmatch" | "contains" |
+    "creplace" | "csplit" | "eq" | "ge" | "gt" | "icontains" | "ieq" | "ige" |
+    "igt" | "ile" | "ilike" | "ilt" | "imatch" | "in" | "ine" | "inotcontains" |
+    "inotlike" | "inotmatch" | "ireplace" | "is" | "isnot" | "isplit" |
+    "join" | "le" | "like" | "lt" | "match" | "ne" | "notcontains" | "notin" |
+    "notlike" | "notmatch" | "replace" | "shl" | "shr" | "split"
+
+formatOperator ->
+    dash "f"
