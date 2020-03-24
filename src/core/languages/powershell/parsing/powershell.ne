@@ -4,17 +4,19 @@
 @include "../../unicode/categories/unicode_Zs.ne"
 @include "../../unicode/categories/unicode_Zl.ne"
 @include "../../unicode/categories/unicode_Zp.ne"
-# @include "../../unicode/categories/unicode_Llu.ne"
-# @include "../../unicode/categories/unicode_Lm.ne"
+@include "../../unicode/categories/unicode_Llu.ne"
+@include "../../unicode/categories/unicode_Lm.ne"
 # @include "../../unicode/categories/unicode_Lo.ne" # Can't import this as it's too big!
-# @include "../../unicode/categories/unicode_Nd.ne"
+@include "../../unicode/categories/unicode_Nd.ne"
 
 # Syntactic grammar
 # Statements
 scriptBlock ->
-    paramBlock:? statementTerminators:? scriptBlockBody:?
+    paramBlock:? _ statementTerminators:? _ scriptBlockBody:?
     {%
         function(data) {
+            const out = [];
+
             return {
                 type: "scriptBlock",
                 data: data
@@ -23,8 +25,8 @@ scriptBlock ->
     %}
 
 paramBlock ->
-    newLines:? attributeList:? newLines:? "param" newLines:?
-        "(" parameterList:? newLines:? ")"
+    newLines:? _ attributeList:? _ newLines:? _ "param" _ newLines:?
+        _ "(" _ parameterList:? _ newLines:? _ ")"
     {%
         function(data) {
             return {
@@ -35,7 +37,7 @@ paramBlock ->
     %}
 
 parameterList ->
-    scriptParameter parameterList newLines:? "," scriptParameter
+    scriptParameter __ parameterList _ newLines:? _ "," _ scriptParameter
     {%
         function(data) {
             return {
@@ -46,7 +48,7 @@ parameterList ->
     %}
 
 scriptParameter ->
-    newLines:? attributeList:? newLines:? variable scriptParameterDefault:?
+    newLines:? _ attributeList:? _ newLines:? _ variable __ scriptParameterDefault:?
     {%
         function(data) {
             return {
@@ -74,13 +76,14 @@ scriptBlockBody ->
         function(data) {
             return {
                 type: "scriptBlockBody",
-                data: data
+                data: data[0]
             }
         }
     %}
 
 namedBlockList ->
-    namedBlock:+
+    namedBlock |
+    namedBlockList namedBlock
     {%
         function(data) {
             return {
@@ -91,7 +94,7 @@ namedBlockList ->
     %}
 
 namedBlock ->
-    blockName statementBlock statementTerminators:?
+    blockName _ statementBlock _ statementTerminators:?
     {%
         function(data) {
             return {
@@ -116,7 +119,7 @@ blockName ->
     %}
 
 statementBlock ->
-    newLines:? "{" statementList:? newLines:? "}"
+    newLines:? _ "{" _ statementList:? _ newLines:? _ "}"
     {%
         function(data) {
             return {
@@ -127,17 +130,19 @@ statementBlock ->
     %}
 
 statementList ->
-    statement:+
+    statement |
+    statementList _:? newLines:? _ statement
     {%
         function(data) {
             return {
                 type: "statementList",
-                list: data[0]
+                data: data[0]
             }
         }
     %}
 
 statement ->
+    comment (statementTerminator | newLineCharacter) |
     ifStatement |
     label:? labeledStatement |
     functionStatement |
@@ -148,7 +153,7 @@ statement ->
     inlinescriptStatement |
     parallelStatement |
     sequenceStatement |
-    pipeline statementTerminator:*
+    pipeline _ statementTerminators
     {%
         function(data) {
             return {
@@ -171,7 +176,8 @@ statementTerminator ->
     %}
 
 statementTerminators ->
-    statementTerminator:+
+    statementTerminator |
+    statementTerminators _ statementTerminator
     {%
         function(data) {
             return {
@@ -182,8 +188,8 @@ statementTerminators ->
     %}
 
 ifStatement ->
-    "if"i newLines:? "(" newLines:? pipeline newLines:? ")" statementBlock
-        elseifClauses:? elseClause:?
+    "if"i _ newLines:? _ "(" _ newLines:? _ pipeline _ newLines:? _ ")" _ statementBlock _
+        elseifClauses:? _ elseClause:?
     {%
         function(data) {
             return {
@@ -194,7 +200,8 @@ ifStatement ->
     %}
 
 elseifClauses ->
-    elseifClause:+
+    elseifClause |
+    elseifClauses _ elseifClause
     {%
         function(data) {
             return {
@@ -205,7 +212,7 @@ elseifClauses ->
     %}
 
 elseifClause ->
-    newLines:? "elseif"i newLines:? "(" newLines:? pipeline newLines:? ")" statementBlock
+    newLines:? _ "elseif"i _ newLines:? _ "(" _ newLines:? _ pipeline _ newLines:? _ ")" _ statementBlock
     {%
         function(data) {
             return {
@@ -216,7 +223,7 @@ elseifClause ->
     %}
 
 elseClause ->
-    newLines:? "else"i statementBlock
+    newLines:? _ "else"i _ statementBlock
     {%
         function(data) {
             return {
@@ -253,7 +260,7 @@ labeledStatement ->
     %}
 
 switchStatement ->
-    "switch"i newLines:? switchParameters:? switchCondition switchBody
+    "switch"i _ newLines:? _ switchParameters:? _ switchCondition _ switchBody
     {%
         function(data) {
             return {
@@ -264,7 +271,8 @@ switchStatement ->
     %}
 
 switchParameters ->
-    switchParameter:+
+    switchParameter |
+    switchParameters _ switchParameter
     {%
         function(data) {
             return {
@@ -290,8 +298,8 @@ switchParameter ->
     %}
 
 switchCondition ->
-    "(" newLines:? pipeline newLines:? ")" |
-    "-file"i newLines:? switchFilename
+    "(" _ newLines:? _ pipeline _ newLines:? _ ")" |
+    "-file"i _ newLines:? _ switchFilename
     {%
         function(data) {
             return {
@@ -314,7 +322,7 @@ switchFilename ->
     %}
 
 switchBody ->
-    newLines:? "{" newLines:? switchClauses "}"
+    newLines:? _ "{" _ newLines:? _ switchClauses _ "}"
     {%
         function(data) {
             return {
@@ -325,7 +333,8 @@ switchBody ->
     %}
 
 switchClauses ->
-    switchClause:+
+    switchClause |
+    switchClauses _ switchClause
     {%
         function(data) {
             return {
@@ -336,7 +345,7 @@ switchClauses ->
     %}
 
 switchClause ->
-    switchClauseCondition statementBlock statementTerminators:?
+    switchClauseCondition _ statementBlock _ statementTerminators:?
     {%
         function(data) {
             return {
@@ -359,9 +368,9 @@ switchClauseCondition ->
     %}
 
 foreachStatement ->
-    "foreach"i newLines:? foreachParameter:? newLines:?
-        "(" newLines:? variable newLines:? "in"i newLines:? pipeline
-        newLines:? ")" statementBlock
+    "foreach"i _ newLines:? _ foreachParameter:? _ newLines:? _
+        "(" _ newLines:? _ variable _ newLines:? _ "in"i _ newLines:? _ pipeline _
+        newLines:? _ ")" _ statementBlock
     {%
         function(data) {
             return {
@@ -383,13 +392,13 @@ foreachParameter ->
     %}
 
 forStatement ->
-    "for"i newLines:? (
-        "(" newLines:? forInitializer:? statementTerminator
-        newLines:? forCondition:? statementTerminator
-        newLines:? forIterator:? newLines:? ")" statementBlock |
-        "(" newLines:? forInitializer:? statementTerminator
-        newLines:? forCondition:? newLines:? ")" statementBlock |
-        "(" newLines:? forInitializer:? newLines:? ")" statementBlock
+    "for"i _ newLines:? _ (
+        "(" _ newLines:? _ forInitializer:? _ statementTerminator _
+        newLines:? _ forCondition:? _ statementTerminator _
+        newLines:? _ forIterator:? _ newLines:? _ ")" _ statementBlock |
+        "(" _ newLines:? _ forInitializer:? _ statementTerminator _
+        newLines:? _ forCondition:? _ newLines:? _ ")" _ statementBlock |
+        "(" _ newLines:? _ forInitializer:? _ newLines:? _ ")" _ statementBlock
     )
     {%
         function(data) {
@@ -434,7 +443,7 @@ forIterator ->
     %}
 
 whileStatement ->
-    "while"i newLines:? "(" newLines:? whileCondition newLines:? ")" statementBlock
+    "while"i _ newLines:? _ "(" newLines:? _ whileCondition _ newLines:? _ ")" _ statementBlock
     {%
         function(data) {
             return {
@@ -445,8 +454,8 @@ whileStatement ->
     %}
 
 doStatement ->
-    "do"i statementBlock newLines:? "while"i newLines:? "(" whileCondition newLines:? ")" |
-    "do"i statementBlock newLines:? "until"i newLines:? "(" whileCondition newLines:? ")"
+    "do"i _ statementBlock _ newLines:? _ "while"i _ newLines:? _ "(" _ whileCondition _ newLines:? _ ")" |
+    "do"i _ statementBlock _ newLines:? _ "until"i _ newLines:? _ "(" _ whileCondition _ newLines:? _ ")"
     {%
         function(data) {
             return {
@@ -457,7 +466,7 @@ doStatement ->
     %}
 
 whileCondition ->
-    newLines:? pipeline
+    newLines:? _ pipeline
     {%
         function(data) {
             return {
@@ -468,9 +477,9 @@ whileCondition ->
     %}
 
 functionStatement ->
-    "function"i newLines:? functionName functionParameterDeclaration:? "{" scriptBlock "}" |
-    "filter"i newLines:? functionName functionParameterDeclaration:? "{" scriptBlock "}" |
-    "workflow"i newLines:? functionName functionParameterDeclaration:? "{" scriptBlock "}"
+    "function"i _ newLines:? _ functionName _ functionParameterDeclaration:? _ "{" _ scriptBlock _ "}" |
+    "filter"i _ newLines:? _ functionName _ functionParameterDeclaration:? _ "{" _ scriptBlock _ "}" |
+    "workflow"i _ newLines:? _ functionName _ functionParameterDeclaration:? _ "{" _ scriptBlock _ "}"
     {%
         function(data) {
             return {
@@ -492,7 +501,7 @@ functionName ->
     %}
 
 functionParameterDeclaration ->
-    newLines:? "(" parameterList newLines:? ")"
+    newLines:? _ "(" _ parameterList _ newLines:? _ ")"
     {%
         function(data) {
             return {
@@ -503,11 +512,11 @@ functionParameterDeclaration ->
     %}
 
 flowControlStatement ->
-    "break"i labelExpression:? |
-    "continue"i labelExpression:? |
-    "throw"i pipeline:? |
-    "return"i pipeline:? |
-    "exit"i pipeline:?
+    "break"i __ labelExpression:? |
+    "continue"i __ labelExpression:? |
+    "throw"i __ pipeline:? |
+    "return"i __ pipeline:? |
+    "exit"i __ pipeline:?
     {%
         function(data) {
             return {
@@ -530,7 +539,7 @@ labelExpression ->
     %}
 
 trapStatement ->
-    "trap"i newLines:? typeLiteral:? newLines:? statementBlock
+    "trap"i _ newLines:? _ typeLiteral:? _ newLines:? _ statementBlock
     {%
         function(data) {
             return {
@@ -541,9 +550,9 @@ trapStatement ->
     %}
 
 tryStatement ->
-    "try"i statementBlock catchClauses |
-    "try"i statementBlock finallyClause |
-    "try"i statementBlock catchClauses finallyClause
+    "try"i _ statementBlock _ catchClauses |
+    "try"i _ statementBlock _ finallyClause |
+    "try"i _ statementBlock _ catchClauses _ finallyClause
     {%
         function(data) {
             return {
@@ -554,7 +563,8 @@ tryStatement ->
     %}
 
 catchClauses ->
-    catchClause:+
+    catchClause |
+    catchClauses _ catchClause
     {%
         function(data) {
             return {
@@ -565,7 +575,7 @@ catchClauses ->
     %}
 
 catchClause ->
-    newLines:? "catch"i catchTypeList:? statementBlock
+    newLines:? _ "catch"i _ catchTypeList:? _ statementBlock
     {%
         function(data) {
             return {
@@ -576,8 +586,8 @@ catchClause ->
     %}
 
 catchTypeList ->
-    newLines:? typeLiteral |
-    catchTypeList newLines:? "," newLines:? typeLiteral
+    newLines:? _ typeLiteral |
+    catchTypeList _ newLines:? _ "," _ newLines:? _ typeLiteral
     {%
         function(data) {
             return {
@@ -588,7 +598,7 @@ catchTypeList ->
     %}
 
 finallyClause ->
-    newLines:? "finally"i statementBlock
+    newLines:? _ "finally"i _ statementBlock
     {%
         function(data) {
             return {
@@ -599,7 +609,7 @@ finallyClause ->
     %}
 
 dataStatement ->
-    "data"i newLines:? dataName dataCommandsAllowed:? statementBlock
+    "data"i _ newLines:? _ dataName _ dataCommandsAllowed:? _ statementBlock
     {%
         function(data) {
             return {
@@ -621,7 +631,7 @@ dataName ->
     %}
 
 dataCommandsAllowed ->
-    newLines:? "-supportedcommand"i dataCommandsList
+    newLines:? _ "-supportedcommand"i _ dataCommandsList
     {%
         function(data) {
             return {
@@ -632,8 +642,8 @@ dataCommandsAllowed ->
     %}
 
 dataCommandsList ->
-    newLines:? dataCommand |
-    dataCommandsList "," newLines:? dataCommand
+    newLines:? _ dataCommand |
+    dataCommandsList _ "," _ newLines:? _ dataCommand
     {%
         function(data) {
             return {
@@ -649,13 +659,13 @@ dataCommand ->
         function(data) {
             return {
                 type: "dataCommand",
-                data: data
+                data: data[0]
             }
         }
     %}
 
 inlinescriptStatement ->
-    "inlinescript"i statementBlock
+    "inlinescript"i __ statementBlock
     {%
         function(data) {
             return {
@@ -666,7 +676,7 @@ inlinescriptStatement ->
     %}
 
 parallelStatement ->
-    "parallel"i statementBlock
+    "parallel"i __ statementBlock
     {%
         function(data) {
             return {
@@ -677,7 +687,7 @@ parallelStatement ->
     %}
 
 sequenceStatement ->
-    "sequence"i statementBlock
+    "sequence"i __ statementBlock
     {%
         function(data) {
             return {
@@ -689,8 +699,8 @@ sequenceStatement ->
 
 pipeline ->
     assignmentExpression |
-    expression redirections:? pipelineTail:? |
-    command verbatimCommandArgument:? pipelineTail:?
+    expression _ redirections:? _ pipelineTail:? |
+    command _ verbatimCommandArgument:? _ pipelineTail:?
     {%
         function(data) {
             return {
@@ -701,7 +711,7 @@ pipeline ->
     %}
 
 assignmentExpression ->
-    expression assignmentOperator statement
+    expression _ assignmentOperator _ statement
     {%
         function(data) {
             return {
@@ -712,8 +722,8 @@ assignmentExpression ->
     %}
 
 pipelineTail ->
-    "|" newLines:? command |
-    "|" newLines:? command pipelineTail
+    "|" _ newLines:? _ command |
+    "|" _ newLines:? _ command _ pipelineTail
     {%
         function(data) {
             return {
@@ -724,8 +734,8 @@ pipelineTail ->
     %}
 
 command ->
-    commandName commandElements:? |
-    commandInvocationOperator commandModule:? commandNameExpression commandElements:?
+    commandName (__ commandElements):? |
+    commandInvocationOperator _ commandModule:? _ commandNameExpression _ commandElements:?
     {%
         function(data) {
             return {
@@ -771,7 +781,7 @@ commandName ->
     %}
 
 genericTokenWithSubexpression ->
-    genericTokenWithSubexpressionStart statementList:? ")" commandName # No whitespace between ) and commandName!
+    genericTokenWithSubexpressionStart _ statementList:? _ ")" commandName # No whitespace between ) and commandName!
     {%
         function(data) {
             return {
@@ -794,7 +804,8 @@ commandNameExpression ->
     %}
 
 commandElements ->
-    commandElement:+
+    commandElement |
+    commandElements __ commandElement
     {%
         function(data) {
             return {
@@ -840,7 +851,8 @@ verbatimCommandArgument ->
     %}
 
 redirections ->
-    redirection:+
+    redirection |
+    redirections _ redirection
     {%
         function(data) {
             return {
@@ -852,7 +864,7 @@ redirections ->
 
 redirection ->
     mergingRedirectionOperator |
-    fileRedirectionOperator redirectedFileName
+    fileRedirectionOperator _ redirectedFileName
     {%
         function(data) {
             return {
@@ -888,9 +900,9 @@ expression ->
 
 logicalExpression ->
     bitwiseExpression |
-    logicalExpression "-and"i newLines:? bitwiseExpression |
-    logicalExpression "-or"i newLines:? bitwiseExpression |
-    logicalExpression "-xor"i newLines:? bitwiseExpression
+    logicalExpression _ "-and"i _ newLines:? _ bitwiseExpression |
+    logicalExpression _ "-or"i _ newLines:? _ bitwiseExpression |
+    logicalExpression _ "-xor"i _ newLines:? _ bitwiseExpression
     {%
         function(data) {
             return {
@@ -902,9 +914,9 @@ logicalExpression ->
 
 bitwiseExpression ->
     comparisonExpression |
-    bitwiseExpression "-band" newLines:? comparisonExpression |
-    bitwiseExpression "-bor" newLines:? comparisonExpression |
-    bitwiseExpression "-bxor" newLines:? comparisonExpression
+    bitwiseExpression _ "-band" _ newLines:? _ comparisonExpression |
+    bitwiseExpression _ "-bor" _ newLines:? _ comparisonExpression |
+    bitwiseExpression _ "-bxor" _ newLines:? _ comparisonExpression
     {%
         function(data) {
             return {
@@ -916,7 +928,7 @@ bitwiseExpression ->
 
 comparisonExpression ->
     additiveExpression |
-    comparisonExpression comparisonOperator newLines:? additiveExpression
+    comparisonExpression _ comparisonOperator _ newLines:? _ additiveExpression
     {%
         function(data) {
             return {
@@ -928,8 +940,8 @@ comparisonExpression ->
 
 additiveExpression ->
     multiplicativeExpression |
-    additiveExpression "+" newLines:? multiplicativeExpression |
-    additiveExpression dash newLines:? multiplicativeExpression
+    additiveExpression _ "+" _ newLines:? multiplicativeExpression |
+    additiveExpression _ dash _ newLines:? multiplicativeExpression
     {%
         function(data) {
             return {
@@ -941,9 +953,9 @@ additiveExpression ->
 
 multiplicativeExpression ->
     formatExpression |
-    multiplicativeExpression "*" newLines:? formatExpression |
-    multiplicativeExpression "/" newLines:? formatExpression |
-    multiplicativeExpression "%" newLines:? formatExpression
+    multiplicativeExpression _ "*" _ newLines:? _ formatExpression |
+    multiplicativeExpression _ "/" _ newLines:? _ formatExpression |
+    multiplicativeExpression _ "%" _ newLines:? _ formatExpression
     {%
         function(data) {
             return {
@@ -955,7 +967,7 @@ multiplicativeExpression ->
 
 formatExpression ->
     rangeExpression |
-    formatExpression formatOperator newLines:? rangeExpression
+    formatExpression _ formatOperator _ newLines:? _ rangeExpression
     {%
         function(data) {
             return {
@@ -967,7 +979,7 @@ formatExpression ->
 
 rangeExpression ->
     arrayLiteralExpression |
-    rangeExpression ".." newLines:? arrayLiteralExpression
+    rangeExpression _ ".." _ newLines:? _ arrayLiteralExpression
     {%
         function(data) {
             return {
@@ -979,7 +991,7 @@ rangeExpression ->
 
 arrayLiteralExpression ->
     unaryExpression |
-    unaryExpression "," newLines:? arrayLiteralExpression
+    unaryExpression _ "," _ newLines:? _ arrayLiteralExpression
     {%
         function(data) {
             return {
@@ -1002,17 +1014,17 @@ unaryExpression ->
     %}
 
 expressionWithUnaryOperator ->
-    "," newLines:? unaryExpression |
-    "-not"i newLines:? unaryExpression |
-    "!" newLines:? unaryExpression |
-    "-bnot"i newLines:? unaryExpression |
-    "+" newLines:? unaryExpression |
-    dash newLines:? unaryExpression |
+    "," _ newLines:? _ unaryExpression |
+    "-not"i _ newLines:? _ unaryExpression |
+    "!" _ newLines:? _ unaryExpression |
+    "-bnot"i _ newLines:? _ unaryExpression |
+    "+" _ newLines:? _ unaryExpression |
+    dash _ newLines:? _ unaryExpression |
     preIncrementExpression |
     preDecrementExpression |
     castExpression |
-    "-split"i newLines:? unaryExpression |
-    "-join"i newLines:? unaryExpression
+    "-split"i _ newLines:? _ unaryExpression |
+    "-join"i _ newLines:? _ unaryExpression
     {%
         function(data) {
             return {
@@ -1023,7 +1035,7 @@ expressionWithUnaryOperator ->
     %}
 
 preIncrementExpression ->
-    "++" newLines:? unaryExpression
+    "++" _ newLines:? _ unaryExpression
     {%
         function(data) {
             return {
@@ -1034,7 +1046,7 @@ preIncrementExpression ->
     %}
 
 preDecrementExpression ->
-    dashdash newLines:? unaryExpression
+    dashdash _ newLines:? _ unaryExpression
     {%
         function(data) {
             return {
@@ -1045,7 +1057,7 @@ preDecrementExpression ->
     %}
 
 castExpression ->
-    typeLiteral unaryExpression
+    typeLiteral _ unaryExpression
     {%
         function(data) {
             return {
@@ -1056,7 +1068,7 @@ castExpression ->
     %}
 
 attributedExpression ->
-    typeLiteral variable
+    typeLiteral _ variable
     {%
         function(data) {
             return {
@@ -1101,7 +1113,7 @@ value ->
     %}
 
 parenthesizedExpression ->
-    "(" newLines:? pipeline newLines:? ")"
+    "(" _ newLines:? _ pipeline _ newLines:? _ ")"
     {%
         function(data) {
             return {
@@ -1112,7 +1124,7 @@ parenthesizedExpression ->
     %}
 
 subExpression ->
-    "$(" newLines:? statementList:? newLines:? ")"
+    "$(" _ newLines:? _ statementList:? _ newLines:? _ ")"
     {%
         function(data) {
             return {
@@ -1123,7 +1135,7 @@ subExpression ->
     %}
 
 arrayExpression ->
-    "@(" newLines:? statementList:? newLines:? ")"
+    "@(" _ newLines:? _ statementList:? _ newLines:? _ ")"
     {%
         function(data) {
             return {
@@ -1134,7 +1146,7 @@ arrayExpression ->
     %}
 
 scriptBlockExpression ->
-    "{" newLines:? scriptBlock newLines:? "}"
+    "{" _ newLines:? _ scriptBlock _ newLines:? _ "}"
     {%
         function(data) {
             return {
@@ -1145,7 +1157,7 @@ scriptBlockExpression ->
     %}
 
 hashLiteralExpression ->
-    "@{" newLines:? hashLiteralBody:? newLines:? "}"
+    "@{" _ newLines:? _ hashLiteralBody:? _ newLines:? _ "}"
     {%
         function(data) {
             return {
@@ -1157,7 +1169,7 @@ hashLiteralExpression ->
 
 hashLiteralBody ->
     hashEntry |
-    hashLiteralBody statementTerminators hashEntry
+    hashLiteralBody _ statementTerminators _ hashEntry
     {%
         function(data) {
             return {
@@ -1168,7 +1180,7 @@ hashLiteralBody ->
     %}
 
 hashEntry ->
-    keyExpression "=" newLines:? statement
+    keyExpression _ "=" _ newLines:? _ statement
     {%
         function(data) {
             return {
@@ -1191,7 +1203,7 @@ keyExpression ->
     %}
 
 postIncrementExpression ->
-    primaryExpression "++"
+    primaryExpression _ "++"
     {%
         function(data) {
             return {
@@ -1202,7 +1214,7 @@ postIncrementExpression ->
     %}
 
 postDecrementExpression ->
-    primaryExpression dashdash
+    primaryExpression _ dashdash
     {%
         function(data) {
             return {
@@ -1225,7 +1237,7 @@ memberAccess -> # No whitespace after primaryExpression
     %}
 
 elementAccess -> # No whitespace between primaryExpression and "["
-    primaryExpression "[" newLines:? expression newLines:? "]"
+    primaryExpression "[" _ newLines:? _ expression _ newLines:? _ "]"
     {%
         function(data) {
             return {
@@ -1236,8 +1248,8 @@ elementAccess -> # No whitespace between primaryExpression and "["
     %}
 
 invocationExpression -> # No whitespace after primaryExpression
-    primaryExpression "." memberName argumentList |
-    primaryExpression "::" memberName argumentList
+    primaryExpression "." memberName _ argumentList |
+    primaryExpression "::" memberName _ argumentList
     {%
         function(data) {
             return {
@@ -1248,7 +1260,7 @@ invocationExpression -> # No whitespace after primaryExpression
     %}
 
 argumentList ->
-    "(" argumentExpressionList:? newLines:? ")"
+    "(" _ argumentExpressionList:? _ newLines:? _ ")"
     {%
         function(data) {
             return {
@@ -1260,7 +1272,7 @@ argumentList ->
 
 argumentExpressionList ->
     argumentExpression |
-    argumentExpression newLines:? "," argumentExpressionList
+    argumentExpression _ newLines:? _ "," _ argumentExpressionList
     {%
         function(data) {
             return {
@@ -1271,7 +1283,7 @@ argumentExpressionList ->
     %}
 
 argumentExpression ->
-    newLines:? logicalArgumentExpression
+    newLines:? _ logicalArgumentExpression
     {%
         function(data) {
             return {
@@ -1283,9 +1295,9 @@ argumentExpression ->
 
 logicalArgumentExpression ->
     bitwiseArgumentExpression |
-    logicalArgumentExpression "-and"i newLines:? bitwiseArgumentExpression |
-    logicalArgumentExpression "-or"i newLines:? bitwiseArgumentExpression |
-    logicalArgumentExpression "-xor"i newLines:? bitwiseArgumentExpression
+    logicalArgumentExpression _ "-and"i _ newLines:? _ bitwiseArgumentExpression |
+    logicalArgumentExpression _ "-or"i _ newLines:? _ bitwiseArgumentExpression |
+    logicalArgumentExpression _ "-xor"i _ newLines:? _ bitwiseArgumentExpression
     {%
         function(data) {
             return {
@@ -1297,9 +1309,9 @@ logicalArgumentExpression ->
 
 bitwiseArgumentExpression ->
     comparisonArgumentExpression |
-    bitwiseArgumentExpression "-band"i newLines:? comparisonArgumentExpression |
-    bitwiseArgumentExpression "-bor"i newLines:? comparisonArgumentExpression |
-    bitwiseArgumentExpression "-bxor"i newLines:? comparisonArgumentExpression
+    bitwiseArgumentExpression _ "-band"i _ newLines:? _ comparisonArgumentExpression |
+    bitwiseArgumentExpression _ "-bor"i _ newLines:? _ comparisonArgumentExpression |
+    bitwiseArgumentExpression _ "-bxor"i _ newLines:? _ comparisonArgumentExpression
     {%
         function(data) {
             return {
@@ -1311,7 +1323,7 @@ bitwiseArgumentExpression ->
 
 comparisonArgumentExpression ->
     additiveArgumentExpression |
-    comparisonArgumentExpression comparisonOperator newLines:? additiveArgumentExpression
+    comparisonArgumentExpression _ comparisonOperator _ newLines:? _ additiveArgumentExpression
     {%
         function(data) {
             return {
@@ -1323,8 +1335,8 @@ comparisonArgumentExpression ->
 
 additiveArgumentExpression ->
     multiplicativeArgumentExpression |
-    additiveArgumentExpression "+" newLines:? multiplicativeArgumentExpression |
-    additiveArgumentExpression dash newLines:? multiplicativeArgumentExpression
+    additiveArgumentExpression _ "+" _ newLines:? _ multiplicativeArgumentExpression |
+    additiveArgumentExpression _ dash _ newLines:? _ multiplicativeArgumentExpression
     {%
         function(data) {
             return {
@@ -1336,9 +1348,9 @@ additiveArgumentExpression ->
 
 multiplicativeArgumentExpression ->
     formatArgumentExpression |
-    multiplicativeArgumentExpression "*" newLines:? formatArgumentExpression |
-    multiplicativeArgumentExpression "/" newLines:? formatArgumentExpression |
-    multiplicativeArgumentExpression "%" newLines:? formatArgumentExpression
+    multiplicativeArgumentExpression _ "*" _ newLines:? _ formatArgumentExpression |
+    multiplicativeArgumentExpression _ "/" _ newLines:? _ formatArgumentExpression |
+    multiplicativeArgumentExpression _ "%" _ newLines:? _ formatArgumentExpression
     {%
         function(data) {
             return {
@@ -1350,7 +1362,7 @@ multiplicativeArgumentExpression ->
 
 formatArgumentExpression ->
     rangeArgumentExpression |
-    formatArgumentExpression formatOperator newLines:? rangeArgumentExpression
+    formatArgumentExpression _ formatOperator _ newLines:? _ rangeArgumentExpression
     {%
         function(data) {
             return {
@@ -1362,7 +1374,7 @@ formatArgumentExpression ->
 
 rangeArgumentExpression ->
     unaryExpression |
-    rangeExpression ".." newLines:? unaryExpression
+    rangeExpression _ ".." _ newLines:? _ unaryExpression
     {%
         function(data) {
             return {
@@ -1399,8 +1411,8 @@ stringLiteralWithSubexpression ->
     %}
 
 expandableStringLiteralWithSubexpression ->
-    expandableStringWithSubexpressionStart statementList:? ")" expandableStringWithSubexpressionChars expandableStringWithSubexpressionEnd |
-    expandableHereStringWithSubexpressionStart statementList:? ")" expandableHereStringWithSubexpressionChars expandableHereStringWithSubexpressionEnd
+    expandableStringWithSubexpressionStart _ statementList:? _ ")" _ expandableStringWithSubexpressionChars _ expandableStringWithSubexpressionEnd |
+    expandableHereStringWithSubexpressionStart _ statementList:? _ ")" _ expandableHereStringWithSubexpressionChars _ expandableHereStringWithSubexpressionEnd
     {%
         function(data) {
             return {
@@ -1436,7 +1448,7 @@ expandableStringWithSubexpressionPart ->
 
 expandableHereStringWithSubexpressionChars ->
     expandableHereStringWithSubexpressionPart |
-    expandableHereStringWithSubexpressionChars expandableHereStringWithSubexpressionPart
+    expandableHereStringWithSubexpressionChars _ expandableHereStringWithSubexpressionPart
     {%
         function(data) {
             return {
@@ -1459,7 +1471,7 @@ expandableHereStringWithSubexpressionPart ->
     %}
 
 typeLiteral ->
-    "[" typeSpec "]"
+    "[" _ typeSpec _ "]"
     {%
         function(data) {
             return {
@@ -1470,8 +1482,8 @@ typeLiteral ->
     %}
 
 typeSpec ->
-    arrayTypeName newLines:? dimension:? "]" |
-    genericTypeName newLines:? genericTypeArguments "]" |
+    arrayTypeName _ newLines:? _ dimension:? _ "]" |
+    genericTypeName _ newLines:? _ genericTypeArguments _ "]" |
     typeName
     {%
         function(data) {
@@ -1484,7 +1496,7 @@ typeSpec ->
 
 dimension ->
     "," |
-    dimension ","
+    dimension _ ","
     {%
         function(data) {
             return {
@@ -1495,8 +1507,8 @@ dimension ->
     %}
 
 genericTypeArguments ->
-    typeSpec newLines:? |
-    genericTypeArguments "," newLines:? typeSpec
+    typeSpec _ newLines:? |
+    genericTypeArguments _ "," _ newLines:? _ typeSpec
     {%
         function(data) {
             return {
@@ -1509,7 +1521,7 @@ genericTypeArguments ->
 # Attributes
 attributeList ->
     attribute |
-    attributeList newLines:? attribute
+    attributeList _ newLines:? _ attribute
     {%
         function(data) {
             return {
@@ -1520,7 +1532,7 @@ attributeList ->
     %}
 
 attribute ->
-    "[" newLines:? attributeName "(" attributeArguments newLines:? ")" newLines:? "]" |
+    "[" _ newLines:? _ attributeName _ "(" _ attributeArguments _ newLines:? _ ")" _ newLines:? _ "]" |
     typeLiteral
     {%
         function(data) {
@@ -1544,7 +1556,7 @@ attributeName ->
 
 attributeArguments ->
     attributeArgument |
-    attributeArgument newLines:? "," attributeArguments
+    attributeArgument _ newLines:? _ "," _ attributeArguments
     {%
         function(data) {
             return {
@@ -1555,9 +1567,9 @@ attributeArguments ->
     %}
 
 attributeArgument ->
-    newLines:? expression |
-    newLines:? simpleName |
-    newLines:? simpleName "=" newLines:? expression
+    newLines:? _ expression |
+    newLines:? _ simpleName |
+    newLines:? _ simpleName _ "=" _ newLines:? _ expression
     {%
         function(data) {
             return {
@@ -1569,7 +1581,7 @@ attributeArgument ->
 
 # Lexical grammar
 input ->
-    inputElements:? signatureBlock:?
+    inputElements:? _ signatureBlock:?
     {%
         function(data) {
             return {
@@ -1580,7 +1592,8 @@ input ->
     %}
 
 inputElements ->
-    inputElement:+
+    inputElement |
+    inputElements inputElement
     {%
         function(data) {
             return {
@@ -1604,7 +1617,7 @@ inputElement ->
     %}
 
 signatureBlock ->
-    signatureBegin signature signatureEnd
+    signatureBegin _ signature _ signatureEnd
     {%
         function(data) {
             return {
@@ -1638,7 +1651,7 @@ signature ->
 
 singleLineComments ->
     singleLineComment |
-    singleLineComments newLineCharacter singleLineComment
+    singleLineComments _ newLineCharacter _ singleLineComment
     {%
         function(data) {
             return {
@@ -1664,39 +1677,16 @@ newLineCharacter ->
     carriageReturnCharacter |
     lineFeedCharacter |
     carriageReturnCharacter lineFeedCharacter
-    {%
-        function(data) {
-            return {
-                type: "newLineCharacter",
-                data: data[0]
-            }
-        }
-    %}
 
 carriageReturnCharacter ->
-    [\r]
-    {%
-        function(data) {
-            return {
-                type: "carriageReturnCharacter",
-                data: data[0]
-            }
-        }
-    %}
+    [\r] {% function() {} %}
 
 lineFeedCharacter ->
-    [\n]
-    {%
-        function(data) {
-            return {
-                type: "lineFeedCharacter",
-                data: data[0]
-            }
-        }
-    %}
+    [\n] {% function() {}%}
 
 newLines ->
-    newLineCharacter:+
+    newLineCharacter |
+    newLines _ newLineCharacter
     {%
         function(data) {
             return {
@@ -1736,7 +1726,8 @@ singleLineComment ->
     %}
 
 inputCharacters ->
-    inputCharacter:+
+    inputCharacter |
+    inputCharacters inputCharacter
     {%
         function(data) {
             let out = ""
@@ -1762,7 +1753,7 @@ inputCharacter ->
     %}
 
 requiresComment ->
-    "#requires" whitespace commandArgument # Docs says commandArguments but might be a typo?
+    "#requires" __ commandArgument # Docs says commandArguments but might be a typo?
     {%
         function(data) {
             return {
@@ -1777,14 +1768,7 @@ dash ->
     "\u2013" |
     "\u2014" |
     "\u2015"
-    {%
-        function(data) {
-            return {
-                type: "dash",
-                data: data[0]
-            }
-        }
-    %}
+    {% id %}
 
 dashdash ->
     dash dash
@@ -1844,12 +1828,13 @@ delimitedCommentSection ->
     %}
 
 hashes ->
-    "#":+
+    "#" |
+    hashes "#"
     {%
         function(data) {
             let out = ""
-            for (let i = 0; i < data.length; i++) {
-                out += data[i]
+            for (let i = 0; i < data[0].length; i++) {
+                out += data[0][i]
             }
             return {
                 type: "hashes",
@@ -1860,14 +1845,7 @@ hashes ->
 
 notGreaterThanOrHash ->
     [^>#]
-    {%
-        function(data) {
-            return {
-                type: "notGreaterThanOrHash",
-                data: data[0]
-            }
-        }
-    %}
+    {% id %}
 
 whitespace ->
     "\u2028" |
@@ -1882,8 +1860,8 @@ whitespace ->
     {%
         function(data) {
             let out = ""
-            for (let i = 0; i < data.length; i++) {
-                out += data[i]
+            for (let i = 0; i < data[0].length; i++) {
+                out += data[0][i]
             }
             return {
                 type: "whitespace",
@@ -1932,8 +1910,8 @@ variable ->
     "$$" |
     "$?" |
     "$^" |
-    "$" variableScope:? variableCharacters |
-    "@" variableScope:? variableCharacters |
+    "$" _ variableScope:? _ variableCharacters |
+    "@" _ variableScope:? _ variableCharacters |
     bracedVariable
     {%
         function(data) {
@@ -1945,7 +1923,7 @@ variable ->
     %}
 
 bracedVariable ->
-    "${" variableScope:? bracedVariableCharacters "}"
+    "${" _ variableScope:? _ bracedVariableCharacters _ "}"
     {%
         function(data) {
             return {
@@ -2057,9 +2035,13 @@ genericToken ->
     genericTokenParts
     {%
         function(data) {
+            const out = [];
+            for (let i = 0; i < data[0].data.length; i++) {
+                out.push(data[0].data[i][0]);
+            }
             return {
                 type: "genericToken",
-                data: data[0].data
+                data: out
             }
         }
     %}
@@ -2068,41 +2050,33 @@ genericTokenParts ->
     genericTokenPart:+
     {%
         function(data) {
-            let out = ""
-            for (let i = 0; i < data[0].length; i++) {
-                out += data[0][i].data;
-            }
-
             return {
                 type: "genericTokenParts",
-                data: out
+                data: data[0]
             }
         }
     %}
 
 genericTokenPart ->
-    genericTokenCharacter:+
-    {%
-        function(data) {
-            let out = ""
-            for (let i = 0; i < data[0].length; i++) {
-                out += data[0][i]
-            }
-            return {
-                type: "genericTokenPart",
-                data: out
-            }
-        }
-    %}
+    expandableStringLiteral |
+    verbatimHereStringLiteral |
+    variable |
+    genericTokenCharacter
+    {% id %}
+    # {%
+    #     function(data) {
+    #         return {
+    #             type: "genericTokenPart",
+    #             data: data[0]
+    #         }
+    #     }
+    # %}
 
 genericTokenCharacter ->
     [^{}();,|&$\u0060'"\r\n\s] |
     escapedCharacter
     {%
         function(data) {
-            if (data[0].hasOwnProperty("type") && data[0].type == "escapedCharacter") {
-                return data[0].data
-            }
             return {
                 type: "genericTokenCharacter",
                 data: data[0]
@@ -2111,7 +2085,7 @@ genericTokenCharacter ->
     %}
 
 genericTokenWithSubexpressionStart ->
-    genericTokenParts "$("
+    genericTokenParts _ "$("
 
 commandParameter ->
     dash firstParameterChar parameterChars colon:?
@@ -2123,9 +2097,8 @@ firstParameterChar ->
     "?"
 
 parameterChars ->
-    parameterChar:+
-    # parameterChar |
-    # parameterChars parameterChar
+    parameterChar |
+    parameterChars parameterChar
 
 parameterChar ->
     [^{}();,|&.[\u003A\r\n\s]
@@ -2134,9 +2107,8 @@ colon ->
     "\u003A"
 
 verbatimCommandArgumentChars ->
-    verbatimCommandArgumentPart:+
-    # verbatimCommandArgumentPart |
-    # verbatimCommandArgumentChars verbatimCommandArgumentPart
+    verbatimCommandArgumentPart |
+    verbatimCommandArgumentChars verbatimCommandArgumentPart
 
 verbatimCommandArgumentPart ->
     verbatimCommandString |
@@ -2150,9 +2122,8 @@ verbatimCommandString ->
     doubleQuoteCharacter nonDoubleQuoteCharacters doubleQuoteCharacter
 
 nonDoubleQuoteCharacters ->
-    nonDoubleQuoteCharacter:+
-    # nonDoubleQuoteCharacter |
-    # nonDoubleQuoteCharacters nonDoubleQuoteCharacter
+    nonDoubleQuoteCharacter |
+    nonDoubleQuoteCharacters nonDoubleQuoteCharacter
 
 nonDoubleQuoteCharacter ->
     [^\u0022\u201C\u201D\u201E]
@@ -2171,9 +2142,8 @@ decimalIntegerLiteral ->
     decimalDigits numericTypeSuffix:? numericMultiplier:?
 
 decimalDigits ->
-    decimalDigit:+
-    # decimalDigit |
-    # decimalDigit decimalDigits
+    decimalDigit |
+    decimalDigit decimalDigits
 
 decimalDigit ->
     [0-9]
@@ -2234,9 +2204,8 @@ doubleQuoteCharacter ->
     "\u201E"
 
 expandableStringCharacters ->
-    expandableStringPart:+
-    # expandableStringPart |
-    # expandableStringCharacters expandableStringPart
+    expandableStringPart |
+    expandableStringCharacters expandableStringPart
 
 expandableStringPart ->
     [^$\u0022\u201C\u201D\u201E\u0060] |
@@ -2252,12 +2221,11 @@ dollars ->
     # dollars "$"
 
 expandableHereStringLiteral ->
-    "@" doubleQuoteCharacter whitespace:? newLineCharacter expandableHereStringCharacters:? newLineCharacter doubleQuoteCharacter "@"
+    "@" doubleQuoteCharacter _ newLineCharacter expandableHereStringCharacters:? newLineCharacter doubleQuoteCharacter "@"
 
 expandableHereStringCharacters ->
-    expandableHereStringPart:+
-    # expandableHereStringPart |
-    # expandableHereStringCharacters expandableHereStringPart
+    expandableHereStringPart |
+    expandableHereStringCharacters expandableHereStringPart
 
 expandableHereStringPart ->
     [^$\r\n] |
@@ -2303,12 +2271,11 @@ verbatimStringPart ->
     singleQuoteCharacter singleQuoteCharacter
 
 verbatimHereStringLiteral ->
-    "@" singleQuoteCharacter whitespace:? newLineCharacter verbatimHereStringCharacters:? newLineCharacter singleQuoteCharacter "@"
+    "@" singleQuoteCharacter _ newLineCharacter verbatimHereStringCharacters:? newLineCharacter singleQuoteCharacter "@"
 
 verbatimHereStringCharacters ->
-    verbatimHereStringPart:+
-    # verbatimHereStringPart |
-    # verbatimHereStringCharacters verbatimHereStringPart
+    verbatimHereStringPart |
+    verbatimHereStringCharacters verbatimHereStringPart
 
 verbatimHereStringPart ->
     [^\r\n] |
@@ -2324,9 +2291,8 @@ simpleNameFirstChar ->
     "\u005F"
 
 simpleNameChars ->
-    simpleNameChar:+
-    # simpleNameChar |
-    # simpleNameChars simpleNameChar
+    simpleNameChar |
+    simpleNameChars simpleNameChar
 
 simpleNameChar ->
     Llu |
@@ -2342,9 +2308,8 @@ typeIdentifier ->
     typeCharacters
 
 typeCharacters ->
-    typeCharacter:+
-    # typeCharacter |
-    # typeCharacters typeCharacter
+    typeCharacter |
+    typeCharacters typeCharacter
 
 typeCharacter ->
     Llu |
@@ -2400,13 +2365,9 @@ comparisonKeyword ->
 formatOperator ->
     dash "f"
 
-# Unicode groups
-# This isn't entirely what PowerShell will accept, but the full unicode group is too big
-Llu ->
-    [A-Za-z]
-
-Lm ->
-    [^$0-9(@\r\n]
-
-Nd ->
-    [0-9]
+# Whitespace
+_ -> (null | _ whitespace)
+    {% function() {} %}
+__ -> whitespace |
+    __ whitespace
+    {% function() {} %}
