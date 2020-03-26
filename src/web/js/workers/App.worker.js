@@ -114,6 +114,15 @@ self.addEventListener("message", async (e) => {
             }
         });
         break;
+    case "prettyPrint":
+        self.postMessage({
+            command: "callback",
+            data: {
+                callbackid: data.data.callbackid,
+                data: self.prettyPrint(data.data.ast, data.data.language)
+            }
+        });
+        break;
     default:
         console.warn(`Invalid command "${data.command}"`);
     }
@@ -122,8 +131,8 @@ self.addEventListener("message", async (e) => {
 /**
  * Parses the input
  *
- * @param {string} encoding - The encoding to use when decoding the input
  * @param {string} language - The name of the language to parse
+ * @param {string} encoding - The encoding to use when decoding the input
  * @returns {object} - The parsed input
  */
 self.parseInput = async function (language, encoding) {
@@ -150,6 +159,23 @@ self.parse = async function (input, language) {
     } catch (error) {
         console.error(error);
         return [];
+    }
+};
+
+/**
+ * Pretty prints the input with the specified language
+ *
+ * @param {object} ast - The AST to pretty print
+ * @param {string} language - The language to pretty print
+ * @returns {string} - Pretty printed language
+ */
+self.prettyPrint = function (ast, language) {
+    try {
+        const languageObject = self.LanguageHelper.getLanguage(language);
+        return languageObject.prettyPrint(ast);
+    } catch (error) {
+        console.error(error);
+        return "";
     }
 };
 
