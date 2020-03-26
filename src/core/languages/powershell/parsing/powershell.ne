@@ -82,8 +82,7 @@ scriptBlockBody ->
     %}
 
 namedBlockList ->
-    namedBlock |
-    namedBlockList namedBlock
+    namedBlock:+
     {%
         function(data) {
             return {
@@ -136,7 +135,7 @@ statementList ->
         function(data) {
             return {
                 type: "statementList",
-                data: data[0]
+                data: data
             }
         }
     %}
@@ -200,8 +199,7 @@ ifStatement ->
     %}
 
 elseifClauses ->
-    elseifClause |
-    elseifClauses _ elseifClause
+    elseifClause:+
     {%
         function(data) {
             return {
@@ -272,7 +270,7 @@ switchStatement ->
 
 switchParameters ->
     switchParameter |
-    switchParameters _ switchParameter
+    switchParameters __ switchParameter
     {%
         function(data) {
             return {
@@ -333,8 +331,7 @@ switchBody ->
     %}
 
 switchClauses ->
-    switchClause |
-    switchClauses _ switchClause
+    switchClause:+
     {%
         function(data) {
             return {
@@ -563,8 +560,7 @@ tryStatement ->
     %}
 
 catchClauses ->
-    catchClause |
-    catchClauses _ catchClause
+    catchClause:+
     {%
         function(data) {
             return {
@@ -575,7 +571,7 @@ catchClauses ->
     %}
 
 catchClause ->
-    newLines:? _ "catch"i _ catchTypeList:? _ statementBlock
+    _ newLines:? _ "catch"i _ catchTypeList:? _ statementBlock
     {%
         function(data) {
             return {
@@ -1677,12 +1673,22 @@ newLineCharacter ->
     carriageReturnCharacter |
     lineFeedCharacter |
     carriageReturnCharacter lineFeedCharacter
+    {%
+        function(data) {
+            return {
+                type: "newLineCharacter",
+                data: data
+            }
+        }
+    %}
 
 carriageReturnCharacter ->
-    [\r] {% function() {} %}
+    [\r]
+    {% id %}
 
 lineFeedCharacter ->
-    [\n] {% function() {}%}
+    [\n]
+    {% id %}
 
 newLines ->
     newLineCharacter |
@@ -1714,29 +1720,20 @@ singleLineComment ->
     "#" inputCharacters:?
     {%
         function(data) {
-            let out = ""
-            for (let i = 0; i < data.length; i++) {
-                out += data[i]
-            }
             return {
                 type: "singleLineComment",
-                data: out
+                data: data
             }
         }
     %}
 
 inputCharacters ->
-    inputCharacter |
-    inputCharacters inputCharacter
+    inputCharacter:+
     {%
         function(data) {
-            let out = ""
-            for (let i = 0; i < data.length; i++) {
-                out += data[i]
-            }
             return {
                 type: "inputCharacters",
-                data: out
+                data: data[0]
             }
         }
     %}
@@ -2036,12 +2033,12 @@ genericToken ->
     {%
         function(data) {
             const out = [];
-            for (let i = 0; i < data[0].data.length; i++) {
-                out.push(data[0].data[i][0]);
-            }
+            // for (let i = 0; i < data[0].data.length; i++) {
+            //    out.push(data[0].data[i][0]);
+            //}
             return {
                 type: "genericToken",
-                data: out
+                data: data
             }
         }
     %}
@@ -2075,95 +2072,208 @@ genericTokenPart ->
 genericTokenCharacter ->
     [^{}();,|&$\u0060'"\r\n\s] |
     escapedCharacter
+    {% id %}
+    # {%
+    #     function(data) {
+    #         return {
+    #             type: "genericTokenCharacter",
+    #             data: data[0]
+    #         }
+    #     }
+    # %}
+
+genericTokenWithSubexpressionStart ->
+    genericTokenParts _ "$("
     {%
         function(data) {
             return {
-                type: "genericTokenCharacter",
-                data: data[0]
+                type: "genericTokenWithSubexpressionStart",
+                data: data
             }
         }
     %}
 
-genericTokenWithSubexpressionStart ->
-    genericTokenParts _ "$("
-
 commandParameter ->
     dash firstParameterChar parameterChars colon:?
+    {%
+        function(data) {
+            return {
+                type: "commandParameter",
+                data: data
+            }
+        }
+    %}
 
 firstParameterChar ->
     Llu |
     Lm |
     "\u005F" |
     "?"
+    {% id %}
 
 parameterChars ->
-    parameterChar |
-    parameterChars parameterChar
+    parameterChar:+
+    {%
+        function(data) {
+            return {
+                type: "parameterChars",
+                data: data[0]
+            }
+        }
+    %}
 
 parameterChar ->
     [^{}();,|&.[\u003A\r\n\s]
+    {% id %}
 
 colon ->
     "\u003A"
+    {% id %}
 
 verbatimCommandArgumentChars ->
     verbatimCommandArgumentPart |
     verbatimCommandArgumentChars verbatimCommandArgumentPart
+    {%
+        function(data) {
+            return {
+                type: "verbatimCommandArgumentChars",
+                data: data
+            }
+        }
+    %}
 
 verbatimCommandArgumentPart ->
     verbatimCommandString |
     "&" nonAmpersandCharacter |
     [^|\r\n]
+    {%
+        function(data) {
+            return {
+                type: "verbatimCommandArgumentPart",
+                data: data
+            }
+        }
+    %}
 
 nonAmpersandCharacter ->
     [^&]
+    {% id %}
 
 verbatimCommandString ->
     doubleQuoteCharacter nonDoubleQuoteCharacters doubleQuoteCharacter
+    {%
+        function(data) {
+            return {
+                type: "verbatimCommandString",
+                data: data
+            }
+        }
+    %}
 
 nonDoubleQuoteCharacters ->
     nonDoubleQuoteCharacter |
     nonDoubleQuoteCharacters nonDoubleQuoteCharacter
+    {%
+        function(data) {
+            return {
+                type: "nonDoubleQuoteCharacters",
+                data: data
+            }
+        }
+    %}
 
 nonDoubleQuoteCharacter ->
     [^\u0022\u201C\u201D\u201E]
+    {% id %}
 
 # Literals
 literal ->
     integerLiteral |
     realLiteral |
     stringLiteral
+    {% id %}
 
 integerLiteral ->
     decimalIntegerLiteral |
     hexadecimalIntegerLiteral
+    {% id %}
 
 decimalIntegerLiteral ->
     decimalDigits numericTypeSuffix:? numericMultiplier:?
+    {%
+        function(data) {
+            return {
+                type: "decimalIntegerLiteral",
+                data: data
+            }
+        }
+    %}
 
 decimalDigits ->
     decimalDigit |
     decimalDigit decimalDigits
+    {%
+        function(data) {
+            return {
+                type: "decimalDigits",
+                data: data
+            }
+        }
+    %}
 
 decimalDigit ->
     [0-9]
+    {% id %}
 
 numericTypeSuffix ->
     longTypeSuffix |
     decimalTypeSuffix
+    {%
+        function(data) {
+            return {
+                type: "numericTypeSuffix",
+                data: data[0]
+            }
+        }
+    %}
 
 hexadecimalIntegerLiteral ->
     "0x" hexadecimalDigits longTypeSuffix:? numericMultiplier:?
+    {%
+        function(data) {
+            return {
+                type: "hexadecimalIntegerLiteral",
+                data: data
+            }
+        }
+    %}
 
 hexadecimalDigits ->
     hexadecimalDigit |
     hexadecimalDigit decimalDigits
+    {%
+        function(data) {
+            return {
+                type: "hexadecimalDigits",
+                data: data
+            }
+        }
+    %}
 
 hexadecimalDigit ->
     [0-9A-Fa-f]
+    {% id %}
 
 longTypeSuffix ->
     "l"
+    {%
+        function(data) {
+            return {
+                type: "longTypeSuffix",
+                data: data[0]
+            }
+        }
+    %}
 
 numericMultiplier ->
     "kb" |
@@ -2171,41 +2281,105 @@ numericMultiplier ->
     "gb" |
     "tb" |
     "pb"
+    {%
+        function(data) {
+            return {
+                type: "numericMultiplier",
+                data: data[0]
+            }
+        }
+    %}
 
 realLiteral ->
     decimalDigits "." decimalDigits exponentPart:? decimalTypeSuffix:? numericMultiplier:? |
     "." decimalDigits exponentPart:? decimalTypeSuffix:? numericMultiplier:? |
     decimalDigits exponentPart decimalTypeSuffix:? numericMultiplier:?
+    {%
+        function(data) {
+            return {
+                type: "realLiteral",
+                data: data
+            }
+        }
+    %}
 
 exponentPart ->
     "e" sign:? decimalDigits
+    {%
+        function(data) {
+            return {
+                type: "exponentPart",
+                data: data
+            }
+        }
+    %}
 
 sign ->
     "+" |
     dash
+    {%
+        function(data) {
+            return {
+                type: "sign",
+                data: data[0]
+            }
+        }
+    %}
 
 decimalTypeSuffix ->
     "d" |
     "l"
+    {%
+        function(data) {
+            return {
+                type: "decimalTypeSuffix",
+                data: data[0]
+            }
+        }
+    %}
 
 stringLiteral ->
     expandableStringLiteral |
     expandableHereStringLiteral |
     verbatimStringLiteral |
     verbatimHereStringLiteral
+    {%
+        function(data) {
+            return {
+                type: "stringLiteral",
+                data: data[0]
+            }
+        }
+    %}
 
 expandableStringLiteral ->
     doubleQuoteCharacter expandableStringCharacters:? dollars:? doubleQuoteCharacter
+    {%
+        function(data) {
+            return {
+                type: "expandableStringLiteral",
+                data: data
+            }
+        }
+    %}
 
 doubleQuoteCharacter ->
     "\u0022" |
     "\u201C" |
     "\u201D" |
     "\u201E"
+    {% id %}
 
 expandableStringCharacters ->
-    expandableStringPart |
-    expandableStringCharacters expandableStringPart
+    expandableStringPart:+
+    {%
+        function(data) {
+            return {
+                type: "expandableStringCharacters",
+                data: data
+            }
+        }
+    %}
 
 expandableStringPart ->
     [^$\u0022\u201C\u201D\u201E\u0060] |
@@ -2214,18 +2388,47 @@ expandableStringPart ->
     "$" escapedCharacter |
     escapedCharacter |
     doubleQuoteCharacter doubleQuoteCharacter
+    {%
+        function(data) {
+            return {
+                type: "expandableStringPart",
+                data: data
+            }
+        }
+    %}
 
 dollars ->
     "$":+
-    # "$" |
-    # dollars "$"
+    {%
+        function(data) {
+            return {
+                type: "dollars",
+                data: data
+            }
+        }
+    %}
 
 expandableHereStringLiteral ->
     "@" doubleQuoteCharacter _ newLineCharacter expandableHereStringCharacters:? newLineCharacter doubleQuoteCharacter "@"
+    {%
+        function(data) {
+            return {
+                type: "expandableHereStringLiteral",
+                data: data
+            }
+        }
+    %}
 
 expandableHereStringCharacters ->
-    expandableHereStringPart |
-    expandableHereStringCharacters expandableHereStringPart
+    expandableHereStringPart:+
+    {%
+        function(data) {
+            return {
+                type: "expandableHereStringCharacters",
+                data: data[0]
+            }
+        }
+    %}
 
 expandableHereStringPart ->
     [^$\r\n] |
@@ -2235,21 +2438,69 @@ expandableHereStringPart ->
     "$" newLineCharacter doubleQuoteCharacter [^@] |
     newLineCharacter nonDoubleQuoteCharacter |
     newLineCharacter doubleQuoteCharacter [^@]
+    {%
+        function(data) {
+            return {
+                type: "expandableHereStringPart",
+                data: data
+            }
+        }
+    %}
 
 expandableStringWithSubexpressionStart ->
     doubleQuoteCharacter expandableStringCharacters:? "$("
+    {%
+        function(data) {
+            return {
+                type: "expandableStringWithSubexpressionStart",
+                data: data
+            }
+        }
+    %}
 
 expandableStringWithSubexpressionEnd ->
     doubleQuoteCharacter
+    {%
+        function(data) {
+            return {
+                type: "expandableStringWithSubexpressionEnd",
+                data: data[0]
+            }
+        }
+    %}
 
 expandableHereStringWithSubexpressionStart ->
     "@" doubleQuoteCharacter whitespace:? newLineCharacter expandableHereStringCharacters:? "$("
+    {%
+        function(data) {
+            return {
+                type: "expandableHereStringWithSubexpressionStart",
+                data: data
+            }
+        }
+    %}
 
 expandableHereStringWithSubexpressionEnd ->
     newLineCharacter doubleQuoteCharacter "@"
+    {%
+        function(data) {
+            return {
+                type: "expandableHereStringWithSubexpressionEnd",
+                data: data
+            }
+        }
+    %}
 
 verbatimStringLiteral ->
     singleQuoteCharacter verbatimStringCharacters:? singleQuoteCharacter
+    {%
+        function(data) {
+            return {
+                type: "verbatimStringLiteral",
+                data: data
+            }
+        }
+    %}
 
 singleQuoteCharacter ->
     "\u0027" |
@@ -2257,70 +2508,155 @@ singleQuoteCharacter ->
     "\u2019" |
     "\u201A" |
     "\u201B"
+    {% id %}
 
 nonSingleQuoteCharacter ->
     [^\u0027\u2018\u2019\u201A\u201B]
+    {% id %}
 
 verbatimStringCharacters ->
     verbatimStringPart:+
-    # verbatimStringPart |
-    # verbatimStringCharacters verbatimStringPart
+    {%
+        function(data) {
+            return {
+                type: "verbatimStringCharacters",
+                data: data[0]
+            }
+        }
+    %}
 
 verbatimStringPart ->
     nonSingleQuoteCharacter |
     singleQuoteCharacter singleQuoteCharacter
+    {%
+        function(data) {
+            return {
+                type: "verbatimStringPart",
+                data: data
+            }
+        }
+    %}
 
 verbatimHereStringLiteral ->
     "@" singleQuoteCharacter _ newLineCharacter verbatimHereStringCharacters:? newLineCharacter singleQuoteCharacter "@"
+    {%
+        function(data) {
+            return {
+                type: "verbatimHereStringLiteral",
+                data: data
+            }
+        }
+    %}
 
 verbatimHereStringCharacters ->
-    verbatimHereStringPart |
-    verbatimHereStringCharacters verbatimHereStringPart
+    verbatimHereStringPart:+
+    {%
+        function(data) {
+            return {
+                type: "verbatimHereStringCharacters",
+                data: data[0]
+            }
+        }
+    %}
 
 verbatimHereStringPart ->
     [^\r\n] |
     newLineCharacter nonSingleQuoteCharacter |
     newLineCharacter singleQuoteCharacter [^@]
+    {%
+        function(data) {
+            return {
+                type: "verbatimHereStringPart",
+                data: data
+            }
+        }
+    %}
 
 simpleName ->
     simpleNameFirstChar simpleNameChars
+    {%
+        function(data) {
+            return {
+                type: "simpleName",
+                data: data
+            }
+        }
+    %}
 
 simpleNameFirstChar ->
     Llu |
     Lm |
     "\u005F"
+    {% id %}
 
 simpleNameChars ->
-    simpleNameChar |
-    simpleNameChars simpleNameChar
+    simpleNameChar:+
+    {%
+        function(data) {
+            return {
+                type: "simpleNameChars",
+                data: data[0]
+            }
+        }
+    %}
 
 simpleNameChar ->
     Llu |
     Lm |
     Nd |
     "\u005F"
+    {% id %}
 
 typeName ->
     typeIdentifier |
     typeName "." typeIdentifier
+    {%
+        function(data) {
+            return {
+                type: "typeName",
+                data: data
+            }
+        }
+    %}
 
 typeIdentifier ->
-    typeCharacters
-
-typeCharacters ->
-    typeCharacter |
-    typeCharacters typeCharacter
+    typeCharacter:+
+    {%
+        function(data) {
+            return {
+                type: "typeIdentifier",
+                data: data[0]
+            }
+        }
+    %}
 
 typeCharacter ->
     Llu |
     Nd |
     "\u005F"
+    {% id %}
 
 arrayTypeName ->
     typeName "["
+    {%
+        function(data) {
+            return {
+                type: "arrayTypeName",
+                data: data
+            }
+        }
+    %}
 
 genericTypeName ->
     typeName "["
+    {%
+        function(data) {
+            return {
+                type: "genericTypeName",
+                data: data
+            }
+        }
+    %}
 
 operatorOrPunctuator ->
     "{" | "}" | "[" | "]" | "(" | ")" | "@(" | "@{" | "$(" | ";" |
@@ -2333,6 +2669,7 @@ operatorOrPunctuator ->
     fileRedirectionOperator |
     comparisonOperator |
     formatOperator
+    {% id %}
 
 assignmentOperator ->
     "=" |
@@ -2341,17 +2678,49 @@ assignmentOperator ->
     "*=" |
     "/=" |
     "%="
+    {%
+        function(data) {
+            return {
+                type: "assignmentOperator",
+                data: data[0]
+            }
+        }
+    %}
 
 mergingRedirectionOperator ->
     "*>&1" | "2>&1" | "3>&1" | "4>&1" | "5>&1" | "6>&1" |
     "*>&2" | "1>&2" | "3>&2" | "4>&2" | "5>&2" | "6>&2"
+    {%
+        function(data) {
+            return {
+                type: "mergingRedirectionOperator",
+                data: data[0]
+            }
+        }
+    %}
 
 fileRedirectionOperator ->
     ">" | ">>" | "2>" | "2>>" | "3>" | "3>>" | "4>" | "4>>" |
     "5>" | "5>>" | "6>" | "6>>" | "*>" | "*>>" | "<"
+    {%
+        function(data) {
+            return {
+                type: "fileRedirectionOperator",
+                data: data[0]
+            }
+        }
+    %}
 
 comparisonOperator ->
     dash comparisonKeyword
+    {%
+        function(data) {
+            return {
+                type: "comparisonOperator",
+                data: data
+            }
+        }
+    %}
 
 comparisonKeyword ->
     "as" | "ccontains" | "ceq" | "cge" | "cgt" | "cle" | "clike" | "clt" |
@@ -2361,13 +2730,36 @@ comparisonKeyword ->
     "inotlike" | "inotmatch" | "ireplace" | "is" | "isnot" | "isplit" |
     "join" | "le" | "like" | "lt" | "match" | "ne" | "notcontains" | "notin" |
     "notlike" | "notmatch" | "replace" | "shl" | "shr" | "split"
+    {%
+        function(data) {
+            return {
+                type: "comparisonKeyword",
+                data: data[0]
+            }
+        }
+    %}
 
 formatOperator ->
     dash "f"
+    {%
+        function(data) {
+            return {
+                type: "formatOperator",
+                data: data
+            }
+        }
+    %}
 
 # Whitespace
-_ -> (null | _ whitespace)
-    {% function() {} %}
+_ -> __:?
+    {% id %}
 __ -> whitespace |
     __ whitespace
-    {% function() {} %}
+    {%
+        function(data) {
+            return {
+                type: "whitespace",
+                data: data
+            }
+        }
+    %}
