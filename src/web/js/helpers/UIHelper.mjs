@@ -145,26 +145,29 @@ class UIHelper {
         inputFileButton.innerText = "Change";
         inputFileButton.removeAttribute("disabled");
 
-        const decoded = await this.App.getDecodedInput();
-
-        try {
-            const parsed = await new Promise((resolve, reject) => {
-                this.App.AppWorker.postMessage({
-                    command: "parseInput",
-                    data: {
-                        callbackid: this.App.addAppWorkerCallback(resolve),
-                        language: "powershell",
-                        encoding: "utf-8"
-                    }
-                });
+        const parsed = await new Promise((resolve, reject) => {
+            this.App.AppWorker.postMessage({
+                command: "parseInput",
+                data: {
+                    callbackid: this.App.addAppWorkerCallback(resolve),
+                    language: "powershell",
+                    encoding: "utf-8"
+                }
             });
+        });
 
-            console.log(parsed);
-        } catch (e) {
-            console.error(e);
-        }
+        const prettyPrinted = await new Promise((resolve, reject) => {
+            this.App.AppWorker.postMessage({
+                command: "prettyPrint",
+                data: {
+                    callbackid: this.App.addAppWorkerCallback(resolve),
+                    language: "powershell",
+                    ast: parsed
+                }
+            });
+        });
 
-        this.App.OutputHelper.updateOutput(decoded, "powershell");
+        this.App.OutputHelper.updateOutput(prettyPrinted, "powershell");
 
         const output = await this.App.OutputHelper.getOutput(true);
         document.getElementById("outputArea").innerHTML = output;
