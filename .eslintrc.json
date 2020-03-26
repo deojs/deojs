@@ -30,6 +30,7 @@
         "func-names": "off",
         "max-len": "off",
         "object-shorthand": "off",
-        "no-control-regex": "off"
+        "no-control-regex": "off",
+        "no-plusplus": "off"
     }
 }
