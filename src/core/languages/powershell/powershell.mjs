@@ -30,10 +30,11 @@ class PowerShellLanguage {
         const numChunks = Math.ceil(inCode.length / chunkSize);
 
         for (let i = 0; i < numChunks; i++) {
-            console.log(`Parsing ${(i / numChunks) * 100}%`);
+            console.log(`Parsing ${Math.round((i / numChunks) * 100)}%`);
             parser.feed(inCode.slice(i * 100, (i * 100) + 100));
         }
         console.log("Parsing complete");
+        console.log(parser.results);
 
         if (parser.results.length > 0) {
             return parser.results[0];

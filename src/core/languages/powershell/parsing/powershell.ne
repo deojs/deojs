@@ -9,51 +9,88 @@
 # @include "../../unicode/categories/unicode_Lo.ne" # Can't import this as it's too big!
 @include "../../unicode/categories/unicode_Nd.ne"
 
+@include "./lexical.ne"
+
 # Syntactic grammar
 # Statements
 scriptBlock ->
-    paramBlock:? _ statementTerminators:? _ scriptBlockBody:?
+    (comment:+):? newLines:? paramBlock:? _ statementTerminators:? _ scriptBlockBody:?
     {%
         function(data) {
-            const out = [];
-
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "scriptBlock",
-                data: data
+                data: out
             }
         }
     %}
 
 paramBlock ->
-    newLines:? _ attributeList:? _ newLines:? _ "param" _ newLines:?
-        _ "(" _ parameterList:? _ newLines:? _ ")"
+    newLines:? (_ attributeList):? (_ newLines):? _ "param" (_ newLines):?
+        _ "(" _ parameterList:? (_ newLines):? _ ")"
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "paramBlock",
-                data: data
+                data: out
             }
         }
     %}
 
 parameterList ->
-    scriptParameter __ parameterList _ newLines:? _ "," _ scriptParameter
+    scriptParameter |
+    parameterList (_ newLines):? _ "," _ scriptParameter
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "parameterList",
-                data: data
+                data: out
             }
         }
     %}
 
 scriptParameter ->
-    newLines:? _ attributeList:? _ newLines:? _ variable __ scriptParameterDefault:?
+    newLines:? _ attributeList:? (_ newLines):? _ variable __ scriptParameterDefault:?
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "scriptParameter",
-                data: data
+                data: out
             }
         }
     %}
@@ -62,9 +99,18 @@ scriptParameterDefault ->
     newLines:? "=" newLines:? expression
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "scriptParameterDefault",
-                data: data
+                data: out
             }
         }
     %}
@@ -87,7 +133,7 @@ namedBlockList ->
         function(data) {
             return {
                 type: "namedBlockList",
-                data: data
+                data: data[0]
             }
         }
     %}
@@ -96,9 +142,18 @@ namedBlock ->
     blockName _ statementBlock _ statementTerminators:?
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "namedBlock",
-                data: data
+                data: out
             }
         }
     %}
@@ -118,30 +173,48 @@ blockName ->
     %}
 
 statementBlock ->
-    newLines:? _ "{" _ statementList:? _ newLines:? _ "}"
+    newLines:? _ "{" _ statementList:? (_ newLines):? _ "}"
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "statementBlock",
-                data: data
+                data: out
             }
         }
     %}
 
 statementList ->
     statement |
-    statementList _:? newLines:? _ statement
+    statementList (_ newLines):? _ statement
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "statementList",
-                data: data
+                data: out
             }
         }
     %}
 
 statement ->
-    comment (statementTerminator | newLineCharacter) |
+    comment |
     ifStatement |
     label:? labeledStatement |
     functionStatement |
@@ -155,9 +228,18 @@ statement ->
     pipeline _ statementTerminators
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "statement",
-                data: data
+                data: out
             }
         }
     %}
@@ -179,21 +261,39 @@ statementTerminators ->
     statementTerminators _ statementTerminator
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "statementTerminators",
-                data: data
+                data: out
             }
         }
     %}
 
 ifStatement ->
-    "if"i _ newLines:? _ "(" _ newLines:? _ pipeline _ newLines:? _ ")" _ statementBlock _
+    "if"i (_ newLines):? _ "(" (_ newLines):? _ pipeline (_ newLines):? _ ")" _ statementBlock _
         elseifClauses:? _ elseClause:?
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "ifStatement",
-                data: data
+                data: out
             }
         }
     %}
@@ -210,12 +310,21 @@ elseifClauses ->
     %}
 
 elseifClause ->
-    newLines:? _ "elseif"i _ newLines:? _ "(" _ newLines:? _ pipeline _ newLines:? _ ")" _ statementBlock
+    newLines:? _ "elseif"i (_ newLines):? _ "(" (_ newLines):? _ pipeline (_ newLines):? _ ")" _ statementBlock
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "elseifClause",
-                data: data
+                data: out
             }
         }
     %}
@@ -224,9 +333,18 @@ elseClause ->
     newLines:? _ "else"i _ statementBlock
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "elseClause",
-                data: data
+                data: out
             }
         }
     %}
@@ -258,12 +376,21 @@ labeledStatement ->
     %}
 
 switchStatement ->
-    "switch"i _ newLines:? _ switchParameters:? _ switchCondition _ switchBody
+    "switch"i (_ newLines):? _ switchParameters:? _ switchCondition _ switchBody
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "switchStatement",
-                data: data
+                data: out
             }
         }
     %}
@@ -273,9 +400,18 @@ switchParameters ->
     switchParameters __ switchParameter
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "switchParameters",
-                data: data
+                data: out
             }
         }
     %}
@@ -296,13 +432,22 @@ switchParameter ->
     %}
 
 switchCondition ->
-    "(" _ newLines:? _ pipeline _ newLines:? _ ")" |
-    "-file"i _ newLines:? _ switchFilename
+    "(" (_ newLines):? _ pipeline (_ newLines):? _ ")" |
+    "-file"i (_ newLines):? _ switchFilename
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "switchCondition",
-                data: data
+                data: out
             }
         }
     %}
@@ -320,12 +465,21 @@ switchFilename ->
     %}
 
 switchBody ->
-    newLines:? _ "{" _ newLines:? _ switchClauses _ "}"
+    newLines:? _ "{" (_ newLines):? _ switchClauses _ "}"
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "switchBody",
-                data: data
+                data: out
             }
         }
     %}
@@ -336,7 +490,7 @@ switchClauses ->
         function(data) {
             return {
                 type: "switchClauses",
-                data: data
+                data: data[0]
             }
         }
     %}
@@ -345,9 +499,18 @@ switchClause ->
     switchClauseCondition _ statementBlock _ statementTerminators:?
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "switchClause",
-                data: data
+                data: out
             }
         }
     %}
@@ -365,14 +528,22 @@ switchClauseCondition ->
     %}
 
 foreachStatement ->
-    "foreach"i _ newLines:? _ foreachParameter:? _ newLines:? _
-        "(" _ newLines:? _ variable _ newLines:? _ "in"i _ newLines:? _ pipeline _
-        newLines:? _ ")" _ statementBlock
+    "foreach"i (_ newLines):? _ foreachParameter:? (_ newLines):? _
+        "(" (_ newLines):? _ variable (_ newLines):? _ "in"i (_ newLines):? _ pipeline (_ newLines):? _ ")" _ statementBlock
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "foreachStatement",
-                data: data
+                data: out
             }
         }
     %}
@@ -389,19 +560,28 @@ foreachParameter ->
     %}
 
 forStatement ->
-    "for"i _ newLines:? _ (
-        "(" _ newLines:? _ forInitializer:? _ statementTerminator _
+    "for"i (_ newLines):? _ (
+        "(" (_ newLines):? _ forInitializer:? _ statementTerminator _
         newLines:? _ forCondition:? _ statementTerminator _
-        newLines:? _ forIterator:? _ newLines:? _ ")" _ statementBlock |
-        "(" _ newLines:? _ forInitializer:? _ statementTerminator _
-        newLines:? _ forCondition:? _ newLines:? _ ")" _ statementBlock |
-        "(" _ newLines:? _ forInitializer:? _ newLines:? _ ")" _ statementBlock
+        newLines:? _ forIterator:? (_ newLines):? _ ")" _ statementBlock |
+        "(" (_ newLines):? _ forInitializer:? _ statementTerminator _
+        newLines:? _ forCondition:? (_ newLines):? _ ")" _ statementBlock |
+        "(" (_ newLines):? _ forInitializer:? (_ newLines):? _ ")" _ statementBlock
     )
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "forStatement",
-                data: data
+                data: out
             }
         }
     %}
@@ -440,24 +620,42 @@ forIterator ->
     %}
 
 whileStatement ->
-    "while"i _ newLines:? _ "(" newLines:? _ whileCondition _ newLines:? _ ")" _ statementBlock
+    "while"i (_ newLines):? _ "(" newLines:? _ whileCondition (_ newLines):? _ ")" _ statementBlock
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "whileStatement",
-                data: data
+                data: out
             }
         }
     %}
 
 doStatement ->
-    "do"i _ statementBlock _ newLines:? _ "while"i _ newLines:? _ "(" _ whileCondition _ newLines:? _ ")" |
-    "do"i _ statementBlock _ newLines:? _ "until"i _ newLines:? _ "(" _ whileCondition _ newLines:? _ ")"
+    "do"i _ statementBlock (_ newLines):? _ "while"i (_ newLines):? _ "(" _ whileCondition (_ newLines):? _ ")" |
+    "do"i _ statementBlock (_ newLines):? _ "until"i (_ newLines):? _ "(" _ whileCondition (_ newLines):? _ ")"
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "doStatement",
-                data: data
+                data: out
             }
         }
     %}
@@ -466,22 +664,40 @@ whileCondition ->
     newLines:? _ pipeline
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "whileCondition",
-                data: data
+                data: out
             }
         }
     %}
 
 functionStatement ->
-    "function"i _ newLines:? _ functionName _ functionParameterDeclaration:? _ "{" _ scriptBlock _ "}" |
-    "filter"i _ newLines:? _ functionName _ functionParameterDeclaration:? _ "{" _ scriptBlock _ "}" |
-    "workflow"i _ newLines:? _ functionName _ functionParameterDeclaration:? _ "{" _ scriptBlock _ "}"
+    "function"i (_ newLines):? _ functionName _ functionParameterDeclaration:? _ "{" _ scriptBlock _ "}" |
+    "filter"i (_ newLines):? _ functionName _ functionParameterDeclaration:? _ "{" _ scriptBlock _ "}" |
+    "workflow"i (_ newLines):? _ functionName _ functionParameterDeclaration:? _ "{" _ scriptBlock _ "}"
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "functionStatement",
-                data: data
+                data: out
             }
         }
     %}
@@ -498,12 +714,21 @@ functionName ->
     %}
 
 functionParameterDeclaration ->
-    newLines:? _ "(" _ parameterList _ newLines:? _ ")"
+    newLines:? _ "(" _ parameterList (_ newLines):? _ ")"
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "functionParameterDeclaration",
-                data: data
+                data: out
             }
         }
     %}
@@ -516,9 +741,18 @@ flowControlStatement ->
     "exit"i __ pipeline:?
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "flowControlStatement",
-                data: data
+                data: out
             }
         }
     %}
@@ -536,12 +770,21 @@ labelExpression ->
     %}
 
 trapStatement ->
-    "trap"i _ newLines:? _ typeLiteral:? _ newLines:? _ statementBlock
+    "trap"i (_ newLines):? _ typeLiteral:? (_ newLines):? _ statementBlock
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "trapStatement",
-                data: data
+                data: out
             }
         }
     %}
@@ -552,9 +795,18 @@ tryStatement ->
     "try"i _ statementBlock _ catchClauses _ finallyClause
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "tryStatement",
-                data: data
+                data: out
             }
         }
     %}
@@ -565,30 +817,48 @@ catchClauses ->
         function(data) {
             return {
                 type: "catchClauses",
-                data: data
+                data: data[0]
             }
         }
     %}
 
 catchClause ->
-    _ newLines:? _ "catch"i _ catchTypeList:? _ statementBlock
+    (_ newLines):? _ "catch"i _ catchTypeList:? _ statementBlock
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "catchClause",
-                data: data
+                data: out
             }
         }
     %}
 
 catchTypeList ->
     newLines:? _ typeLiteral |
-    catchTypeList _ newLines:? _ "," _ newLines:? _ typeLiteral
+    catchTypeList (_ newLines):? _ "," (_ newLines):? _ typeLiteral
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "catchTypeList",
-                data: data
+                data: out
             }
         }
     %}
@@ -597,20 +867,38 @@ finallyClause ->
     newLines:? _ "finally"i _ statementBlock
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "finallyClause",
-                data: data
+                data: out
             }
         }
     %}
 
 dataStatement ->
-    "data"i _ newLines:? _ dataName _ dataCommandsAllowed:? _ statementBlock
+    "data"i (_ newLines _ | __) dataName _ dataCommandsAllowed:? _ statementBlock
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "dataStatement",
-                data: data
+                data: out
             }
         }
     %}
@@ -630,21 +918,39 @@ dataCommandsAllowed ->
     newLines:? _ "-supportedcommand"i _ dataCommandsList
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "dataCommandsAllowed",
-                data: data
+                data: out
             }
         }
     %}
 
 dataCommandsList ->
     newLines:? _ dataCommand |
-    dataCommandsList _ "," _ newLines:? _ dataCommand
+    dataCommandsList _ "," (_ newLines):? _ dataCommand
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "dataCommandsList",
-                data: data
+                data: out
             }
         }
     %}
@@ -696,13 +1002,22 @@ sequenceStatement ->
 pipeline ->
     assignmentExpression |
     expression _ redirections:? _ pipelineTail:? |
-    command _ verbatimCommandArgument:? _ pipelineTail:?
+    command (_ verbatimCommandArgument):? _ pipelineTail:?
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "pipeline",
-                data: data
-            };
+                data: out
+            }
         }
     %}
 
@@ -710,30 +1025,57 @@ assignmentExpression ->
     expression _ assignmentOperator _ statement
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "assignmentExpression",
-                data: data
-            };
+                data: out
+            }
         }
     %}
 
 pipelineTail ->
-    "|" _ newLines:? _ command |
-    "|" _ newLines:? _ command _ pipelineTail
+    "|" (_ newLines):? _ command |
+    "|" (_ newLines):? _ command _ pipelineTail
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "pipelineTail",
-                data: data
+                data: out
             }
         }
     %}
 
 command ->
     commandName (__ commandElements):? |
-    commandInvocationOperator _ commandModule:? _ commandNameExpression _ commandElements:?
+    commandInvocationOperator (_ commandModule:?) commandNameExpression (_ commandElements):?
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "command",
                 data: data
@@ -780,9 +1122,18 @@ genericTokenWithSubexpression ->
     genericTokenWithSubexpressionStart _ statementList:? _ ")" commandName # No whitespace between ) and commandName!
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "genericTokenWithSubexpression",
-                data: data
+                data: out
             }
         }
     %}
@@ -801,12 +1152,21 @@ commandNameExpression ->
 
 commandElements ->
     commandElement |
-    commandElements __ commandElement
+    commandElements (__ | _ "," _) commandElement
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "commandElements",
-                data: data
+                data: out
             }
         }
     %}
@@ -851,9 +1211,18 @@ redirections ->
     redirections _ redirection
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "redirections",
-                data: data
+                data: out
             }
         }
     %}
@@ -863,9 +1232,18 @@ redirection ->
     fileRedirectionOperator _ redirectedFileName
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "redirection",
-                data: data
+                data: out
             }
         }
     %}
@@ -896,103 +1274,175 @@ expression ->
 
 logicalExpression ->
     bitwiseExpression |
-    logicalExpression _ "-and"i _ newLines:? _ bitwiseExpression |
-    logicalExpression _ "-or"i _ newLines:? _ bitwiseExpression |
-    logicalExpression _ "-xor"i _ newLines:? _ bitwiseExpression
+    logicalExpression _ "-and"i (_ newLines):? _ bitwiseExpression |
+    logicalExpression _ "-or"i (_ newLines):? _ bitwiseExpression |
+    logicalExpression _ "-xor"i (_ newLines):? _ bitwiseExpression
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "logicalExpression",
-                data: data
+                data: out
             }
         }
     %}
 
 bitwiseExpression ->
     comparisonExpression |
-    bitwiseExpression _ "-band" _ newLines:? _ comparisonExpression |
-    bitwiseExpression _ "-bor" _ newLines:? _ comparisonExpression |
-    bitwiseExpression _ "-bxor" _ newLines:? _ comparisonExpression
+    bitwiseExpression _ "-band" (_ newLines):? _ comparisonExpression |
+    bitwiseExpression _ "-bor" (_ newLines):? _ comparisonExpression |
+    bitwiseExpression _ "-bxor" (_ newLines):? _ comparisonExpression
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "bitwiseExpression",
-                data: data
+                data: out
             }
         }
     %}
 
 comparisonExpression ->
     additiveExpression |
-    comparisonExpression _ comparisonOperator _ newLines:? _ additiveExpression
+    comparisonExpression _ comparisonOperator (_ newLines):? _ additiveExpression
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "comparisonExpression",
-                data: data
+                data: out
             }
         }
     %}
 
 additiveExpression ->
     multiplicativeExpression |
-    additiveExpression _ "+" _ newLines:? multiplicativeExpression |
-    additiveExpression _ dash _ newLines:? multiplicativeExpression
+    additiveExpression _ "+" (_ newLines):? _ multiplicativeExpression |
+    additiveExpression _ dash (_ newLines):? _ multiplicativeExpression
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "additiveExpression",
-                data: data
+                data: out
             }
         }
     %}
 
 multiplicativeExpression ->
     formatExpression |
-    multiplicativeExpression _ "*" _ newLines:? _ formatExpression |
-    multiplicativeExpression _ "/" _ newLines:? _ formatExpression |
-    multiplicativeExpression _ "%" _ newLines:? _ formatExpression
+    multiplicativeExpression _ "*" (_ newLines):? _ formatExpression |
+    multiplicativeExpression _ "/" (_ newLines):? _ formatExpression |
+    multiplicativeExpression _ "%" (_ newLines):? _ formatExpression
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "multiplicativeExpression",
-                data: data
+                data: out
             }
         }
     %}
 
 formatExpression ->
     rangeExpression |
-    formatExpression _ formatOperator _ newLines:? _ rangeExpression
+    formatExpression _ formatOperator (_ newLines):? _ rangeExpression
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "formatExpression",
-                data: data
+                data: out
             }
         }
     %}
 
 rangeExpression ->
     arrayLiteralExpression |
-    rangeExpression _ ".." _ newLines:? _ arrayLiteralExpression
+    rangeExpression _ ".." (_ newLines):? _ arrayLiteralExpression
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "rangeExpression",
-                data: data
+                data: out
             }
         }
     %}
 
 arrayLiteralExpression ->
     unaryExpression |
-    unaryExpression _ "," _ newLines:? _ arrayLiteralExpression
+    unaryExpression _ "," (_ newLines):? _ arrayLiteralExpression
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "arrayLiteralExpression",
-                data: data
+                data: out
             }
         }
     %}
@@ -1010,44 +1460,71 @@ unaryExpression ->
     %}
 
 expressionWithUnaryOperator ->
-    "," _ newLines:? _ unaryExpression |
-    "-not"i _ newLines:? _ unaryExpression |
-    "!" _ newLines:? _ unaryExpression |
-    "-bnot"i _ newLines:? _ unaryExpression |
-    "+" _ newLines:? _ unaryExpression |
-    dash _ newLines:? _ unaryExpression |
+    "," (_ newLines):? _ unaryExpression |
+    "-not"i (_ newLines):? _ unaryExpression |
+    "!" (_ newLines):? _ unaryExpression |
+    "-bnot"i (_ newLines):? _ unaryExpression |
+    "+" (_ newLines):? _ unaryExpression |
+    dash (_ newLines):? _ unaryExpression |
     preIncrementExpression |
     preDecrementExpression |
     castExpression |
-    "-split"i _ newLines:? _ unaryExpression |
-    "-join"i _ newLines:? _ unaryExpression
+    "-split"i (_ newLines):? _ unaryExpression |
+    "-join"i (_ newLines):? _ unaryExpression
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "expressionWithUnaryOperator",
-                data: data
+                data: out
             }
         }
     %}
 
 preIncrementExpression ->
-    "++" _ newLines:? _ unaryExpression
+    "++" (_ newLines):? _ unaryExpression
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "preIncrementExpression",
-                data: data
+                data: out
             }
         }
     %}
 
 preDecrementExpression ->
-    dashdash _ newLines:? _ unaryExpression
+    dashdash (_ newLines):? _ unaryExpression
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "preDecrementExpression",
-                data: data
+                data: out
             }
         }
     %}
@@ -1056,9 +1533,18 @@ castExpression ->
     typeLiteral _ unaryExpression
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "castExpression",
-                data: data
+                data: out
             }
         }
     %}
@@ -1067,9 +1553,18 @@ attributedExpression ->
     typeLiteral _ variable
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "attributedExpression",
-                data: data
+                data: out
             }
         }
     %}
@@ -1109,56 +1604,101 @@ value ->
     %}
 
 parenthesizedExpression ->
-    "(" _ newLines:? _ pipeline _ newLines:? _ ")"
+    "(" (_ newLines):? _ pipeline (_ newLines):? _ ")"
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "parenthesizedExpression",
-                data: data
+                data: out
             }
         }
     %}
 
 subExpression ->
-    "$(" _ newLines:? _ statementList:? _ newLines:? _ ")"
+    "$(" (_ newLines):? _ statementList:? (_ newLines):? _ ")"
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "subExpression",
-                data: data
+                data: out
             }
         }
     %}
 
 arrayExpression ->
-    "@(" _ newLines:? _ statementList:? _ newLines:? _ ")"
+    "@(" (_ newLines):? _ statementList:? (_ newLines):? _ ")"
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "arrayExpression",
-                data: data
+                data: out
             }
         }
     %}
 
 scriptBlockExpression ->
-    "{" _ newLines:? _ scriptBlock _ newLines:? _ "}"
+    "{" (_ newLines):? _ scriptBlock (_ newLines):? _ "}"
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "scriptBlockExpression",
-                data: data
+                data: out
             }
         }
     %}
 
 hashLiteralExpression ->
-    "@{" _ newLines:? _ hashLiteralBody:? _ newLines:? _ "}"
+    "@{" (_ newLines):? _ hashLiteralBody:? (_ newLines):? _ "}"
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "hashLiteralExpression",
-                data: data
+                data: out
             }
         }
     %}
@@ -1168,20 +1708,38 @@ hashLiteralBody ->
     hashLiteralBody _ statementTerminators _ hashEntry
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "hashLiteralBody",
-                data: data
+                data: out
             }
         }
     %}
 
 hashEntry ->
-    keyExpression _ "=" _ newLines:? _ statement
+    keyExpression _ "=" (_ newLines):? _ statement
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "hashEntry",
-                data: data
+                data: out
             }
         }
     %}
@@ -1202,9 +1760,18 @@ postIncrementExpression ->
     primaryExpression _ "++"
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "postIncrementExpression",
-                data: data
+                data: out
             }
         }
     %}
@@ -1233,12 +1800,21 @@ memberAccess -> # No whitespace after primaryExpression
     %}
 
 elementAccess -> # No whitespace between primaryExpression and "["
-    primaryExpression "[" _ newLines:? _ expression _ newLines:? _ "]"
+    primaryExpression "[" (_ newLines):? _ expression (_ newLines):? _ "]"
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "elementAccess",
-                data: data
+                data: out
             }
         }
     %}
@@ -1248,32 +1824,59 @@ invocationExpression -> # No whitespace after primaryExpression
     primaryExpression "::" memberName _ argumentList
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "invocationExpression",
-                data: data
+                data: out
             }
         }
     %}
 
 argumentList ->
-    "(" _ argumentExpressionList:? _ newLines:? _ ")"
+    "(" _ argumentExpressionList:? (_ newLines):? _ ")"
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "argumentList",
-                data: data
+                data: out
             }
         }
     %}
 
 argumentExpressionList ->
     argumentExpression |
-    argumentExpression _ newLines:? _ "," _ argumentExpressionList
+    argumentExpression (_ newLines):? _ "," _ argumentExpressionList
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "argumentExpressionList",
-                data: data
+                data: out
             }
         }
     %}
@@ -1282,100 +1885,172 @@ argumentExpression ->
     newLines:? _ logicalArgumentExpression
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "argumentExpression",
-                data: data
+                data: out
             }
         }
     %}
 
 logicalArgumentExpression ->
     bitwiseArgumentExpression |
-    logicalArgumentExpression _ "-and"i _ newLines:? _ bitwiseArgumentExpression |
-    logicalArgumentExpression _ "-or"i _ newLines:? _ bitwiseArgumentExpression |
-    logicalArgumentExpression _ "-xor"i _ newLines:? _ bitwiseArgumentExpression
+    logicalArgumentExpression _ "-and"i (_ newLines):? _ bitwiseArgumentExpression |
+    logicalArgumentExpression _ "-or"i (_ newLines):? _ bitwiseArgumentExpression |
+    logicalArgumentExpression _ "-xor"i (_ newLines):? _ bitwiseArgumentExpression
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "logicalArgumentExpression",
-                data: data
+                data: out
             }
         }
     %}
 
 bitwiseArgumentExpression ->
     comparisonArgumentExpression |
-    bitwiseArgumentExpression _ "-band"i _ newLines:? _ comparisonArgumentExpression |
-    bitwiseArgumentExpression _ "-bor"i _ newLines:? _ comparisonArgumentExpression |
-    bitwiseArgumentExpression _ "-bxor"i _ newLines:? _ comparisonArgumentExpression
+    bitwiseArgumentExpression _ "-band"i (_ newLines):? _ comparisonArgumentExpression |
+    bitwiseArgumentExpression _ "-bor"i (_ newLines):? _ comparisonArgumentExpression |
+    bitwiseArgumentExpression _ "-bxor"i (_ newLines):? _ comparisonArgumentExpression
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "bitwiseArgumentExpression",
-                data: data
+                data: out
             }
         }
     %}
 
 comparisonArgumentExpression ->
     additiveArgumentExpression |
-    comparisonArgumentExpression _ comparisonOperator _ newLines:? _ additiveArgumentExpression
+    comparisonArgumentExpression _ comparisonOperator (_ newLines):? _ additiveArgumentExpression
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "comparisonArgumentExpression",
-                data: data
+                data: out
             }
         }
     %}
 
 additiveArgumentExpression ->
     multiplicativeArgumentExpression |
-    additiveArgumentExpression _ "+" _ newLines:? _ multiplicativeArgumentExpression |
-    additiveArgumentExpression _ dash _ newLines:? _ multiplicativeArgumentExpression
+    additiveArgumentExpression _ "+" (_ newLines):? _ multiplicativeArgumentExpression |
+    additiveArgumentExpression _ dash (_ newLines):? _ multiplicativeArgumentExpression
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "additiveArgumentExpression",
-                data: data
+                data: out
             }
         }
     %}
 
 multiplicativeArgumentExpression ->
     formatArgumentExpression |
-    multiplicativeArgumentExpression _ "*" _ newLines:? _ formatArgumentExpression |
-    multiplicativeArgumentExpression _ "/" _ newLines:? _ formatArgumentExpression |
-    multiplicativeArgumentExpression _ "%" _ newLines:? _ formatArgumentExpression
+    multiplicativeArgumentExpression _ "*" (_ newLines):? _ formatArgumentExpression |
+    multiplicativeArgumentExpression _ "/" (_ newLines):? _ formatArgumentExpression |
+    multiplicativeArgumentExpression _ "%" (_ newLines):? _ formatArgumentExpression
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "multiplicativeArgumentExpression",
-                data: data
+                data: out
             }
         }
     %}
 
 formatArgumentExpression ->
     rangeArgumentExpression |
-    formatArgumentExpression _ formatOperator _ newLines:? _ rangeArgumentExpression
+    formatArgumentExpression _ formatOperator (_ newLines):? _ rangeArgumentExpression
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "formatArgumentExpression",
-                data: data
+                data: out
             }
         }
     %}
 
 rangeArgumentExpression ->
     unaryExpression |
-    rangeExpression _ ".." _ newLines:? _ unaryExpression
+    rangeExpression _ ".." (_ newLines):? _ unaryExpression
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "rangeArgumentExpression",
-                data: data
+                data: out
             }
         }
     %}
@@ -1411,9 +2086,18 @@ expandableStringLiteralWithSubexpression ->
     expandableHereStringWithSubexpressionStart _ statementList:? _ ")" _ expandableHereStringWithSubexpressionChars _ expandableHereStringWithSubexpressionEnd
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "expandableStringLiteralWithSubexpression",
-                data: data
+                data: out
             }
         }
     %}
@@ -1447,9 +2131,18 @@ expandableHereStringWithSubexpressionChars ->
     expandableHereStringWithSubexpressionChars _ expandableHereStringWithSubexpressionPart
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "expandableHereStringWithSubExpressionPart",
-                data: data
+                data: out
             }
         }
     %}
@@ -1470,22 +2163,40 @@ typeLiteral ->
     "[" _ typeSpec _ "]"
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "typeLiteral",
-                data: data
+                data: out
             }
         }
     %}
 
 typeSpec ->
-    arrayTypeName _ newLines:? _ dimension:? _ "]" |
-    genericTypeName _ newLines:? _ genericTypeArguments _ "]" |
+    arrayTypeName (_ newLines):? _ dimension:? _ "]" |
+    genericTypeName (_ newLines):? _ genericTypeArguments _ "]" |
     typeName
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "typeSpec",
-                data: data
+                data: out
             }
         }
     %}
@@ -1495,21 +2206,39 @@ dimension ->
     dimension _ ","
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "dimension",
-                data: data
+                data: out
             }
         }
     %}
 
 genericTypeArguments ->
     typeSpec _ newLines:? |
-    genericTypeArguments _ "," _ newLines:? _ typeSpec
+    genericTypeArguments _ "," (_ newLines):? _ typeSpec
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "genericTypeArguments",
-                data: data
+                data: out
             }
         }
     %}
@@ -1517,24 +2246,42 @@ genericTypeArguments ->
 # Attributes
 attributeList ->
     attribute |
-    attributeList _ newLines:? _ attribute
+    attributeList (_ newLines):? _ attribute
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "attributeList",
-                data: data
+                data: out
             }
         }
     %}
 
 attribute ->
-    "[" _ newLines:? _ attributeName _ "(" _ attributeArguments _ newLines:? _ ")" _ newLines:? _ "]" |
+    "[" (_ newLines):? _ attributeName _ "(" _ attributeArguments (_ newLines):? _ ")" (_ newLines):? _ "]" |
     typeLiteral
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "attribute",
-                data: data
+                data: out
             }
         }
     %}
@@ -1552,12 +2299,21 @@ attributeName ->
 
 attributeArguments ->
     attributeArgument |
-    attributeArgument _ newLines:? _ "," _ attributeArguments
+    attributeArgument (_ newLines):? _ "," _ attributeArguments
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "attributeArguments",
-                data: data
+                data: out
             }
         }
     %}
@@ -1565,1201 +2321,21 @@ attributeArguments ->
 attributeArgument ->
     newLines:? _ expression |
     newLines:? _ simpleName |
-    newLines:? _ simpleName _ "=" _ newLines:? _ expression
+    newLines:? _ simpleName _ "=" (_ newLines):? _ expression
     {%
         function(data) {
+            let out = [];
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null && data[i] !== undefined) {
+                    out.push(data[i]);
+                }
+            }
+            if (out.length === 1) {
+                out = out[0];
+            }
             return {
                 type: "attributeArgument",
-                data: data
-            }
-        }
-    %}
-
-# Lexical grammar
-input ->
-    inputElements:? _ signatureBlock:?
-    {%
-        function(data) {
-            return {
-                type: "input",
-                data: data
-            }
-        }
-    %}
-
-inputElements ->
-    inputElement |
-    inputElements inputElement
-    {%
-        function(data) {
-            return {
-                type: "inputElements",
-                data: data
-            }
-        }
-    %}
-
-inputElement ->
-    whitespace |
-    comment |
-    token
-    {%
-        function(data) {
-            return {
-                type: "inputElement",
-                data: data
-            }
-        }
-    %}
-
-signatureBlock ->
-    signatureBegin _ signature _ signatureEnd
-    {%
-        function(data) {
-            return {
-                type: "signatureBlock",
-                data: data
-            }
-        }
-    %}
-
-signatureBegin ->
-    newLineCharacter "# SIG # Begin signature block" newLineCharacter
-    {%
-        function(data) {
-            return {
-                type: "signatureBegin",
-                data: data[0] + data[1] + data[2]
-            }
-        }
-    %}
-
-signature ->
-    singleLineComments
-    {%
-        function(data) {
-            return {
-                type: "signature",
-                data: data[0]
-            }
-        }
-    %}
-
-singleLineComments ->
-    singleLineComment |
-    singleLineComments _ newLineCharacter _ singleLineComment
-    {%
-        function(data) {
-            return {
-                type: "singleLineComments",
-                data: data
-            }
-        }
-    %}
-
-signatureEnd ->
-    newLineCharacter "# SIG # End signature block" newLineCharacter
-    {%
-        function(data) {
-            return {
-                type: "signatureEnd",
-                data: data[0] + data[1] + data[2]
-            }
-        }
-    %}
-
-# Line terminators
-newLineCharacter ->
-    carriageReturnCharacter |
-    lineFeedCharacter |
-    carriageReturnCharacter lineFeedCharacter
-    {%
-        function(data) {
-            return {
-                type: "newLineCharacter",
-                data: data
-            }
-        }
-    %}
-
-carriageReturnCharacter ->
-    [\r]
-    {% id %}
-
-lineFeedCharacter ->
-    [\n]
-    {% id %}
-
-newLines ->
-    newLineCharacter |
-    newLines _ newLineCharacter
-    {%
-        function(data) {
-            return {
-                type: "newLines",
-                data: data
-            }
-        }
-    %}
-
-# Comments
-comment ->
-    singleLineComment |
-    requiresComment |
-    delimitedComment
-    {%
-        function(data) {
-            return {
-                type: "comment",
-                data: data[0]
-            }
-        }
-    %}
-
-singleLineComment ->
-    "#" inputCharacters:?
-    {%
-        function(data) {
-            return {
-                type: "singleLineComment",
-                data: data
-            }
-        }
-    %}
-
-inputCharacters ->
-    inputCharacter:+
-    {%
-        function(data) {
-            return {
-                type: "inputCharacters",
-                data: data[0]
-            }
-        }
-    %}
-
-inputCharacter ->
-    [^\r\n]
-    {%
-        function(data) {
-            return {
-                type: "inputCharacter",
-                data: data[0]
-            }
-        }
-    %}
-
-requiresComment ->
-    "#requires" __ commandArgument # Docs says commandArguments but might be a typo?
-    {%
-        function(data) {
-            return {
-                type: "requiresComment",
-                data: data
-            }
-        }
-    %}
-
-dash ->
-    "\u002D" |
-    "\u2013" |
-    "\u2014" |
-    "\u2015"
-    {% id %}
-
-dashdash ->
-    dash dash
-    {%
-        function(data) {
-            return {
-                type: "dashdash",
-                data: data[0] + data[1]
-            }
-        }
-    %}
-
-delimitedComment ->
-    "<#" delimitedCommentText:? hashes ">"
-    {%
-        function(data) {
-            let out = ""
-            for (let i = 0; i < data.length; i++) {
-                out += data[i]
-            }
-            return {
-                type: "delimitedComment",
                 data: out
-            }
-        }
-    %}
-
-delimitedCommentText ->
-    delimitedCommentSection:+
-    {%
-        function(data) {
-            let out = ""
-            for (let i = 0; i < data.length; i++) {
-                out += data[i]
-            }
-            return {
-                type: "delimitedCommentText",
-                data: out
-            }
-        }
-    %}
-
-delimitedCommentSection ->
-    ">" |
-    hashes:? notGreaterThanOrHash
-    {%
-        function(data) {
-            let out = ""
-            for (let i = 0; i < data.length; i++) {
-                out += data[i]
-            }
-            return {
-                type: "delimitedCommentSection",
-                data: out
-            }
-        }
-    %}
-
-hashes ->
-    "#" |
-    hashes "#"
-    {%
-        function(data) {
-            let out = ""
-            for (let i = 0; i < data[0].length; i++) {
-                out += data[0][i]
-            }
-            return {
-                type: "hashes",
-                data: out
-            }
-        }
-    %}
-
-notGreaterThanOrHash ->
-    [^>#]
-    {% id %}
-
-whitespace ->
-    "\u2028" |
-    "\u2029" |
-    "\u0009" |
-    "\u000B" |
-    "\u000C" |
-    Zs |
-    Zl |
-    Zp |
-    "`" newLineCharacter
-    {%
-        function(data) {
-            let out = ""
-            for (let i = 0; i < data[0].length; i++) {
-                out += data[0][i]
-            }
-            return {
-                type: "whitespace",
-                data: out
-            }
-        }
-    %}
-
-token ->
-    keyword |
-    variable |
-    command |
-    commandParameter |
-    # commandArgumentToken |
-    integerLiteral |
-    realLiteral |
-    stringLiteral |
-    typeLiteral |
-    operatorOrPunctuator
-    {%
-        function(data) {
-            return {
-                type: "token",
-                data: data[0]
-            }
-        }
-    %}
-
-keyword ->
-    "begin" | "break" | "catch" | "class" | "continue" | "data" |
-    "define" | "do" | "dynamicparam" | "else" | "elseif" | "end" |
-    "exit" | "filter" | "finally" | "for" | "foreach" | "from" |
-    "function" | "if" | "in" | "inlinescript" | "parallel" | "param" |
-    "process" | "return" | "switch" | "throw" | "trap" | "try" |
-    "until" | "using" | "var" | "while" | "workflow"
-    {%
-        function(data) {
-            return {
-                type: "keyword",
-                data: data[0]
-            }
-        }
-    %}
-
-variable ->
-    "$$" |
-    "$?" |
-    "$^" |
-    "$" _ variableScope:? _ variableCharacters |
-    "@" _ variableScope:? _ variableCharacters |
-    bracedVariable
-    {%
-        function(data) {
-            return {
-                type: "variable",
-                data: data
-            }
-        }
-    %}
-
-bracedVariable ->
-    "${" _ variableScope:? _ bracedVariableCharacters _ "}"
-    {%
-        function(data) {
-            return {
-                type: "bracedVariable",
-                data: data
-            }
-        }
-    %}
-
-variableScope ->
-    "global:" |
-    "local:" |
-    "private:" |
-    "script:" |
-    "using:" |
-    "workflow:" |
-    variableNamespace
-    {%
-        function(data) {
-            return {
-                type: "variableScope",
-                data: data[0]
-            }
-        }
-    %}
-
-variableNamespace ->
-    variableCharacters ":"
-    {%
-        function(data) {
-            return {
-                type: "variableNamespace",
-                data: data
-            }
-        }
-    %}
-
-variableCharacters ->
-    variableCharacter:+
-    {%
-        function(data) {
-            let out = ""
-            for (let i = 0; i < data.length; i++) {
-                out += data[i]
-            }
-            return {
-                type: "variableCharacters",
-                data: out
-            }
-        }
-    %}
-
-variableCharacter ->
-    # This should include the unicode category 'Lo', however this has >120,000 characters so is too big
-    Llu |
-    Lm |
-    Nd |
-    "\u005F" |
-    "?"
-    {%
-        function(data) {
-            return {
-                type: "variableCharacter",
-                data: data[0]
-            }
-        }
-    %}
-
-bracedVariableCharacters ->
-    bracedVariableCharacter:+
-    {%
-        function(data) {
-            let out = ""
-            for (let i = 0; i < data.length; i++) {
-                out += data[i]
-            }
-            return {
-                type: "bracedVariableCharacters",
-                data: out
-            }
-        }
-    %}
-
-bracedVariableCharacter ->
-    [^\u007D\u0060] |
-    escapedCharacter
-    {%
-        function(data) {
-            return {
-                type: "bracedVariableCharacter",
-                data: data[0]
-            }
-        }
-    %}
-
-escapedCharacter ->
-    "\u0060" . # Any character
-    {%
-        function(data) {
-            return {
-                type: "escapedCharacter",
-                data: data[0] + data[1]
-            }
-        }
-    %}
-
-# Commands
-genericToken ->
-    genericTokenParts
-    {%
-        function(data) {
-            const out = [];
-            // for (let i = 0; i < data[0].data.length; i++) {
-            //    out.push(data[0].data[i][0]);
-            //}
-            return {
-                type: "genericToken",
-                data: data
-            }
-        }
-    %}
-
-genericTokenParts ->
-    genericTokenPart:+
-    {%
-        function(data) {
-            return {
-                type: "genericTokenParts",
-                data: data[0]
-            }
-        }
-    %}
-
-genericTokenPart ->
-    expandableStringLiteral |
-    verbatimHereStringLiteral |
-    variable |
-    genericTokenCharacter
-    {% id %}
-    # {%
-    #     function(data) {
-    #         return {
-    #             type: "genericTokenPart",
-    #             data: data[0]
-    #         }
-    #     }
-    # %}
-
-genericTokenCharacter ->
-    [^{}();,|&$\u0060'"\r\n\s] |
-    escapedCharacter
-    {% id %}
-    # {%
-    #     function(data) {
-    #         return {
-    #             type: "genericTokenCharacter",
-    #             data: data[0]
-    #         }
-    #     }
-    # %}
-
-genericTokenWithSubexpressionStart ->
-    genericTokenParts _ "$("
-    {%
-        function(data) {
-            return {
-                type: "genericTokenWithSubexpressionStart",
-                data: data
-            }
-        }
-    %}
-
-commandParameter ->
-    dash firstParameterChar parameterChars colon:?
-    {%
-        function(data) {
-            return {
-                type: "commandParameter",
-                data: data
-            }
-        }
-    %}
-
-firstParameterChar ->
-    Llu |
-    Lm |
-    "\u005F" |
-    "?"
-    {% id %}
-
-parameterChars ->
-    parameterChar:+
-    {%
-        function(data) {
-            return {
-                type: "parameterChars",
-                data: data[0]
-            }
-        }
-    %}
-
-parameterChar ->
-    [^{}();,|&.[\u003A\r\n\s]
-    {% id %}
-
-colon ->
-    "\u003A"
-    {% id %}
-
-verbatimCommandArgumentChars ->
-    verbatimCommandArgumentPart |
-    verbatimCommandArgumentChars verbatimCommandArgumentPart
-    {%
-        function(data) {
-            return {
-                type: "verbatimCommandArgumentChars",
-                data: data
-            }
-        }
-    %}
-
-verbatimCommandArgumentPart ->
-    verbatimCommandString |
-    "&" nonAmpersandCharacter |
-    [^|\r\n]
-    {%
-        function(data) {
-            return {
-                type: "verbatimCommandArgumentPart",
-                data: data
-            }
-        }
-    %}
-
-nonAmpersandCharacter ->
-    [^&]
-    {% id %}
-
-verbatimCommandString ->
-    doubleQuoteCharacter nonDoubleQuoteCharacters doubleQuoteCharacter
-    {%
-        function(data) {
-            return {
-                type: "verbatimCommandString",
-                data: data
-            }
-        }
-    %}
-
-nonDoubleQuoteCharacters ->
-    nonDoubleQuoteCharacter |
-    nonDoubleQuoteCharacters nonDoubleQuoteCharacter
-    {%
-        function(data) {
-            return {
-                type: "nonDoubleQuoteCharacters",
-                data: data
-            }
-        }
-    %}
-
-nonDoubleQuoteCharacter ->
-    [^\u0022\u201C\u201D\u201E]
-    {% id %}
-
-# Literals
-literal ->
-    integerLiteral |
-    realLiteral |
-    stringLiteral
-    {% id %}
-
-integerLiteral ->
-    decimalIntegerLiteral |
-    hexadecimalIntegerLiteral
-    {% id %}
-
-decimalIntegerLiteral ->
-    decimalDigits numericTypeSuffix:? numericMultiplier:?
-    {%
-        function(data) {
-            return {
-                type: "decimalIntegerLiteral",
-                data: data
-            }
-        }
-    %}
-
-decimalDigits ->
-    decimalDigit |
-    decimalDigit decimalDigits
-    {%
-        function(data) {
-            return {
-                type: "decimalDigits",
-                data: data
-            }
-        }
-    %}
-
-decimalDigit ->
-    [0-9]
-    {% id %}
-
-numericTypeSuffix ->
-    longTypeSuffix |
-    decimalTypeSuffix
-    {%
-        function(data) {
-            return {
-                type: "numericTypeSuffix",
-                data: data[0]
-            }
-        }
-    %}
-
-hexadecimalIntegerLiteral ->
-    "0x" hexadecimalDigits longTypeSuffix:? numericMultiplier:?
-    {%
-        function(data) {
-            return {
-                type: "hexadecimalIntegerLiteral",
-                data: data
-            }
-        }
-    %}
-
-hexadecimalDigits ->
-    hexadecimalDigit |
-    hexadecimalDigit decimalDigits
-    {%
-        function(data) {
-            return {
-                type: "hexadecimalDigits",
-                data: data
-            }
-        }
-    %}
-
-hexadecimalDigit ->
-    [0-9A-Fa-f]
-    {% id %}
-
-longTypeSuffix ->
-    "l"
-    {%
-        function(data) {
-            return {
-                type: "longTypeSuffix",
-                data: data[0]
-            }
-        }
-    %}
-
-numericMultiplier ->
-    "kb" |
-    "mb" |
-    "gb" |
-    "tb" |
-    "pb"
-    {%
-        function(data) {
-            return {
-                type: "numericMultiplier",
-                data: data[0]
-            }
-        }
-    %}
-
-realLiteral ->
-    decimalDigits "." decimalDigits exponentPart:? decimalTypeSuffix:? numericMultiplier:? |
-    "." decimalDigits exponentPart:? decimalTypeSuffix:? numericMultiplier:? |
-    decimalDigits exponentPart decimalTypeSuffix:? numericMultiplier:?
-    {%
-        function(data) {
-            return {
-                type: "realLiteral",
-                data: data
-            }
-        }
-    %}
-
-exponentPart ->
-    "e" sign:? decimalDigits
-    {%
-        function(data) {
-            return {
-                type: "exponentPart",
-                data: data
-            }
-        }
-    %}
-
-sign ->
-    "+" |
-    dash
-    {%
-        function(data) {
-            return {
-                type: "sign",
-                data: data[0]
-            }
-        }
-    %}
-
-decimalTypeSuffix ->
-    "d" |
-    "l"
-    {%
-        function(data) {
-            return {
-                type: "decimalTypeSuffix",
-                data: data[0]
-            }
-        }
-    %}
-
-stringLiteral ->
-    expandableStringLiteral |
-    expandableHereStringLiteral |
-    verbatimStringLiteral |
-    verbatimHereStringLiteral
-    {%
-        function(data) {
-            return {
-                type: "stringLiteral",
-                data: data[0]
-            }
-        }
-    %}
-
-expandableStringLiteral ->
-    doubleQuoteCharacter expandableStringCharacters:? dollars:? doubleQuoteCharacter
-    {%
-        function(data) {
-            return {
-                type: "expandableStringLiteral",
-                data: data
-            }
-        }
-    %}
-
-doubleQuoteCharacter ->
-    "\u0022" |
-    "\u201C" |
-    "\u201D" |
-    "\u201E"
-    {% id %}
-
-expandableStringCharacters ->
-    expandableStringPart:+
-    {%
-        function(data) {
-            return {
-                type: "expandableStringCharacters",
-                data: data
-            }
-        }
-    %}
-
-expandableStringPart ->
-    [^$\u0022\u201C\u201D\u201E\u0060] |
-    bracedVariable |
-    "$" [^({\u0022\u201C\u201D\u201E\u0060] |
-    "$" escapedCharacter |
-    escapedCharacter |
-    doubleQuoteCharacter doubleQuoteCharacter
-    {%
-        function(data) {
-            return {
-                type: "expandableStringPart",
-                data: data
-            }
-        }
-    %}
-
-dollars ->
-    "$":+
-    {%
-        function(data) {
-            return {
-                type: "dollars",
-                data: data
-            }
-        }
-    %}
-
-expandableHereStringLiteral ->
-    "@" doubleQuoteCharacter _ newLineCharacter expandableHereStringCharacters:? newLineCharacter doubleQuoteCharacter "@"
-    {%
-        function(data) {
-            return {
-                type: "expandableHereStringLiteral",
-                data: data
-            }
-        }
-    %}
-
-expandableHereStringCharacters ->
-    expandableHereStringPart:+
-    {%
-        function(data) {
-            return {
-                type: "expandableHereStringCharacters",
-                data: data[0]
-            }
-        }
-    %}
-
-expandableHereStringPart ->
-    [^$\r\n] |
-    bracedVariable |
-    "$" [^(\r\n] |
-    "$" newLineCharacter nonDoubleQuoteCharacter |
-    "$" newLineCharacter doubleQuoteCharacter [^@] |
-    newLineCharacter nonDoubleQuoteCharacter |
-    newLineCharacter doubleQuoteCharacter [^@]
-    {%
-        function(data) {
-            return {
-                type: "expandableHereStringPart",
-                data: data
-            }
-        }
-    %}
-
-expandableStringWithSubexpressionStart ->
-    doubleQuoteCharacter expandableStringCharacters:? "$("
-    {%
-        function(data) {
-            return {
-                type: "expandableStringWithSubexpressionStart",
-                data: data
-            }
-        }
-    %}
-
-expandableStringWithSubexpressionEnd ->
-    doubleQuoteCharacter
-    {%
-        function(data) {
-            return {
-                type: "expandableStringWithSubexpressionEnd",
-                data: data[0]
-            }
-        }
-    %}
-
-expandableHereStringWithSubexpressionStart ->
-    "@" doubleQuoteCharacter whitespace:? newLineCharacter expandableHereStringCharacters:? "$("
-    {%
-        function(data) {
-            return {
-                type: "expandableHereStringWithSubexpressionStart",
-                data: data
-            }
-        }
-    %}
-
-expandableHereStringWithSubexpressionEnd ->
-    newLineCharacter doubleQuoteCharacter "@"
-    {%
-        function(data) {
-            return {
-                type: "expandableHereStringWithSubexpressionEnd",
-                data: data
-            }
-        }
-    %}
-
-verbatimStringLiteral ->
-    singleQuoteCharacter verbatimStringCharacters:? singleQuoteCharacter
-    {%
-        function(data) {
-            return {
-                type: "verbatimStringLiteral",
-                data: data
-            }
-        }
-    %}
-
-singleQuoteCharacter ->
-    "\u0027" |
-    "\u2018" |
-    "\u2019" |
-    "\u201A" |
-    "\u201B"
-    {% id %}
-
-nonSingleQuoteCharacter ->
-    [^\u0027\u2018\u2019\u201A\u201B]
-    {% id %}
-
-verbatimStringCharacters ->
-    verbatimStringPart:+
-    {%
-        function(data) {
-            return {
-                type: "verbatimStringCharacters",
-                data: data[0]
-            }
-        }
-    %}
-
-verbatimStringPart ->
-    nonSingleQuoteCharacter |
-    singleQuoteCharacter singleQuoteCharacter
-    {%
-        function(data) {
-            return {
-                type: "verbatimStringPart",
-                data: data
-            }
-        }
-    %}
-
-verbatimHereStringLiteral ->
-    "@" singleQuoteCharacter _ newLineCharacter verbatimHereStringCharacters:? newLineCharacter singleQuoteCharacter "@"
-    {%
-        function(data) {
-            return {
-                type: "verbatimHereStringLiteral",
-                data: data
-            }
-        }
-    %}
-
-verbatimHereStringCharacters ->
-    verbatimHereStringPart:+
-    {%
-        function(data) {
-            return {
-                type: "verbatimHereStringCharacters",
-                data: data[0]
-            }
-        }
-    %}
-
-verbatimHereStringPart ->
-    [^\r\n] |
-    newLineCharacter nonSingleQuoteCharacter |
-    newLineCharacter singleQuoteCharacter [^@]
-    {%
-        function(data) {
-            return {
-                type: "verbatimHereStringPart",
-                data: data
-            }
-        }
-    %}
-
-simpleName ->
-    simpleNameFirstChar simpleNameChars
-    {%
-        function(data) {
-            return {
-                type: "simpleName",
-                data: data
-            }
-        }
-    %}
-
-simpleNameFirstChar ->
-    Llu |
-    Lm |
-    "\u005F"
-    {% id %}
-
-simpleNameChars ->
-    simpleNameChar:+
-    {%
-        function(data) {
-            return {
-                type: "simpleNameChars",
-                data: data[0]
-            }
-        }
-    %}
-
-simpleNameChar ->
-    Llu |
-    Lm |
-    Nd |
-    "\u005F"
-    {% id %}
-
-typeName ->
-    typeIdentifier |
-    typeName "." typeIdentifier
-    {%
-        function(data) {
-            return {
-                type: "typeName",
-                data: data
-            }
-        }
-    %}
-
-typeIdentifier ->
-    typeCharacter:+
-    {%
-        function(data) {
-            return {
-                type: "typeIdentifier",
-                data: data[0]
-            }
-        }
-    %}
-
-typeCharacter ->
-    Llu |
-    Nd |
-    "\u005F"
-    {% id %}
-
-arrayTypeName ->
-    typeName "["
-    {%
-        function(data) {
-            return {
-                type: "arrayTypeName",
-                data: data
-            }
-        }
-    %}
-
-genericTypeName ->
-    typeName "["
-    {%
-        function(data) {
-            return {
-                type: "genericTypeName",
-                data: data
-            }
-        }
-    %}
-
-operatorOrPunctuator ->
-    "{" | "}" | "[" | "]" | "(" | ")" | "@(" | "@{" | "$(" | ";" |
-    "&&" | "||" | "&" | "|" | "," | "++" | ".." | "::" | "." | "!" |
-    "*" | "/" | "%" | "+" |
-    dash | dashdash | dash "and" | dash "band" | dash "bnot" |
-    dash "bor" | dash "bxor" | dash "not" | dash "or" | dash "xor" |
-    assignmentOperator |
-    mergingRedirectionOperator |
-    fileRedirectionOperator |
-    comparisonOperator |
-    formatOperator
-    {% id %}
-
-assignmentOperator ->
-    "=" |
-    dash "=" |
-    "+=" |
-    "*=" |
-    "/=" |
-    "%="
-    {%
-        function(data) {
-            return {
-                type: "assignmentOperator",
-                data: data[0]
-            }
-        }
-    %}
-
-mergingRedirectionOperator ->
-    "*>&1" | "2>&1" | "3>&1" | "4>&1" | "5>&1" | "6>&1" |
-    "*>&2" | "1>&2" | "3>&2" | "4>&2" | "5>&2" | "6>&2"
-    {%
-        function(data) {
-            return {
-                type: "mergingRedirectionOperator",
-                data: data[0]
-            }
-        }
-    %}
-
-fileRedirectionOperator ->
-    ">" | ">>" | "2>" | "2>>" | "3>" | "3>>" | "4>" | "4>>" |
-    "5>" | "5>>" | "6>" | "6>>" | "*>" | "*>>" | "<"
-    {%
-        function(data) {
-            return {
-                type: "fileRedirectionOperator",
-                data: data[0]
-            }
-        }
-    %}
-
-comparisonOperator ->
-    dash comparisonKeyword
-    {%
-        function(data) {
-            return {
-                type: "comparisonOperator",
-                data: data
-            }
-        }
-    %}
-
-comparisonKeyword ->
-    "as" | "ccontains" | "ceq" | "cge" | "cgt" | "cle" | "clike" | "clt" |
-    "cmatch" | "cne"| "cnotcontains" | "cnotlike" | "cnotmatch" | "contains" |
-    "creplace" | "csplit" | "eq" | "ge" | "gt" | "icontains" | "ieq" | "ige" |
-    "igt" | "ile" | "ilike" | "ilt" | "imatch" | "in" | "ine" | "inotcontains" |
-    "inotlike" | "inotmatch" | "ireplace" | "is" | "isnot" | "isplit" |
-    "join" | "le" | "like" | "lt" | "match" | "ne" | "notcontains" | "notin" |
-    "notlike" | "notmatch" | "replace" | "shl" | "shr" | "split"
-    {%
-        function(data) {
-            return {
-                type: "comparisonKeyword",
-                data: data[0]
-            }
-        }
-    %}
-
-formatOperator ->
-    dash "f"
-    {%
-        function(data) {
-            return {
-                type: "formatOperator",
-                data: data
-            }
-        }
-    %}
-
-# Whitespace
-_ -> __:?
-    {% id %}
-__ -> whitespace |
-    __ whitespace
-    {%
-        function(data) {
-            return {
-                type: "whitespace",
-                data: data
             }
         }
     %}
