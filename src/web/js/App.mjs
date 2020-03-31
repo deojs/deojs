@@ -4,6 +4,7 @@
 
 import UIHelper from "./helpers/UIHelper.mjs";
 import OutputHelper from "./helpers/OutputHelper.mjs";
+import OperationHelper from "./helpers/OperationHelper.mjs";
 
 import AppWorker from "./workers/App.worker.js";
 
@@ -19,6 +20,7 @@ class App {
     setupHelpers() {
         this.UIHelper = new UIHelper(this);
         this.OutputHelper = new OutputHelper(this);
+        this.OperationHelper = new OperationHelper(this);
 
         this.UIHelper.setupUI();
     }

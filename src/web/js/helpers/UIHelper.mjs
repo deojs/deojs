@@ -87,6 +87,8 @@ class UIHelper {
         this.createSplits();
         this.createSortableLists();
         this.addEventListeners();
+
+        this.App.OperationHelper.populateOperationsList();
     }
 
     /**
