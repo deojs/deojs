@@ -14,17 +14,6 @@ class PowerShellLanguage {
      * @returns {object} - Parsed code
      */
     parse(inCode) {
-        // const lexer = moo.states(this.getTokens());
-        // const parser = new nearley.Parser(nearley.Grammar.fromCompiled(grammar));
-        // lexer.reset(inCode);
-
-        // let token = lexer.next();
-        // while (token !== undefined) {
-        //     console.log(token);
-        //     token = lexer.next();
-        // }
-
-        // return inCode;
         const parser = new nearley.Parser(nearley.Grammar.fromCompiled(grammar));
         const chunkSize = 100; // Characters
         const numChunks = Math.ceil(inCode.length / chunkSize);
@@ -34,7 +23,6 @@ class PowerShellLanguage {
             parser.feed(inCode.slice(i * 100, (i * 100) + 100));
         }
         console.log("Parsing complete");
-        console.log(parser.results);
 
         if (parser.results.length > 0) {
             return parser.results[0];
@@ -73,12 +61,6 @@ class PowerShellLanguage {
 
         return recurse(ast);
     }
-
-    // parse function
-    // parse function should handle lexing and actual parsing
-    // lexing ideally should be a separate function so we can call it separately
-
-    // pretty-print function, nearley should be able to handle this itself
 }
 
 export default PowerShellLanguage;
