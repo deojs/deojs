@@ -5,3 +5,8 @@
 #inputFileSelector {
     display: none;
 }
+
+.opArgLabel {
+    padding: 2px;
+    margin-right: 10px;
+}

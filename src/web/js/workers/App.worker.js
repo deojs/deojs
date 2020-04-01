@@ -8,6 +8,7 @@ import LanguageHelper from "../helpers/LanguageHelper.mjs";
 import InputHelper from "../helpers/InputHelper.mjs";
 
 import InputWorker from "./Input.worker.js";
+import OperationWorker from "./Operation.worker.js";
 
 self.createHelpers = function () {
     self.LanguageHelper = new LanguageHelper();
@@ -17,8 +18,10 @@ self.createHelpers = function () {
 self.createWorkers = function () {
     self.InputWorker = new InputWorker();
     self.InputWorker.addEventListener("message", self.handleInputWorkerMessage.bind(self));
-    self.InputWorkerCallbacks = {};
-    self.InputWorkerCallbackId = 0;
+    self.callbacks = {};
+    self.callbacksId = 0;
+    self.OperationWorker = new OperationWorker();
+    self.OperationWorker.addEventListener("message", self.handleOperationWorkerMessage.bind(self));
 };
 
 self.handleInputWorkerMessage = function (message) {
@@ -28,17 +31,53 @@ self.handleInputWorkerMessage = function (message) {
     if (!data.command) return;
     switch (data.command) {
     case "callback":
-        self.InputWorkerCallbacks[data.data.callbackid](data.data.data);
+        self.callbacks[data.data.callbackid](data.data.data);
         break;
     default:
         console.error(`Invalid command "${data.command}"`);
     }
 };
 
-self.addInputWorkerCallback = function (callback) {
-    const id = self.InputWorkerCallbackId;
-    self.InputWorkerCallbackId += 1;
-    self.InputWorkerCallbacks[id] = callback;
+self.handleOperationWorkerMessage = async function (message) {
+    if (!message.data) return;
+    const data = message.data;
+
+    if (!data.command) return;
+    switch (data.command) {
+    case "prettyPrint":
+        self.OperationWorker.postMessage({
+            command: "callback",
+            data: {
+                callbackid: data.data.callbackid,
+                data: self.prettyPrint(data.data.ast, data.data.language)
+            }
+        });
+        break;
+    case "parse":
+        self.OperationWorker.postMessage({
+            command: "callback",
+            data: {
+                callbackid: data.data.callbackid,
+                data: await self.parse(data.data.input, data.data.language)
+            }
+        });
+        break;
+    case "complete":
+        console.log("Running operations completed.");
+        self.postMessage({
+            command: "runcomplete",
+            data: data.data
+        });
+        break;
+    default:
+        console.error(`Invalid command "${data.command}"`);
+    }
+};
+
+self.addCallback = function (callback) {
+    const id = self.callbacksIs;
+    self.callbacksId += 1;
+    self.callbacks[id] = callback;
     return id;
 };
 
@@ -81,7 +120,15 @@ self.addEventListener("message", async (e) => {
     switch (data.command) {
     case "run":
         // Runs the deobfuscation
-        console.log("run");
+        self.OperationWorker.postMessage({
+            command: "run",
+            data: {
+                operations: data.data.operations,
+                operationClasses: data.data.operationClasses,
+                input: await self.parseInput(data.data.language, data.data.encoding),
+                language: data.data.language
+            }
+        });
         break;
     case "loadfile":
         // Loads a new file using the InputWorker

@@ -29,16 +29,17 @@ class Operations {
     }
 
     /**
-     * Gets a list of operations and their options
+     * Gets a list of operations and their options.
+     * Returns an object containing the details for all operations
      *
-     * @returns {Array} - Operations list
+     * @returns {object} - Operations list
      */
     getOperationList() {
         const opNames = Object.keys(this.operations);
-        const operations = [];
+        const operations = {};
         for (let i = 0; i < opNames.length; i++) {
             const op = this.getOperation(opNames[i]);
-            operations.push({
+            operations[opNames[i]] = {
                 name: opNames[i],
                 displayName: op.name,
                 args: op.args,
@@ -46,7 +47,7 @@ class Operations {
                 inputType: op.inputType,
                 outputType: op.outputType,
                 progress: op.progress
-            });
+            };
         }
 
         return operations;

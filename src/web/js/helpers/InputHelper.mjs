@@ -132,7 +132,7 @@ class InputHelper {
      */
     getDecodedData(encoding = "utf-8") {
         return new Promise((resolve, reject) => {
-            const callbackid = this.App.addInputWorkerCallback(resolve);
+            const callbackid = this.App.addCallback(resolve);
             this.App.InputWorker.postMessage({
                 command: "getDecodedData",
                 data: {

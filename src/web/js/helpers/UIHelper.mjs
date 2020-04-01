@@ -38,7 +38,11 @@ class UIHelper {
      * @param {Event} event - SortableJs onAdd event object
      */
     onFunctionAdded(event) {
-        event.item.classList.add("flowItem");
+        const itemElement = event.item;
+        itemElement.classList.add("flowItem");
+        const opDetails = this.App.OperationHelper.getOperationDetails(event.item.getAttribute("opname"));
+        const opHtml = this.App.OperationHelper.createOperationHtml(opDetails);
+        itemElement.appendChild(opHtml);
     }
 
     /**
@@ -65,7 +69,7 @@ class UIHelper {
             group: {
                 name: "operationsGroup"
             },
-            onAdd: this.onFunctionAdded,
+            onAdd: this.onFunctionAdded.bind(this),
             delay: 0
         });
     }
@@ -78,6 +82,9 @@ class UIHelper {
         document.getElementById("inputFileButton").addEventListener("click", this.openFileClicked.bind(this));
         document.getElementById("inputFileSelector").addEventListener("change", this.loadFiles.bind(this));
         document.getElementById("inputErrorAlertClose").addEventListener("click", this.closeInputErrorAlert.bind(this));
+
+        // Run
+        document.getElementById("runFlowButton").addEventListener("click", this.App.OperationHelper.run.bind(this.App.OperationHelper));
     }
 
     /**

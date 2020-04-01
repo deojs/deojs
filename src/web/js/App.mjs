@@ -67,6 +67,9 @@ class App {
         case "callback":
             this.AppWorkerCallbacks[data.data.callbackid](data.data.data);
             break;
+        case "runcomplete":
+            this.OperationHelper.runComplete(data.data.output, data.data.language);
+            break;
         default:
             console.error(`Invalid command "${command}"`);
         }

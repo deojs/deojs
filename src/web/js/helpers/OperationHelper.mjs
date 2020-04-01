@@ -21,13 +21,24 @@ class OperationHelper {
      */
     getOperation(opName) {
         const Operation = this.operations.getOperation(opName);
-        return new Operation();
+        return Operation;
     }
 
     /**
-     * Get a list of operations
+     * Gets the details for an operation
      *
-     * @returns {Array} - Operation list
+     * @param {string} opName - The name of the operation
+     * @returns {object} - Operation details
+     */
+    getOperationDetails(opName) {
+        return this.opList[opName];
+    }
+
+    /**
+     * Get a list of operations.
+     * Returns an object containing the details for all operations
+     *
+     * @returns {object} - Operation list
      */
     getOperationList() {
         return this.opList;
@@ -38,8 +49,9 @@ class OperationHelper {
      */
     populateOperationsList() {
         const operationsList = document.getElementById("operationsList");
-        for (let i = 0; i < this.opList.length; i++) {
-            operationsList.append(this.createOperationListHtml(this.opList[i]));
+        const opNames = Object.keys(this.opList);
+        for (let i = 0; i < opNames.length; i++) {
+            operationsList.append(this.createOperationListHtml(this.opList[opNames[i]]));
         }
     }
 
@@ -63,7 +75,87 @@ class OperationHelper {
      * @returns {HTMLElement} - The created operation HTML
      */
     createOperationHtml(operation) {
+        const argContainer = document.createElement("div");
+        argContainer.id = "argContainer";
 
+        for (let i = 0; i < operation.args.length; i++) {
+            const arg = operation.args[i];
+            const label = document.createElement("label");
+            label.innerText = arg.name;
+            label.classList.add("opArgLabel");
+            argContainer.appendChild(label);
+
+            switch (arg.type) {
+            case "string": {
+                const strInput = document.createElement("input");
+                strInput.setAttribute("type", "text");
+                strInput.classList.add("operationArgument");
+                argContainer.appendChild(strInput);
+                break;
+            }
+            default:
+                console.error(`Unknown argument type "${arg.type}".`);
+            }
+            argContainer.appendChild(document.createElement("br"));
+        }
+
+        return argContainer;
+    }
+
+    /**
+     * Runs the operations by sending them to the operationWorker
+     */
+    async run() {
+        // Create a list of operations to run
+        const operationList = document.getElementById("flowList");
+        const operationElements = operationList.children;
+
+        const operationsUsed = {};
+        const opsList = [];
+        for (let i = 0; i < operationElements.length; i++) {
+            const opElement = operationElements.item(i);
+            operationsUsed[opElement.getAttribute("opName")] = true;
+
+            const args = [];
+            const argElements = opElement.getElementsByClassName("operationArgument");
+            for (let x = 0; x < argElements.length; x++) {
+                const argElement = argElements.item(x);
+                args.push(argElement.value);
+            }
+
+            const opDetails = this.getOperationDetails(opElement.getAttribute("opName"));
+            opDetails.args = args;
+            opsList.push(opDetails);
+        }
+
+        const operationClasses = {};
+        const opNames = Object.keys(operationsUsed);
+        for (let i = 0; i < opNames.length; i++) {
+            // Create a new instance of the operation and add it to the object
+            operationClasses[opNames[i]] = this.getOperation(opNames[i]);
+        }
+
+        this.App.AppWorker.postMessage({
+            command: "run",
+            data: {
+                language: "powershell",
+                encoding: "utf-8",
+                operations: opsList
+            }
+        });
+    }
+
+    /**
+     * Executed when the OperationWorker completes execution
+     *
+     * @param {object} output - The output data
+     * @param {string} language - The output language
+     */
+    async runComplete(output, language) {
+        this.App.OutputHelper.updateOutput(output, language);
+
+        const outputData = await this.App.OutputHelper.getOutput(true);
+        document.getElementById("outputArea").innerHTML = outputData;
     }
 }
 
