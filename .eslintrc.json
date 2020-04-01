@@ -31,6 +31,7 @@
         "max-len": "off",
         "object-shorthand": "off",
         "no-control-regex": "off",
-        "no-plusplus": "off"
+        "no-plusplus": "off",
+        "no-await-in-loop": "off"
     }
 }
