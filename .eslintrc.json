@@ -32,6 +32,7 @@
         "object-shorthand": "off",
         "no-control-regex": "off",
         "no-plusplus": "off",
-        "no-await-in-loop": "off"
+        "no-await-in-loop": "off",
+        "no-param-reassign": "off"
     }
 }
