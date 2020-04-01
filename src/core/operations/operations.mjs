@@ -4,6 +4,8 @@
 
 // Operation imports
 import FindReplace from "./FindReplace.mjs";
+// import RemoveComments from "./RemoveComments.mjs";
+import ReplaceFormatExpression from "./ReplaceFormatExpression.mjs";
 
 class Operations {
     constructor() {
@@ -12,6 +14,8 @@ class Operations {
         // Create an object containing all operations so we can refer
         // to them by name (filename)
         this.operations.findreplace = FindReplace;
+        // this.operations.removecomments = RemoveComments;
+        this.operations.replaceformatexpression = ReplaceFormatExpression;
     }
 
     /**

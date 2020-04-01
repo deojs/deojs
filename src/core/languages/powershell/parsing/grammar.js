@@ -9572,6 +9572,7 @@ var grammar = {
                     out.push(data[i]);
                 }
             }
+            console.error(out);
             if (out.length === 1) {
                 out = out[0];
             }
