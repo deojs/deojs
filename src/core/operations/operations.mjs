@@ -5,6 +5,7 @@
 // Operation imports
 import FindReplace from "./FindReplace.mjs";
 import RemoveComments from "./RemoveComments.mjs";
+import ReplaceAliases from "./ReplaceAliases.mjs";
 import ReplaceFormatExpression from "./ReplaceFormatExpression.mjs";
 
 class Operations {
@@ -15,6 +16,7 @@ class Operations {
         // to them by name (filename)
         this.operations.findreplace = FindReplace;
         this.operations.removecomments = RemoveComments;
+        this.operations.replacealiases = ReplaceAliases;
         this.operations.replaceformatexpression = ReplaceFormatExpression;
     }
 
