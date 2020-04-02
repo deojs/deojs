@@ -90,7 +90,36 @@ class OperationHelper {
                 const strInput = document.createElement("input");
                 strInput.setAttribute("type", "text");
                 strInput.classList.add("operationArgument");
+                strInput.value = arg.default;
                 argContainer.appendChild(strInput);
+                break;
+            }
+            case "boolean": {
+                const checkInput = document.createElement("input");
+                checkInput.setAttribute("type", "checkbox");
+                checkInput.classList.add("operationArgument");
+                checkInput.checked = arg.default;
+                argContainer.appendChild(checkInput);
+                break;
+            }
+            case "dropdown": {
+                const dropInput = document.createElement("select");
+                dropInput.classList.add("operationArgument");
+                dropInput.setAttribute("type", "dropdown");
+
+                for (let x = 0; x < arg.options.length; x++) {
+                    const opElement = document.createElement("option");
+                    opElement.setAttribute("value", arg.options[x]);
+                    opElement.innerText = arg.options[x];
+
+                    if (arg.options[x] === arg.default) {
+                        opElement.setAttribute("selected", "selected");
+                    }
+
+                    dropInput.appendChild(opElement);
+                }
+
+                argContainer.appendChild(dropInput);
                 break;
             }
             default:
@@ -120,7 +149,19 @@ class OperationHelper {
             const argElements = opElement.getElementsByClassName("operationArgument");
             for (let x = 0; x < argElements.length; x++) {
                 const argElement = argElements.item(x);
-                args.push(argElement.value);
+                switch (argElement.getAttribute("type")) {
+                case "text":
+                    args.push(argElement.value);
+                    break;
+                case "checkbox":
+                    args.push(argElement.checked);
+                    break;
+                case "dropdown":
+                    args.push(argElement.value);
+                    break;
+                default:
+                    console.error(`Unknown input element type ${argElement.getAttribute("type")}`);
+                }
             }
 
             const opDetails = this.getOperationDetails(opElement.getAttribute("opName"));
