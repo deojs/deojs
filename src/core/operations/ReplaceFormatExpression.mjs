@@ -25,13 +25,21 @@ class ReplaceFormatExpression {
             if (typeof obj === "string") {
                 return null;
             }
+            if (Object.prototype.hasOwnProperty.call(obj, "type")
+            && Object.prototype.hasOwnProperty.call(obj, "data")) {
+                if (obj.type === "verbatimStringLiteral") {
+                    // Only pretty print the string characters
+                    return this.prettyPrint(obj.data[1]);
+                }
+                return recurse(obj.data);
+            }
             if (Array.isArray(obj)) {
-                const out = [];
+                let out = [];
                 for (let i = 0; i < obj.length; i++) {
                     const data = recurse(obj[i]);
                     if (data !== null) {
                         if (Array.isArray(data)) {
-                            out.concat(data);
+                            out = out.concat(data);
                         } else {
                             out.push(data);
                         }
@@ -45,35 +53,33 @@ class ReplaceFormatExpression {
                 }
                 return out;
             }
-            if (Object.prototype.hasOwnProperty.call(obj, "type") &&
-                Object.prototype.hasOwnProperty.call(obj, "data")) {
-                if (obj.type === "verbatimStringLiteral") {
-                    return this.prettyPrint(obj.data[1]);
-                }
-            }
-            if (Object.prototype.hasOwnProperty.call(obj, "data")) {
-                return recurse(obj.data);
-            }
 
             return null;
         }.bind(this);
-
-        console.log(recurse(formatExpressionData));
-
-        return [];
+        return recurse(formatExpressionData);
     }
 
     /**
      * Replaces a format expression with the actual string
      *
-     * @param {object} formatExpression - The format expression in the syntax tree
+     * @param {Array} formatExpression - The format expression in the syntax tree
      * @returns {string} - The replaced format expression
      */
     replaceFormatExpression(formatExpression) {
         // console.log(formatExpression);
         let outStr = this.prettyPrint(formatExpression[0]);
-        this.getFormatExpressionStrings(formatExpression[2]);
+        // We can cheat and just use the last element in the formatExpression array as this will account for optional whitespace
+        const strings = this.getFormatExpressionStrings(formatExpression[formatExpression.length - 1]);
 
+        if (strings === null || strings.length === 0) {
+            // Pretty print the expression anyway so the code still works
+            return this.prettyPrint(formatExpression);
+        }
+
+        for (let i = 0; i < strings.length; i++) {
+            outStr = outStr.replace(`{${i}}`, strings[i]);
+        }
+        return outStr;
     }
 
     /**
