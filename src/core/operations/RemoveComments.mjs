@@ -7,7 +7,7 @@ class RemoveComments {
         this.args = [];
         this.languages = ["powershell"];
         this.inputType = "ast";
-        this.outputType = "string";
+        this.outputType = "ast";
         this.progress = false;
     }
 
@@ -21,30 +21,27 @@ class RemoveComments {
     run(input, args) {
         const recurse = function (obj) {
             if (obj === null || obj === undefined) {
-                return "";
+                return;
             }
             if (typeof obj === "string") {
-                return obj;
+                return;
             }
             if (Array.isArray(obj)) {
-                let out = "";
                 for (let i = 0; i < obj.length; i++) {
-                    out += recurse(obj[i]);
+                    recurse(obj[i]);
                 }
-                return out;
             }
             if (Object.prototype.hasOwnProperty.call(obj, "data")
             && Object.prototype.hasOwnProperty.call(obj, "type")) {
                 if (obj.type === "singleLineComment" || obj.type === "delimitedComment") {
-                    return "";
+                    obj.data = null;
+                    return;
                 }
-                return recurse(obj.data);
+                recurse(obj.data);
             }
-
-            return "";
         };
-
-        return recurse(input);
+        recurse(input);
+        return input;
     }
 }
 
