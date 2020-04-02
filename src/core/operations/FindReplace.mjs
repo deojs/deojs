@@ -7,11 +7,13 @@ class FindReplace {
         this.args = [
             {
                 name: "Find text",
-                type: "string"
+                type: "string",
+                default: ""
             },
             {
                 name: "Replace text",
-                type: "string"
+                type: "string",
+                default: ""
             }
         ];
         this.languages = []; // Empty array = all languages
