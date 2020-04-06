@@ -170,6 +170,15 @@ self.addEventListener("message", async (e) => {
             }
         });
         break;
+    case "scanInput":
+        self.postMessage({
+            command: "callback",
+            data: {
+                callbackid: data.data.callbackid,
+                data: await self.InputHelper.scanInput()
+            }
+        });
+        break;
     default:
         console.warn(`Invalid command "${data.command}"`);
     }

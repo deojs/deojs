@@ -82,6 +82,7 @@ class UIHelper {
         document.getElementById("inputFileButton").addEventListener("click", this.openFileClicked.bind(this));
         document.getElementById("inputFileSelector").addEventListener("change", this.loadFiles.bind(this));
         document.getElementById("inputErrorAlertClose").addEventListener("click", this.closeInputErrorAlert.bind(this));
+        document.getElementById("inputScanButton").addEventListener("click", this.scanInputClicked.bind(this));
 
         // Run
         document.getElementById("runFlowButton").addEventListener("click", this.App.OperationHelper.run.bind(this.App.OperationHelper));
@@ -108,11 +109,6 @@ class UIHelper {
         if (element.files.length > 0) {
             document.getElementById("inputFileName").innerText = "loading...";
             document.getElementById("inputFileButton").setAttribute("disabled", true);
-            // const fileObj = this.App.InputHelper.loadFile(element.files[0], this.App.InputHelper.inputFileLoaded.bind(this.App.InputHelper));
-            // this.App.InputWorker.postMessage({
-            //     command: "newInputFile",
-            //     data: fileObj
-            // });
             this.App.AppWorker.postMessage({
                 command: "loadfile",
                 data: element.files[0]
@@ -132,6 +128,35 @@ class UIHelper {
      */
     closeInputErrorAlert() {
         document.getElementById("inputErrorAlert").classList.add("hidden");
+    }
+
+    /**
+     * Fires when the scan input button is clicked
+     */
+    async scanInputClicked() {
+        const scanResults = await new Promise((resolve, reject) => {
+            this.App.AppWorker.postMessage({
+                command: "scanInput",
+                data: {
+                    callbackid: this.App.addAppWorkerCallback(resolve)
+                }
+            });
+        });
+        console.log(scanResults);
+
+        const scanStatus = document.getElementById("inputScanStatus");
+
+        if (scanResults.response_code === 0) {
+            scanStatus.style.color = "";
+            scanStatus.innerText = "No match";
+        } else {
+            if (scanResults.positives !== 0) {
+                scanStatus.style.color = "#FF0000";
+            } else {
+                scanStatus.style.color = "";
+            }
+            scanStatus.innerText = `${scanResults.positives}/${scanResults.total} engines detected this file.`;
+        }
     }
 
     /**

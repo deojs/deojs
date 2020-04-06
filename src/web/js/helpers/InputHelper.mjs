@@ -1,3 +1,5 @@
+import CryptoJS from "crypto-js";
+
 import FileLoader from "../workers/FileLoader.worker.js";
 
 /**
@@ -128,7 +130,7 @@ class InputHelper {
      * Requests decoded data from the inputWorker
      *
      * @param {string} encoding - The encoding type to use, defaults to "utf-8"
-     * @returns {string}
+     * @returns {string} - The decoded data
      */
     getDecodedData(encoding = "utf-8") {
         return new Promise((resolve, reject) => {
@@ -141,6 +143,45 @@ class InputHelper {
                 }
             });
         });
+    }
+
+    /**
+     * Requests raw data from the inputWorker
+     *
+     * @returns {ArrayBuffer} - The raw data
+     */
+    async getRawData() {
+        return new Promise((resolve, reject) => {
+            const callbackid = this.App.addCallback(resolve);
+            this.App.InputWorker.postMessage({
+                command: "getRawData",
+                data: {
+                    callbackid: callbackid
+                }
+            });
+        });
+    }
+
+    /**
+     * Scans the input for known malware
+     *
+     * @returns {JSON} - Response
+     */
+    async scanInput() {
+        const proxyUrl = "http://localhost:8000/";
+        const rawData = await this.getRawData();
+        const arrayData = CryptoJS.lib.WordArray.create(rawData);
+        const hash = CryptoJS.SHA256(arrayData).toString();
+        const headers = new Headers();
+
+        const apikey = "";
+
+        const response = await fetch(`${proxyUrl}https://www.virustotal.com/vtapi/v2/file/report?apikey=${apikey}&resource=${hash}`, {
+            method: "GET",
+            headers: headers
+        });
+
+        return response.json();
     }
 }
 

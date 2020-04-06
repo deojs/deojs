@@ -29,6 +29,18 @@ self.addEventListener("message", (e) => {
             }
         });
         break;
+    case "getRawData":
+        self.postMessage({
+            command: "callback",
+            data: {
+                callbackid: data.data.callbackid,
+                data: self.getRawData()
+            }
+        });
+        break;
+    case "scanInput":
+        self.scanInput();
+        break;
     default:
         console.error(`Invalid command "${data.command}"`);
     }
@@ -65,4 +77,33 @@ self.getDecodedData = function (encoding) {
     const decoder = new TextDecoder(encoding);
     const decoded = decoder.decode(new Uint8Array(self.input.data));
     return decoded;
+};
+
+/**
+ * Returns the raw ArrayBuffer
+ *
+ * @returns {ArrayBuffer}
+ */
+self.getRawData = function () {
+    if (!self.input || !self.input.data) {
+        return new ArrayBuffer();
+    }
+    return self.input.data;
+};
+
+self.scanInput = async function () {
+    if (!self.input || !self.input.data) {
+        return;
+    }
+    console.log(`Scanning "${self.input.file.name}"`);
+
+    // const hash = toBase64(self.input.data);
+    // console.log(hash);
+
+    const url = "https://www.virustotal.com/vtapi/v2/file/scan";
+    const data = new FormData();
+    data.append("apikey", "1b7fc85d02663a49c39f5961a860406e44eb49f1e633746cbe545c0502194");
+    const scanResult = await fetch(url, {
+        method: "POST"
+    });
 };
