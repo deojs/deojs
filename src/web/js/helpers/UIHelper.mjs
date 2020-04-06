@@ -134,6 +134,12 @@ class UIHelper {
      * Fires when the scan input button is clicked
      */
     async scanInputClicked() {
+        const scanButton = document.getElementById("inputScanButton");
+        const buttonText = scanButton.innerText;
+
+        scanButton.disabled = true;
+        scanButton.innerText = "Scanning...";
+
         const scanResults = await new Promise((resolve, reject) => {
             this.App.AppWorker.postMessage({
                 command: "scanInput",
@@ -157,6 +163,9 @@ class UIHelper {
             }
             scanStatus.innerText = `${scanResults.positives}/${scanResults.total} engines detected this file.`;
         }
+
+        scanButton.innerText = buttonText;
+        scanButton.disabled = false;
     }
 
     /**
