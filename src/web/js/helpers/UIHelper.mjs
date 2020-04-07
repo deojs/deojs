@@ -148,7 +148,6 @@ class UIHelper {
                 }
             });
         });
-        console.log(scanResults);
 
         const scanStatus = document.getElementById("inputScanStatus");
 
