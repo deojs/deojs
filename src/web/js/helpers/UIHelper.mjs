@@ -33,16 +33,60 @@ class UIHelper {
     }
 
     /**
+     * Creates the HTML for list arrow
+     *
+     * @returns {HTMLElement} - The arrow and container
+     */
+    createFunctionArrow() {
+        const arrowContainer = document.createElement("div");
+        arrowContainer.style.textAlign = "center";
+
+        const arrow = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        arrow.classList.add("bi");
+        arrow.classList.add("bi-arrow-down");
+        arrow.setAttribute("width", "2em");
+        arrow.setAttribute("height", "2em");
+        arrow.setAttribute("viewBox", "0 0 16 16");
+        arrow.setAttribute("fill", "#777777");
+
+        const firstPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        firstPath.setAttribute("fill-rule", "evenodd");
+        firstPath.setAttribute("d", "M4.646 9.646a.5.5 0 01.708 0L8 12.293l2.646-2.647a.5.5 0 01.708.708l-3 3a.5.5 0 01-.708 0l-3-3a.5.5 0 010-.708z");
+        firstPath.setAttribute("clip-rule", "evenodd");
+
+        const secondPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        secondPath.setAttribute("fill-rule", "evenodd");
+        secondPath.setAttribute("d", "M8 2.5a.5.5 0 01.5.5v9a.5.5 0 01-1 0V3a.5.5 0 01.5-.5z");
+        secondPath.setAttribute("clip-rule", "evenodd");
+
+        arrow.appendChild(firstPath);
+        arrow.appendChild(secondPath);
+
+        arrowContainer.appendChild(arrow);
+
+        return arrowContainer;
+    }
+
+    /**
      * Adds the "flowItem" class to a list item when added to the list
      *
      * @param {Event} event - SortableJs onAdd event object
      */
     onFunctionAdded(event) {
         const itemElement = event.item;
-        itemElement.classList.add("flowItem");
+        const opContainer = document.createElement("div");
         const opDetails = this.App.OperationHelper.getOperationDetails(event.item.getAttribute("opname"));
         const opHtml = this.App.OperationHelper.createOperationHtml(opDetails);
-        itemElement.appendChild(opHtml);
+
+
+        opContainer.innerText = itemElement.innerText;
+        itemElement.innerText = "";
+
+        itemElement.appendChild(this.createFunctionArrow());
+
+        opContainer.classList.add("flowItem");
+        opContainer.appendChild(opHtml);
+        itemElement.appendChild(opContainer);
     }
 
     /**
