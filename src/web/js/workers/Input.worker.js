@@ -89,7 +89,7 @@ self.getDecodedData = function (encoding) {
 /**
  * Returns the raw ArrayBuffer
  *
- * @returns {ArrayBuffer}
+ * @returns {ArrayBuffer} - The input data
  */
 self.getRawData = function () {
     if (!self.input || !self.input.data) {
@@ -104,16 +104,21 @@ self.getRawData = function () {
  * @returns {JSON} - Response
  */
 self.scanInput = async function () {
-    const proxyUrl = "http://localhost:8000/";
-    const rawData = self.getRawData();
-    const arrayData = CryptoJS.lib.WordArray.create(rawData);
-    const hash = CryptoJS.SHA256(arrayData).toString();
+    try {
+        const proxyUrl = "http://localhost:8000/";
+        const rawData = self.getRawData();
+        const arrayData = CryptoJS.lib.WordArray.create(rawData);
+        const hash = CryptoJS.SHA256(arrayData).toString();
 
-    const apikey = "1b7fc85d02663a49c39f5961a860406e44eb49f1e633746cbe545c0502194b50";
+        const apikey = "1b7fc85d02663a49c39f5961a860406e44eb49f1e633746cbe545c0502194b50";
 
-    const response = await fetch(`${proxyUrl}https://www.virustotal.com/vtapi/v2/file/report?apikey=${apikey}&resource=${hash}`, {
-        method: "GET"
-    });
+        const response = await fetch(`${proxyUrl}https://www.virustotal.com/vtapi/v2/file/report?apikey=${apikey}&resource=${hash}`, {
+            method: "GET"
+        });
 
-    return response.json();
+        return response.json();
+    } catch (error) {
+        console.error(error);
+        return {};
+    }
 };

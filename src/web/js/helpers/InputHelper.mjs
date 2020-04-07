@@ -91,6 +91,14 @@ class InputHelper {
         switch (message.command) {
         case "progress":
             console.log(`File ID ${message.data.id} load progress: ${message.data.loaded}/${message.data.total}`);
+            this.App.postMessage({
+                command: "inputFileLoadProgress",
+                data: {
+                    id: message.data.id,
+                    loaded: message.data.loaded,
+                    total: message.data.total
+                }
+            });
             break;
         case "fileLoaded":
             this.fileLoaded(message.data);

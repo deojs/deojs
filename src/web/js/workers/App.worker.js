@@ -194,7 +194,7 @@ self.addEventListener("message", async (e) => {
 self.parseInput = async function (language, encoding) {
     try {
         const input = await self.InputHelper.getDecodedData(encoding);
-        return self.parse(input, language);
+        return self.parse(input, language, self.updateInputParseProgress.bind(self));
     } catch (error) {
         console.error(error);
         return [];
@@ -202,16 +202,33 @@ self.parseInput = async function (language, encoding) {
 };
 
 /**
+ * Sends a message to the main thread indicating input parse progress
+ *
+ * @param {number} current - The current progress
+ * @param {number} total - The total progress
+ */
+self.updateInputParseProgress = function (current, total) {
+    self.postMessage({
+        command: "inputParseProgress",
+        data: {
+            current: current,
+            total: total
+        }
+    });
+};
+
+/**
  * Parses the input with the specified language and encoding
  *
  * @param {string} input - The text to parse
  * @param {string} language - The language to parse the input with
+ * @param {function} progress - A callback which is called to update the progress
  * @returns {object} - Parsed language
  */
-self.parse = async function (input, language) {
+self.parse = async function (input, language, progress) {
     try {
         const languageObject = self.LanguageHelper.getLanguage(language);
-        return languageObject.parse(input);
+        return languageObject.parse(input, progress);
     } catch (error) {
         console.error(error);
         return [];
