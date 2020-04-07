@@ -173,7 +173,7 @@ blockName ->
     %}
 
 statementBlock ->
-    newLines:? _ "{" _ statementList:? (_ newLines):? _ "}"
+    (_ newLines):? _ "{" _ statementList:? (_ newLines):? _ "}"
     {%
         function(data) {
             let out = [];
@@ -620,7 +620,7 @@ forIterator ->
     %}
 
 whileStatement ->
-    "while"i (_ newLines):? _ "(" newLines:? _ whileCondition (_ newLines):? _ ")" _ statementBlock
+    "while"i (_ newLines):? _ "(" newLines:? _ whileCondition (_ newLines):? _ ")" statementBlock
     {%
         function(data) {
             let out = [];
@@ -640,8 +640,8 @@ whileStatement ->
     %}
 
 doStatement ->
-    "do"i _ statementBlock (_ newLines):? _ "while"i (_ newLines):? _ "(" _ whileCondition (_ newLines):? _ ")" |
-    "do"i _ statementBlock (_ newLines):? _ "until"i (_ newLines):? _ "(" _ whileCondition (_ newLines):? _ ")"
+    "do"i statementBlock (_ newLines):? _ "while"i (_ newLines):? _ "(" _ whileCondition (_ newLines):? _ ")" |
+    "do"i statementBlock (_ newLines):? _ "until"i (_ newLines):? _ "(" _ whileCondition (_ newLines):? _ ")"
     {%
         function(data) {
             let out = [];
@@ -681,9 +681,9 @@ whileCondition ->
     %}
 
 functionStatement ->
-    "function"i (_ newLines):? _ functionName _ functionParameterDeclaration:? _ "{" _ scriptBlock _ "}" |
-    "filter"i (_ newLines):? _ functionName _ functionParameterDeclaration:? _ "{" _ scriptBlock _ "}" |
-    "workflow"i (_ newLines):? _ functionName _ functionParameterDeclaration:? _ "{" _ scriptBlock _ "}"
+    "function"i (_ newLines):? _ functionName _ functionParameterDeclaration:? _ "{" scriptBlock _ "}" |
+    "filter"i (_ newLines):? _ functionName _ functionParameterDeclaration:? _ "{" scriptBlock _ "}" |
+    "workflow"i (_ newLines):? _ functionName _ functionParameterDeclaration:? _ "{" scriptBlock _ "}"
     {%
         function(data) {
             let out = [];
@@ -714,7 +714,7 @@ functionName ->
     %}
 
 functionParameterDeclaration ->
-    newLines:? _ "(" _ parameterList (_ newLines):? _ ")"
+    (newLines _):? "(" _ parameterList (_ newLines):? _ ")"
     {%
         function(data) {
             let out = [];

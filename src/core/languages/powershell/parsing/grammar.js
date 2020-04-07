@@ -6764,7 +6764,9 @@ var grammar = {
             }
         }
             },
-    {"name": "singleLineComment", "symbols": [{"literal":"#"}, "inputCharacters", "statementTerminators"], "postprocess": 
+    {"name": "singleLineComment$ebnf$1", "symbols": ["inputCharacters"], "postprocess": id},
+    {"name": "singleLineComment$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
+    {"name": "singleLineComment", "symbols": [{"literal":"#"}, "singleLineComment$ebnf$1", "newLines"], "postprocess": 
         function(data) {
             return {
                 type: "singleLineComment",
@@ -8368,7 +8370,8 @@ var grammar = {
             }
         }
             },
-    {"name": "statementBlock$ebnf$1", "symbols": ["newLines"], "postprocess": id},
+    {"name": "statementBlock$ebnf$1$subexpression$1", "symbols": ["_", "newLines"]},
+    {"name": "statementBlock$ebnf$1", "symbols": ["statementBlock$ebnf$1$subexpression$1"], "postprocess": id},
     {"name": "statementBlock$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
     {"name": "statementBlock$ebnf$2", "symbols": ["statementList"], "postprocess": id},
     {"name": "statementBlock$ebnf$2", "symbols": [], "postprocess": function(d) {return null;}},
@@ -8876,7 +8879,7 @@ var grammar = {
     {"name": "whileStatement$ebnf$3$subexpression$1", "symbols": ["_", "newLines"]},
     {"name": "whileStatement$ebnf$3", "symbols": ["whileStatement$ebnf$3$subexpression$1"], "postprocess": id},
     {"name": "whileStatement$ebnf$3", "symbols": [], "postprocess": function(d) {return null;}},
-    {"name": "whileStatement", "symbols": ["whileStatement$subexpression$1", "whileStatement$ebnf$1", "_", {"literal":"("}, "whileStatement$ebnf$2", "_", "whileCondition", "whileStatement$ebnf$3", "_", {"literal":")"}, "_", "statementBlock"], "postprocess": 
+    {"name": "whileStatement", "symbols": ["whileStatement$subexpression$1", "whileStatement$ebnf$1", "_", {"literal":"("}, "whileStatement$ebnf$2", "_", "whileCondition", "whileStatement$ebnf$3", "_", {"literal":")"}, "statementBlock"], "postprocess": 
         function(data) {
             let out = [];
             for (let i = 0; i < data.length; i++) {
@@ -8904,7 +8907,7 @@ var grammar = {
     {"name": "doStatement$ebnf$3$subexpression$1", "symbols": ["_", "newLines"]},
     {"name": "doStatement$ebnf$3", "symbols": ["doStatement$ebnf$3$subexpression$1"], "postprocess": id},
     {"name": "doStatement$ebnf$3", "symbols": [], "postprocess": function(d) {return null;}},
-    {"name": "doStatement", "symbols": ["doStatement$subexpression$1", "_", "statementBlock", "doStatement$ebnf$1", "_", "doStatement$subexpression$2", "doStatement$ebnf$2", "_", {"literal":"("}, "_", "whileCondition", "doStatement$ebnf$3", "_", {"literal":")"}]},
+    {"name": "doStatement", "symbols": ["doStatement$subexpression$1", "statementBlock", "doStatement$ebnf$1", "_", "doStatement$subexpression$2", "doStatement$ebnf$2", "_", {"literal":"("}, "_", "whileCondition", "doStatement$ebnf$3", "_", {"literal":")"}]},
     {"name": "doStatement$subexpression$3", "symbols": [/[dD]/, /[oO]/], "postprocess": function(d) {return d.join(""); }},
     {"name": "doStatement$ebnf$4$subexpression$1", "symbols": ["_", "newLines"]},
     {"name": "doStatement$ebnf$4", "symbols": ["doStatement$ebnf$4$subexpression$1"], "postprocess": id},
@@ -8916,7 +8919,7 @@ var grammar = {
     {"name": "doStatement$ebnf$6$subexpression$1", "symbols": ["_", "newLines"]},
     {"name": "doStatement$ebnf$6", "symbols": ["doStatement$ebnf$6$subexpression$1"], "postprocess": id},
     {"name": "doStatement$ebnf$6", "symbols": [], "postprocess": function(d) {return null;}},
-    {"name": "doStatement", "symbols": ["doStatement$subexpression$3", "_", "statementBlock", "doStatement$ebnf$4", "_", "doStatement$subexpression$4", "doStatement$ebnf$5", "_", {"literal":"("}, "_", "whileCondition", "doStatement$ebnf$6", "_", {"literal":")"}], "postprocess": 
+    {"name": "doStatement", "symbols": ["doStatement$subexpression$3", "statementBlock", "doStatement$ebnf$4", "_", "doStatement$subexpression$4", "doStatement$ebnf$5", "_", {"literal":"("}, "_", "whileCondition", "doStatement$ebnf$6", "_", {"literal":")"}], "postprocess": 
         function(data) {
             let out = [];
             for (let i = 0; i < data.length; i++) {
@@ -8958,21 +8961,21 @@ var grammar = {
     {"name": "functionStatement$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
     {"name": "functionStatement$ebnf$2", "symbols": ["functionParameterDeclaration"], "postprocess": id},
     {"name": "functionStatement$ebnf$2", "symbols": [], "postprocess": function(d) {return null;}},
-    {"name": "functionStatement", "symbols": ["functionStatement$subexpression$1", "functionStatement$ebnf$1", "_", "functionName", "_", "functionStatement$ebnf$2", "_", {"literal":"{"}, "_", "scriptBlock", "_", {"literal":"}"}]},
+    {"name": "functionStatement", "symbols": ["functionStatement$subexpression$1", "functionStatement$ebnf$1", "_", "functionName", "_", "functionStatement$ebnf$2", "_", {"literal":"{"}, "scriptBlock", "_", {"literal":"}"}]},
     {"name": "functionStatement$subexpression$2", "symbols": [/[fF]/, /[iI]/, /[lL]/, /[tT]/, /[eE]/, /[rR]/], "postprocess": function(d) {return d.join(""); }},
     {"name": "functionStatement$ebnf$3$subexpression$1", "symbols": ["_", "newLines"]},
     {"name": "functionStatement$ebnf$3", "symbols": ["functionStatement$ebnf$3$subexpression$1"], "postprocess": id},
     {"name": "functionStatement$ebnf$3", "symbols": [], "postprocess": function(d) {return null;}},
     {"name": "functionStatement$ebnf$4", "symbols": ["functionParameterDeclaration"], "postprocess": id},
     {"name": "functionStatement$ebnf$4", "symbols": [], "postprocess": function(d) {return null;}},
-    {"name": "functionStatement", "symbols": ["functionStatement$subexpression$2", "functionStatement$ebnf$3", "_", "functionName", "_", "functionStatement$ebnf$4", "_", {"literal":"{"}, "_", "scriptBlock", "_", {"literal":"}"}]},
+    {"name": "functionStatement", "symbols": ["functionStatement$subexpression$2", "functionStatement$ebnf$3", "_", "functionName", "_", "functionStatement$ebnf$4", "_", {"literal":"{"}, "scriptBlock", "_", {"literal":"}"}]},
     {"name": "functionStatement$subexpression$3", "symbols": [/[wW]/, /[oO]/, /[rR]/, /[kK]/, /[fF]/, /[lL]/, /[oO]/, /[wW]/], "postprocess": function(d) {return d.join(""); }},
     {"name": "functionStatement$ebnf$5$subexpression$1", "symbols": ["_", "newLines"]},
     {"name": "functionStatement$ebnf$5", "symbols": ["functionStatement$ebnf$5$subexpression$1"], "postprocess": id},
     {"name": "functionStatement$ebnf$5", "symbols": [], "postprocess": function(d) {return null;}},
     {"name": "functionStatement$ebnf$6", "symbols": ["functionParameterDeclaration"], "postprocess": id},
     {"name": "functionStatement$ebnf$6", "symbols": [], "postprocess": function(d) {return null;}},
-    {"name": "functionStatement", "symbols": ["functionStatement$subexpression$3", "functionStatement$ebnf$5", "_", "functionName", "_", "functionStatement$ebnf$6", "_", {"literal":"{"}, "_", "scriptBlock", "_", {"literal":"}"}], "postprocess": 
+    {"name": "functionStatement", "symbols": ["functionStatement$subexpression$3", "functionStatement$ebnf$5", "_", "functionName", "_", "functionStatement$ebnf$6", "_", {"literal":"{"}, "scriptBlock", "_", {"literal":"}"}], "postprocess": 
         function(data) {
             let out = [];
             for (let i = 0; i < data.length; i++) {
@@ -8997,12 +9000,13 @@ var grammar = {
             }
         }
             },
-    {"name": "functionParameterDeclaration$ebnf$1", "symbols": ["newLines"], "postprocess": id},
+    {"name": "functionParameterDeclaration$ebnf$1$subexpression$1", "symbols": ["newLines", "_"]},
+    {"name": "functionParameterDeclaration$ebnf$1", "symbols": ["functionParameterDeclaration$ebnf$1$subexpression$1"], "postprocess": id},
     {"name": "functionParameterDeclaration$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
     {"name": "functionParameterDeclaration$ebnf$2$subexpression$1", "symbols": ["_", "newLines"]},
     {"name": "functionParameterDeclaration$ebnf$2", "symbols": ["functionParameterDeclaration$ebnf$2$subexpression$1"], "postprocess": id},
     {"name": "functionParameterDeclaration$ebnf$2", "symbols": [], "postprocess": function(d) {return null;}},
-    {"name": "functionParameterDeclaration", "symbols": ["functionParameterDeclaration$ebnf$1", "_", {"literal":"("}, "_", "parameterList", "functionParameterDeclaration$ebnf$2", "_", {"literal":")"}], "postprocess": 
+    {"name": "functionParameterDeclaration", "symbols": ["functionParameterDeclaration$ebnf$1", {"literal":"("}, "_", "parameterList", "functionParameterDeclaration$ebnf$2", "_", {"literal":")"}], "postprocess": 
         function(data) {
             let out = [];
             for (let i = 0; i < data.length; i++) {
@@ -9572,7 +9576,6 @@ var grammar = {
                     out.push(data[i]);
                 }
             }
-            console.error(out);
             if (out.length === 1) {
                 out = out[0];
             }

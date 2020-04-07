@@ -194,7 +194,7 @@ comment ->
     %}
 
 singleLineComment ->
-    "#" inputCharacters statementTerminators
+    "#" inputCharacters:? newLines
     {%
         function(data) {
             return {
