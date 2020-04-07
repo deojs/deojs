@@ -1,5 +1,3 @@
-import CryptoJS from "crypto-js";
-
 import FileLoader from "../workers/FileLoader.worker.js";
 
 /**
@@ -160,28 +158,6 @@ class InputHelper {
                 }
             });
         });
-    }
-
-    /**
-     * Scans the input for known malware
-     *
-     * @returns {JSON} - Response
-     */
-    async scanInput() {
-        const proxyUrl = "http://localhost:8000/";
-        const rawData = await this.getRawData();
-        const arrayData = CryptoJS.lib.WordArray.create(rawData);
-        const hash = CryptoJS.SHA256(arrayData).toString();
-        const headers = new Headers();
-
-        const apikey = "";
-
-        const response = await fetch(`${proxyUrl}https://www.virustotal.com/vtapi/v2/file/report?apikey=${apikey}&resource=${hash}`, {
-            method: "GET",
-            headers: headers
-        });
-
-        return response.json();
     }
 }
 

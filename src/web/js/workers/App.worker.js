@@ -175,7 +175,7 @@ self.addEventListener("message", async (e) => {
             command: "callback",
             data: {
                 callbackid: data.data.callbackid,
-                data: await self.InputHelper.scanInput()
+                data: await self.scanInput()
             }
         });
         break;
@@ -233,6 +233,23 @@ self.prettyPrint = function (ast, language) {
         console.error(error);
         return "";
     }
+};
+
+/**
+ * Scans the input using the InputHelper
+ *
+ * @returns {JSON} - Scan results
+ */
+self.scanInput = async function () {
+    return new Promise((resolve, reject) => {
+        const callbackid = self.addCallback(resolve);
+        self.InputWorker.postMessage({
+            command: "scanInput",
+            data: {
+                callbackid: callbackid
+            }
+        });
+    });
 };
 
 self.createHelpers();

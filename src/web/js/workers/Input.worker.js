@@ -1,6 +1,7 @@
 /**
  * Worker to handle storage and processing of the input file
  */
+import CryptoJS from "crypto-js";
 
 // Object containing the input file and data
 self.input = null;
@@ -8,7 +9,7 @@ self.input = null;
 /**
  * Handle messages sent by the main thread
  */
-self.addEventListener("message", (e) => {
+self.addEventListener("message", async (e) => {
     if (!e.data) return;
     const data = e.data;
 
@@ -39,7 +40,13 @@ self.addEventListener("message", (e) => {
         });
         break;
     case "scanInput":
-        self.scanInput();
+        self.postMessage({
+            command: "callback",
+            data: {
+                callbackid: data.data.callbackid,
+                data: await self.scanInput()
+            }
+        });
         break;
     default:
         console.error(`Invalid command "${data.command}"`);
@@ -91,19 +98,22 @@ self.getRawData = function () {
     return self.input.data;
 };
 
+/**
+ * Scans the input for known malware
+ *
+ * @returns {JSON} - Response
+ */
 self.scanInput = async function () {
-    if (!self.input || !self.input.data) {
-        return;
-    }
-    console.log(`Scanning "${self.input.file.name}"`);
+    const proxyUrl = "http://localhost:8000/";
+    const rawData = self.getRawData();
+    const arrayData = CryptoJS.lib.WordArray.create(rawData);
+    const hash = CryptoJS.SHA256(arrayData).toString();
 
-    // const hash = toBase64(self.input.data);
-    // console.log(hash);
+    const apikey = "1b7fc85d02663a49c39f5961a860406e44eb49f1e633746cbe545c0502194b50";
 
-    const url = "https://www.virustotal.com/vtapi/v2/file/scan";
-    const data = new FormData();
-    data.append("apikey", "1b7fc85d02663a49c39f5961a860406e44eb49f1e633746cbe545c0502194");
-    const scanResult = await fetch(url, {
-        method: "POST"
+    const response = await fetch(`${proxyUrl}https://www.virustotal.com/vtapi/v2/file/report?apikey=${apikey}&resource=${hash}`, {
+        method: "GET"
     });
+
+    return response.json();
 };
