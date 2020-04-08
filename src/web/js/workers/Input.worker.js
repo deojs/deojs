@@ -48,6 +48,15 @@ self.addEventListener("message", async (e) => {
             }
         });
         break;
+    case "calculateInputHashes":
+        self.postMessage({
+            command: "callback",
+            data: {
+                callbackid: data.data.callbackid,
+                data: await self.calculateHashes()
+            }
+        });
+        break;
     default:
         console.error(`Invalid command "${data.command}"`);
     }
@@ -121,4 +130,24 @@ self.scanInput = async function () {
         console.error(error);
         return {};
     }
+};
+
+/**
+ * Calculates hashes for the input file
+ *
+ * @returns {object} - Object containing MD5, SHA1 and SHA256 hashes
+ */
+self.calculateHashes = function () {
+    const data = self.getRawData();
+    const arrayData = CryptoJS.lib.WordArray.create(data);
+
+    const md5 = CryptoJS.MD5(arrayData);
+    const sha1 = CryptoJS.SHA1(arrayData);
+    const sha256 = CryptoJS.SHA256(arrayData);
+
+    return {
+        md5: md5.toString(),
+        sha1: sha1.toString(),
+        sha256: sha256.toString()
+    };
 };

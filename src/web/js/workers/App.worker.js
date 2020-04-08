@@ -179,6 +179,15 @@ self.addEventListener("message", async (e) => {
             }
         });
         break;
+    case "calculateInputHashes":
+        self.postMessage({
+            command: "callback",
+            data: {
+                callbackid: data.data.callbackid,
+                data: await self.calculateInputHashes()
+            }
+        });
+        break;
     default:
         console.warn(`Invalid command "${data.command}"`);
     }
@@ -262,6 +271,23 @@ self.scanInput = async function () {
         const callbackid = self.addCallback(resolve);
         self.InputWorker.postMessage({
             command: "scanInput",
+            data: {
+                callbackid: callbackid
+            }
+        });
+    });
+};
+
+/**
+ * Calculates hashes of the input file
+ *
+ * @returns {object} - Calculated hashes
+ */
+self.calculateInputHashes = async function () {
+    return new this.Promise((resolve, reject) => {
+        const callbackid = self.addCallback(resolve);
+        self.InputWorker.postMessage({
+            command: "calculateInputHashes",
             data: {
                 callbackid: callbackid
             }

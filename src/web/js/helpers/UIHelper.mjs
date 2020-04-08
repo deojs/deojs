@@ -240,6 +240,22 @@ class UIHelper {
         inputFileButton.innerText = "Change";
         inputFileButton.removeAttribute("disabled");
 
+        const hashes = await new Promise((resolve, reject) => {
+            this.App.AppWorker.postMessage({
+                command: "calculateInputHashes",
+                data: {
+                    callbackid: this.App.addAppWorkerCallback(resolve)
+                }
+            });
+        });
+
+        const hashList = document.getElementById("inputFileHashes");
+        hashList.style.display = "";
+
+        document.getElementById("inputFileMd5").innerText = `MD5: ${hashes.md5}`;
+        document.getElementById("inputFileSha1").innerText = `SHA1: ${hashes.sha1}`;
+        document.getElementById("inputFileSha256").innerText = `SHA256: ${hashes.sha256}`;
+
         const parsed = await new Promise((resolve, reject) => {
             this.App.AppWorker.postMessage({
                 command: "parseInput",
@@ -262,12 +278,12 @@ class UIHelper {
             });
         });
 
-        document.getElementById("inputProgress").style.display = "none";
-
         this.App.OutputHelper.updateOutput(prettyPrinted, "powershell");
 
         const output = await this.App.OutputHelper.getOutput(true);
         document.getElementById("outputArea").innerHTML = output;
+
+        document.getElementById("inputProgress").style.display = "none";
     }
 
     /**

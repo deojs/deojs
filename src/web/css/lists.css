@@ -35,7 +35,16 @@
     height: 250px;
 }
 
-#inputOptionsList {
-    list-style-type: none;
-    padding: 0;
+#inputProgress {
+    height: 2em;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+#inputScanContainer {
+    margin-top: 3px;
+}
+
+#inputFileHashes {
+    margin-top: 3px;
 }
