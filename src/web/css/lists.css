@@ -12,6 +12,10 @@
     background-color: #E1F5FE;
 }
 
+#operationsList {
+    min-height: 90vh
+}
+
 #operationsList li:hover,
 #flowList li:hover {
     cursor: pointer;
