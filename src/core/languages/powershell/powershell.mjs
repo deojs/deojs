@@ -11,7 +11,7 @@ class PowerShellLanguage {
      * Lexes and parses inCode
      *
      * @param {string} inCode The code to be parsed
-     * @param {function} progress A callback to call to update progress
+     * @param {Function} progress A callback to call to update progress
      * @returns {object} - Parsed code
      */
     parse(inCode, progress) {
@@ -20,13 +20,11 @@ class PowerShellLanguage {
         const numChunks = Math.ceil(inCode.length / chunkSize);
 
         for (let i = 0; i < numChunks; i++) {
-            console.log(`Parsing ${Math.round((i / numChunks) * 100)}%`);
             if (progress !== undefined && progress !== null) {
                 progress(i, numChunks);
             }
             parser.feed(inCode.slice(i * 100, (i * 100) + 100));
         }
-        console.log("Parsing complete");
         console.log(parser.results[0]);
 
         if (parser.results.length > 0) {
