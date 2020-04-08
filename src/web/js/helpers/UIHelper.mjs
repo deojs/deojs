@@ -90,6 +90,17 @@ class UIHelper {
     }
 
     /**
+     * Fired when a flow item stops being dragged
+     *
+     * @param {Event} event - SortableJs onEnd event
+     */
+    flowElementDragged(event) {
+        if (event.to !== event.from) {
+            event.item.parentNode.removeChild(event.item);
+        }
+    }
+
+    /**
      * Initialises the sortable lists and populates the operations list
      */
     createSortableLists() {
@@ -102,8 +113,8 @@ class UIHelper {
             sort: false,
             group: {
                 name: "operationsGroup",
-                pull: "clone",
-                put: false
+                pull: "clone"
+                // put: false
             },
             delay: 0
         });
@@ -114,6 +125,7 @@ class UIHelper {
                 name: "operationsGroup"
             },
             onAdd: this.onFunctionAdded.bind(this),
+            onEnd: this.flowElementDragged.bind(this),
             delay: 0
         });
     }
