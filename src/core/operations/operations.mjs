@@ -35,6 +35,25 @@ class Operations {
     }
 
     /**
+     * Gets the details of an operation
+     *
+     * @param {string} opName - The operation name
+     * @returns {object} - The operation details
+     */
+    getOperationDetails(opName) {
+        const op = this.getOperation(opName);
+        return {
+            name: op,
+            displayName: op.name,
+            args: op.args,
+            languages: op.languages,
+            inputType: op.inputType,
+            outputType: op.outputType,
+            progress: op.progress
+        };
+    }
+
+    /**
      * Gets a list of operations and their options.
      * Returns an object containing the details for all operations
      *
