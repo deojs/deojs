@@ -138,8 +138,10 @@ class ReplaceAliases {
      * string of that token matches an alias.
      *
      * @param {object} data - The data to search and replace in
+     * @param {string} aliasName - The alias to replace
+     * @param {string} fullName - The full version of the alias
      */
-    replaceAlias(data) {
+    replaceAlias(data, aliasName, fullName) {
         const recurse = function (obj) {
             if (obj === null || obj === undefined) {
                 return;
@@ -157,8 +159,12 @@ class ReplaceAliases {
             && Object.prototype.hasOwnProperty.call(obj, "type")) {
                 if (obj.type === "genericToken") {
                     const text = this.prettyPrint(obj.data);
-                    if (Object.prototype.hasOwnProperty.call(this.aliases, text)) {
-                        obj.data = this.aliases[text];
+                    if (aliasName === "All default aliases") {
+                        if (Object.prototype.hasOwnProperty.call(this.aliases, text)) {
+                            obj.data = this.aliases[text];
+                        }
+                    } else if (text === aliasName) {
+                        obj.data = fullName;
                     }
                     return;
                 }
@@ -193,7 +199,13 @@ class ReplaceAliases {
             if (Object.prototype.hasOwnProperty.call(obj, "data")
             && Object.prototype.hasOwnProperty.call(obj, "type")) {
                 if (obj.type === "pipeline") {
-                    this.replaceAlias(obj.data);
+                    if (args[0] === "All default aliases") {
+                        this.replaceAlias(obj.data, args[0], "");
+                    } else if (args[0] === "Custom") {
+                        this.replaceAlias(obj.data, args[1], args[2]);
+                    } else {
+                        this.replaceAlias(obj.data, args[0], this.aliases[args[0]]);
+                    }
                     return;
                 }
                 recurse(obj.data);
