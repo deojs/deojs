@@ -10,7 +10,6 @@ class OperationHelper {
         this.callbacks = {};
         this.currentId = 0;
         this.operations = new Operations();
-        this.opList = this.operations.getOperationList();
     }
 
     /**
@@ -31,7 +30,7 @@ class OperationHelper {
      * @returns {object} - Operation details
      */
     getOperationDetails(opName) {
-        return this.opList[opName];
+        return this.getOperationList()[opName];
     }
 
     /**
@@ -41,7 +40,7 @@ class OperationHelper {
      * @returns {object} - Operation list
      */
     getOperationList() {
-        return this.opList;
+        return this.operations.getOperationList();
     }
 
     /**
@@ -49,9 +48,10 @@ class OperationHelper {
      */
     populateOperationsList() {
         const operationsList = document.getElementById("operationsList");
-        const opNames = Object.keys(this.opList);
+        const opList = this.getOperationList();
+        const opNames = Object.keys(opList);
         for (let i = 0; i < opNames.length; i++) {
-            operationsList.append(this.createOperationListHtml(this.opList[opNames[i]]));
+            operationsList.append(this.createOperationListHtml(opList[opNames[i]]));
         }
     }
 

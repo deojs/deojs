@@ -90,6 +90,17 @@ class UIHelper {
     }
 
     /**
+     * Fired when a flow item stops being dragged
+     *
+     * @param {Event} event - SortableJs onEnd event
+     */
+    flowElementDragged(event) {
+        if (event.to !== event.from) {
+            event.item.parentNode.removeChild(event.item);
+        }
+    }
+
+    /**
      * Initialises the sortable lists and populates the operations list
      */
     createSortableLists() {
@@ -102,8 +113,8 @@ class UIHelper {
             sort: false,
             group: {
                 name: "operationsGroup",
-                pull: "clone",
-                put: false
+                pull: "clone"
+                // put: false
             },
             delay: 0
         });
@@ -114,6 +125,7 @@ class UIHelper {
                 name: "operationsGroup"
             },
             onAdd: this.onFunctionAdded.bind(this),
+            onEnd: this.flowElementDragged.bind(this),
             delay: 0
         });
     }
@@ -153,6 +165,8 @@ class UIHelper {
         if (element.files.length > 0) {
             document.getElementById("inputFileName").innerText = "loading...";
             document.getElementById("inputFileButton").setAttribute("disabled", true);
+            document.getElementById("inputProgress").style.display = "";
+            document.getElementById("inputProgress").firstElementChild.innerText = "Loading (0%)";
             this.App.AppWorker.postMessage({
                 command: "loadfile",
                 data: element.files[0]
@@ -195,16 +209,21 @@ class UIHelper {
 
         const scanStatus = document.getElementById("inputScanStatus");
 
-        if (scanResults.response_code === 0) {
-            scanStatus.style.color = "";
-            scanStatus.innerText = "No match";
-        } else {
-            if (scanResults.positives !== 0) {
-                scanStatus.style.color = "#FF0000";
-            } else {
+        if (Object.prototype.hasOwnProperty.call(scanResults, "response_code")) {
+            if (scanResults.response_code === 0) {
                 scanStatus.style.color = "";
+                scanStatus.innerText = "No match";
+            } else {
+                if (scanResults.positives !== 0) {
+                    scanStatus.style.color = "#FF0000";
+                } else {
+                    scanStatus.style.color = "";
+                }
+                scanStatus.innerText = `${scanResults.positives}/${scanResults.total} engines detected this file.`;
             }
-            scanStatus.innerText = `${scanResults.positives}/${scanResults.total} engines detected this file.`;
+        } else {
+            scanStatus.innerText = "Scan failed. (Check console)";
+            scanStatus.style.color = "#FF0000";
         }
 
         scanButton.innerText = buttonText;
@@ -218,6 +237,8 @@ class UIHelper {
      * @param {boolean} error - True if an error occurred
      */
     async inputFileLoaded(data, error) {
+        this.updateInputProgress(100, 100, "Loading");
+
         if (error) {
             document.getElementById("inputErrorText").innerText = "An error occurred loading the input file. Check the console for more information.";
             document.getElementById("inputErrorAlert").classList.remove("hidden");
@@ -230,6 +251,22 @@ class UIHelper {
         const inputFileButton = document.getElementById("inputFileButton");
         inputFileButton.innerText = "Change";
         inputFileButton.removeAttribute("disabled");
+
+        const hashes = await new Promise((resolve, reject) => {
+            this.App.AppWorker.postMessage({
+                command: "calculateInputHashes",
+                data: {
+                    callbackid: this.App.addAppWorkerCallback(resolve)
+                }
+            });
+        });
+
+        const hashList = document.getElementById("inputFileHashes");
+        hashList.style.display = "";
+
+        document.getElementById("inputFileMd5").innerText = `MD5: ${hashes.md5}`;
+        document.getElementById("inputFileSha1").innerText = `SHA1: ${hashes.sha1}`;
+        document.getElementById("inputFileSha256").innerText = `SHA256: ${hashes.sha256}`;
 
         const parsed = await new Promise((resolve, reject) => {
             this.App.AppWorker.postMessage({
@@ -257,6 +294,24 @@ class UIHelper {
 
         const output = await this.App.OutputHelper.getOutput(true);
         document.getElementById("outputArea").innerHTML = output;
+
+        document.getElementById("inputProgress").style.display = "none";
+    }
+
+    /**
+     * Updates input load progress
+     *
+     * @param {number} loaded
+     * @param {number} total
+     * @param {string} progressType
+     */
+    updateInputProgress(loaded, total, progressType) {
+        const progress = document.getElementById("inputProgress");
+        const progressBar = progress.firstElementChild;
+        const loadedPercent = Math.round((loaded / total) * 100);
+
+        progressBar.style.width = `${loadedPercent}%`;
+        progressBar.innerText = `${progressType} (${loadedPercent}%)`;
     }
 }
 

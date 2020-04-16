@@ -70,6 +70,12 @@ class App {
         case "runcomplete":
             this.OperationHelper.runComplete(data.data.output, data.data.language);
             break;
+        case "inputFileLoadProgress":
+            this.UIHelper.updateInputProgress(data.data.loaded, data.data.total, "Loading");
+            break;
+        case "inputParseProgress":
+            this.UIHelper.updateInputProgress(data.data.current, data.data.total, "Parsing");
+            break;
         default:
             console.error(`Invalid command "${command}"`);
         }

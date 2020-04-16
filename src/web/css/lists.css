@@ -12,6 +12,10 @@
     background-color: #E1F5FE;
 }
 
+#operationsList {
+    min-height: 90vh
+}
+
 #operationsList li:hover,
 #flowList li:hover {
     cursor: pointer;
@@ -26,7 +30,6 @@
     background-color: #E1F5FE;
     border: 1px solid #B3E5FC;
     padding: 10px;
-    border-radius: 4px;
     box-shadow: 2px 2px 2px #DDDDDD;
 }
 
@@ -35,7 +38,16 @@
     height: 250px;
 }
 
-#inputOptionsList {
-    list-style-type: none;
-    padding: 0;
+#inputProgress {
+    height: 2em;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+#inputScanContainer {
+    margin-top: 3px;
+}
+
+#inputFileHashes {
+    margin-top: 3px;
 }
