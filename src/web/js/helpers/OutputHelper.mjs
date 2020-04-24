@@ -33,6 +33,15 @@ class OutputHelper {
     }
 
     /**
+     * Clears the output
+     */
+    clearOutput() {
+        this.OutputWorker.terminate();
+        this.OutputWorker = new OutputWorker();
+        this.OutputWorker.addEventListener("message", this.handleWorkerMessage.bind(this));
+    }
+
+    /**
      * Adds a new callback
      *
      * @param {Function} callback - The callback function

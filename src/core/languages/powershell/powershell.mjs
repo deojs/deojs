@@ -25,7 +25,6 @@ class PowerShellLanguage {
             }
             parser.feed(inCode.slice(i * 100, (i * 100) + 100));
         }
-        console.log(parser.results[0]);
 
         if (parser.results.length > 0) {
             return parser.results[0];

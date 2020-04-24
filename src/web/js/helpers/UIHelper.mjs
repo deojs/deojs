@@ -161,6 +161,8 @@ class UIHelper {
      * @param {Event} event - Input event
      */
     async loadFiles(event) {
+        this.App.OutputHelper.clearOutput();
+
         const element = event.target;
         if (element.files.length > 0) {
             document.getElementById("inputFileName").innerText = "loading...";
@@ -242,6 +244,7 @@ class UIHelper {
         if (error) {
             document.getElementById("inputErrorText").innerText = "An error occurred loading the input file. Check the console for more information.";
             document.getElementById("inputErrorAlert").classList.remove("hidden");
+            document.getElementById("inputProgress").style.display = "none";
             return;
         }
 
@@ -278,6 +281,13 @@ class UIHelper {
                 }
             });
         });
+
+        if (Array.isArray(parsed) && parsed.length === 0) {
+            document.getElementById("inputErrorText").innerText = "An error occurred parsing the input file. Check the console for more information.";
+            document.getElementById("inputErrorAlert").classList.remove("hidden");
+            document.getElementById("inputProgress").style.display = "none";
+            return;
+        }
 
         const prettyPrinted = await new Promise((resolve, reject) => {
             this.App.AppWorker.postMessage({
