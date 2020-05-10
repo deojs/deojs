@@ -8378,7 +8378,7 @@ var grammar = {
     {"name": "statementBlock$ebnf$3$subexpression$1", "symbols": ["_", "newLines"]},
     {"name": "statementBlock$ebnf$3", "symbols": ["statementBlock$ebnf$3$subexpression$1"], "postprocess": id},
     {"name": "statementBlock$ebnf$3", "symbols": [], "postprocess": function(d) {return null;}},
-    {"name": "statementBlock", "symbols": ["statementBlock$ebnf$1", "_", {"literal":"{"}, "_", "statementBlock$ebnf$2", "statementBlock$ebnf$3", "_", {"literal":"}"}], "postprocess": 
+    {"name": "statementBlock", "symbols": [{"literal":"{"}, "statementBlock$ebnf$1", "_", "statementBlock$ebnf$2", "statementBlock$ebnf$3", "_", {"literal":"}"}], "postprocess": 
         function(data) {
             let out = [];
             for (let i = 0; i < data.length; i++) {
@@ -8483,11 +8483,17 @@ var grammar = {
     {"name": "ifStatement$ebnf$3$subexpression$1", "symbols": ["_", "newLines"]},
     {"name": "ifStatement$ebnf$3", "symbols": ["ifStatement$ebnf$3$subexpression$1"], "postprocess": id},
     {"name": "ifStatement$ebnf$3", "symbols": [], "postprocess": function(d) {return null;}},
-    {"name": "ifStatement$ebnf$4", "symbols": ["elseifClauses"], "postprocess": id},
+    {"name": "ifStatement$ebnf$4$subexpression$1", "symbols": ["_", "newLines"]},
+    {"name": "ifStatement$ebnf$4", "symbols": ["ifStatement$ebnf$4$subexpression$1"], "postprocess": id},
     {"name": "ifStatement$ebnf$4", "symbols": [], "postprocess": function(d) {return null;}},
-    {"name": "ifStatement$ebnf$5", "symbols": ["elseClause"], "postprocess": id},
+    {"name": "ifStatement$ebnf$5$subexpression$1", "symbols": ["_", "newLines"]},
+    {"name": "ifStatement$ebnf$5", "symbols": ["ifStatement$ebnf$5$subexpression$1"], "postprocess": id},
     {"name": "ifStatement$ebnf$5", "symbols": [], "postprocess": function(d) {return null;}},
-    {"name": "ifStatement", "symbols": ["ifStatement$subexpression$1", "ifStatement$ebnf$1", "_", {"literal":"("}, "ifStatement$ebnf$2", "_", "pipeline", "ifStatement$ebnf$3", "_", {"literal":")"}, "_", "statementBlock", "_", "ifStatement$ebnf$4", "_", "ifStatement$ebnf$5"], "postprocess": 
+    {"name": "ifStatement$ebnf$6", "symbols": ["elseifClauses"], "postprocess": id},
+    {"name": "ifStatement$ebnf$6", "symbols": [], "postprocess": function(d) {return null;}},
+    {"name": "ifStatement$ebnf$7", "symbols": ["elseClause"], "postprocess": id},
+    {"name": "ifStatement$ebnf$7", "symbols": [], "postprocess": function(d) {return null;}},
+    {"name": "ifStatement", "symbols": ["ifStatement$subexpression$1", "ifStatement$ebnf$1", "_", {"literal":"("}, "ifStatement$ebnf$2", "_", "pipeline", "ifStatement$ebnf$3", "_", {"literal":")"}, "ifStatement$ebnf$4", "_", "statementBlock", "ifStatement$ebnf$5", "_", "ifStatement$ebnf$6", "_", "ifStatement$ebnf$7"], "postprocess": 
         function(data) {
             let out = [];
             for (let i = 0; i < data.length; i++) {

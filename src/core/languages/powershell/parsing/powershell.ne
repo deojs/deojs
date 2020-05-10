@@ -173,7 +173,7 @@ blockName ->
     %}
 
 statementBlock ->
-    (_ newLines):? _ "{" _ statementList:? (_ newLines):? _ "}"
+    "{" (_ newLines):? _ statementList:? (_ newLines):? _ "}"
     {%
         function(data) {
             let out = [];
@@ -278,7 +278,7 @@ statementTerminators ->
     %}
 
 ifStatement ->
-    "if"i (_ newLines):? _ "(" (_ newLines):? _ pipeline (_ newLines):? _ ")" _ statementBlock _
+    "if"i (_ newLines):? _ "(" (_ newLines):? _ pipeline (_ newLines):? _ ")" (_ newLines):? _ statementBlock (_ newLines):? _
         elseifClauses:? _ elseClause:?
     {%
         function(data) {
