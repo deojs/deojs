@@ -20,7 +20,9 @@ class PowerShellLanguage {
         const numChunks = Math.ceil(inCode.length / chunkSize);
 
         for (let i = 0; i < numChunks; i++) {
-            if (progress !== undefined && progress !== null) {
+            if (progress !== undefined
+                && progress !== null
+                && typeof progress === "function") {
                 progress(i, numChunks);
             }
             parser.feed(inCode.slice(i * 100, (i * 100) + 100));
