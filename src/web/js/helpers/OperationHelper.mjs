@@ -30,7 +30,7 @@ class OperationHelper {
      * @returns {object} - Operation details
      */
     getOperationDetails(opName) {
-        return this.getOperationList()[opName];
+        return this.operations.getOperationDetails(opName);
     }
 
     /**
