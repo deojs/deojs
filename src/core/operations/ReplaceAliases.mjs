@@ -36,6 +36,7 @@ class ReplaceAliases {
             gdr: "Get-PSDrive",
             gv: "Get-Variable",
             group: "Group-Object",
+            iex: "Invoke-Expression",
             ipmo: "Import-Module",
             ii: "Invoke-Item",
             measure: "Measure-Object",
