@@ -43,7 +43,7 @@ class Operations {
     getOperationDetails(opName) {
         const op = this.getOperation(opName);
         return {
-            name: op,
+            name: opName,
             displayName: op.name,
             args: op.args,
             languages: op.languages,
@@ -63,18 +63,8 @@ class Operations {
         const opNames = Object.keys(this.operations);
         const operations = {};
         for (let i = 0; i < opNames.length; i++) {
-            const op = this.getOperation(opNames[i]);
-            operations[opNames[i]] = {
-                name: opNames[i],
-                displayName: op.name,
-                args: op.args,
-                languages: op.languages,
-                inputType: op.inputType,
-                outputType: op.outputType,
-                progress: op.progress
-            };
+            operations[opNames[i]] = this.getOperationDetails(opNames[i]);
         }
-
         return operations;
     }
 }
