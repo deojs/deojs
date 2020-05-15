@@ -7,6 +7,7 @@ Once installed, run using:
 ```
 npm run dev
 ```
+This will start the webpack dev server, which will be accessible at `http://localhost:8080/`
 
 
 ## VirusTotal Scanning
