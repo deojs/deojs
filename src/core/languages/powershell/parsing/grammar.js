@@ -9616,7 +9616,32 @@ var grammar = {
                 return "";
             };
         
-            if (recurse(data) === "if") {
+            const dataString = recurse(data)
+        
+            if (dataString === "if" ||
+                dataString === "switch" ||
+                dataString === "foreach" ||
+                dataString === "for" ||
+                dataString === "while" ||
+                dataString === "do" ||
+                dataString === "function" ||
+                dataString === "filter" ||
+                dataString === "workflow" ||
+                dataString === "break" ||
+                dataString === "continue" ||
+                dataString === "throw" ||
+                dataString === "return" ||
+                dataString === "exit" ||
+                dataString === "trap" ||
+                dataString === "try" ||
+                dataString === "data" ||
+                dataString === "inlinescript" ||
+                dataString === "parallel" ||
+                dataString === "sequence") {
+                return reject;
+            }
+        
+            if (dataString.includes(" ")) {
                 return reject;
             }
         
