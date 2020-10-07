@@ -8,9 +8,13 @@ import RemoveComments from "./RemoveComments.mjs";
 import ReplaceAliases from "./ReplaceAliases.mjs";
 import ReplaceFormatExpression from "./ReplaceFormatExpression.mjs";
 
+// Debug operation imports
+import LogAST from "./debug/LogAST.mjs";
+
 class Operations {
     constructor() {
         this.operations = {};
+        this.debugoperations = {};
 
         // Create an object containing all operations so we can refer
         // to them by name (filename)
@@ -18,6 +22,8 @@ class Operations {
         this.operations.removecomments = RemoveComments;
         this.operations.replacealiases = ReplaceAliases;
         this.operations.replaceformatexpression = ReplaceFormatExpression;
+
+        this.debugoperations.logast = LogAST;
     }
 
     /**
@@ -30,6 +36,9 @@ class Operations {
         const lowerName = opName.toLowerCase();
         if (this.operations[lowerName] !== undefined) {
             return new this.operations[lowerName]();
+        }
+        if (this.debugoperations[lowerName] !== undefined) {
+            return new this.debugoperations[lowerName]();
         }
         throw Error(`Operation "${opName}" does not exist!`);
     }
@@ -61,6 +70,21 @@ class Operations {
      */
     getOperationList() {
         const opNames = Object.keys(this.operations);
+        const operations = {};
+        for (let i = 0; i < opNames.length; i++) {
+            operations[opNames[i]] = this.getOperationDetails(opNames[i]);
+        }
+        return operations;
+    }
+
+    /**
+     * Gets a list of debug operations and their options.
+     * Returns an object containing the details for all debug operations
+     *
+     * @returns {object} - Debug operations list
+     */
+    getDebugOperationList() {
+        const opNames = Object.keys(this.debugoperations);
         const operations = {};
         for (let i = 0; i < opNames.length; i++) {
             operations[opNames[i]] = this.getOperationDetails(opNames[i]);

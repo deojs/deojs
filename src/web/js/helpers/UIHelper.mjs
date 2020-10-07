@@ -142,6 +142,9 @@ class UIHelper {
 
         // Run
         document.getElementById("runFlowButton").addEventListener("click", this.App.OperationHelper.run.bind(this.App.OperationHelper));
+
+        // Operations
+        document.getElementById("debugOpsCheckbox").addEventListener("change", this.refreshOperationsList.bind(this));
     }
 
     /**
@@ -152,7 +155,15 @@ class UIHelper {
         this.createSortableLists();
         this.addEventListeners();
 
-        this.App.OperationHelper.populateOperationsList();
+        this.refreshOperationsList();
+    }
+
+    /**
+     * Removes existing operations and re-populates the list
+     */
+    refreshOperationsList() {
+        this.App.OperationHelper.clearOperationsList();
+        this.App.OperationHelper.populateOperationsList(document.getElementById("debugOpsCheckbox").checked);
     }
 
     /**

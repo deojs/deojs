@@ -27,3 +27,14 @@
     line-height: 1.6em;
     display: inline;
 }
+
+
+#debugOpsCheckbox {
+    position: relative;
+    margin-right: 5px;
+    float: right;
+}
+
+#debugOpsCheckboxLabel {
+    float: right;
+}

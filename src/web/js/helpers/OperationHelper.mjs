@@ -44,14 +44,44 @@ class OperationHelper {
     }
 
     /**
-     * Populates the UI operations list with a list of operations
+     * Get a list of debug operations.
+     * Returns an object containing the details for all debug operations
+     *
+     * @returns {object} - Debug operation list
      */
-    populateOperationsList() {
+    getDebugOperationList() {
+        return this.operations.getDebugOperationList();
+    }
+
+    /**
+     * Populates the UI operations list with a list of operations
+     *
+     * @param {boolean} debug - Set to true to include debug operations
+     */
+    populateOperationsList(debug = false) {
         const operationsList = document.getElementById("operationsList");
-        const opList = this.getOperationList();
-        const opNames = Object.keys(opList);
+        let opList = this.getOperationList();
+        let opNames = Object.keys(opList);
         for (let i = 0; i < opNames.length; i++) {
             operationsList.append(this.createOperationListHtml(opList[opNames[i]]));
+        }
+
+        if (debug) {
+            opList = this.getDebugOperationList();
+            opNames = Object.keys(opList);
+            for (let i = 0; i < opNames.length; i++) {
+                operationsList.append(this.createOperationListHtml(opList[opNames[i]]));
+            }
+        }
+    }
+
+    /**
+     * Clears the UI operations list
+     */
+    clearOperationsList() {
+        const operationsList = document.getElementById("operationsList");
+        for (let i = operationsList.children.length - 1; i >= 0; i--) {
+            operationsList.children.item(i).remove();
         }
     }
 
