@@ -9463,7 +9463,10 @@ var grammar = {
     {"name": "pipeline$subexpression$1$ebnf$1", "symbols": ["pipeline$subexpression$1$ebnf$1$subexpression$1"], "postprocess": id},
     {"name": "pipeline$subexpression$1$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
     {"name": "pipeline$subexpression$1", "symbols": ["expression", "pipeline$subexpression$1$subexpression$1", "pipeline$subexpression$1$ebnf$1"]},
-    {"name": "pipeline$subexpression$1$ebnf$2$subexpression$1", "symbols": ["_", "verbatimCommandArgument"]},
+    {"name": "pipeline$subexpression$1$ebnf$2$subexpression$1$subexpression$1", "symbols": [/[\{\}\(\);,|&$`"']/]},
+    {"name": "pipeline$subexpression$1$ebnf$2$subexpression$1$subexpression$1", "symbols": ["__"]},
+    {"name": "pipeline$subexpression$1$ebnf$2$subexpression$1$subexpression$1", "symbols": ["newLines"]},
+    {"name": "pipeline$subexpression$1$ebnf$2$subexpression$1", "symbols": ["pipeline$subexpression$1$ebnf$2$subexpression$1$subexpression$1", "verbatimCommandArgument"]},
     {"name": "pipeline$subexpression$1$ebnf$2", "symbols": ["pipeline$subexpression$1$ebnf$2$subexpression$1"], "postprocess": id},
     {"name": "pipeline$subexpression$1$ebnf$2", "symbols": [], "postprocess": function(d) {return null;}},
     {"name": "pipeline$subexpression$1$ebnf$3$subexpression$1", "symbols": ["_", "pipelineTail"]},
@@ -9717,7 +9720,34 @@ var grammar = {
         }
             },
     {"name": "commandArgument", "symbols": ["commandNameExpression"], "postprocess": 
-        function(data) {
+        function(data, location, reject) {
+            const recurse = function (obj) {
+                if (obj === null || obj === undefined) {
+                    return "";
+                }
+                if (typeof obj === "string") {
+                    return obj;
+                }
+                if (Array.isArray(obj)) {
+                    let out = "";
+                    for (let i = 0; i < obj.length; i++) {
+                        out += recurse(obj[i]);
+                    }
+                    return out;
+                }
+                if (Object.prototype.hasOwnProperty.call(obj, "data")) {
+                    return recurse(obj.data);
+                }
+        
+                return "";
+            };
+        
+            const dataString = recurse(data)
+        
+            if (dataString[0] === "-") {
+                return reject;
+            }
+        
             return {
                 type: "commandArgument",
                 data: data[0]

@@ -1018,10 +1018,12 @@ sequenceStatement ->
         }
     %}
 
+# The regex following 'command' should match the opposite of "genericToken".
+# This stops command names being matched as a command argument as otherwise there was no separator
 pipeline ->
     (assignmentExpression |
     expression (_ redirections:?) (_ pipelineTail):? |
-    command (_ verbatimCommandArgument):? (_ pipelineTail):?)
+    command (([\{\}\(\);,|&$`"'] | __ | newLines) verbatimCommandArgument):? (_ pipelineTail):?)
     {%
         function(data) {
             data = data[0];
@@ -1275,7 +1277,34 @@ commandElement ->
 commandArgument ->
     commandNameExpression
     {%
-        function(data) {
+        function(data, location, reject) {
+            const recurse = function (obj) {
+                if (obj === null || obj === undefined) {
+                    return "";
+                }
+                if (typeof obj === "string") {
+                    return obj;
+                }
+                if (Array.isArray(obj)) {
+                    let out = "";
+                    for (let i = 0; i < obj.length; i++) {
+                        out += recurse(obj[i]);
+                    }
+                    return out;
+                }
+                if (Object.prototype.hasOwnProperty.call(obj, "data")) {
+                    return recurse(obj.data);
+                }
+
+                return "";
+            };
+
+            const dataString = recurse(data)
+
+            if (dataString[0] === "-") {
+                return reject;
+            }
+
             return {
                 type: "commandArgument",
                 data: data[0]

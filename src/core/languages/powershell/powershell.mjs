@@ -29,6 +29,7 @@ class PowerShellLanguage {
         }
 
         if (parser.results.length > 0) {
+            console.log(parser.results);
             console.log(`Parse produced ${parser.results.length} results.`);
             return parser.results[0];
         }
