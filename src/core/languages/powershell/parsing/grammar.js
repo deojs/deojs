@@ -8249,7 +8249,11 @@ var grammar = {
             },
     {"name": "_$ebnf$1", "symbols": ["__"], "postprocess": id},
     {"name": "_$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
-    {"name": "_", "symbols": ["_$ebnf$1"], "postprocess": id},
+    {"name": "_", "symbols": ["_$ebnf$1"], "postprocess": 
+        function(data) {
+            return data[0];
+        }
+            },
     {"name": "__$ebnf$1", "symbols": ["whitespace"]},
     {"name": "__$ebnf$1", "symbols": ["__$ebnf$1", "whitespace"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "__", "symbols": ["__$ebnf$1"], "postprocess": 
@@ -8593,7 +8597,6 @@ var grammar = {
     {"name": "ifStatement$ebnf$7", "symbols": [], "postprocess": function(d) {return null;}},
     {"name": "ifStatement", "symbols": ["ifStatement$subexpression$1", "ifStatement$ebnf$1", "_", {"literal":"("}, "ifStatement$ebnf$2", "_", "pipeline", "ifStatement$ebnf$3", "_", {"literal":")"}, "ifStatement$ebnf$4", "_", "statementBlock", "ifStatement$ebnf$5", "_", "ifStatement$ebnf$6", "_", "ifStatement$ebnf$7"], "postprocess": 
         function(data) {
-            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -9433,24 +9436,36 @@ var grammar = {
         }
             },
     {"name": "pipeline$subexpression$1", "symbols": ["assignmentExpression"]},
-    {"name": "pipeline$subexpression$1$ebnf$1", "symbols": ["redirections"], "postprocess": id},
+    {"name": "pipeline$subexpression$1$subexpression$1$ebnf$1", "symbols": ["redirections"], "postprocess": id},
+    {"name": "pipeline$subexpression$1$subexpression$1$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
+    {"name": "pipeline$subexpression$1$subexpression$1", "symbols": ["_", "pipeline$subexpression$1$subexpression$1$ebnf$1"]},
+    {"name": "pipeline$subexpression$1$ebnf$1", "symbols": ["pipelineTail"], "postprocess": id},
     {"name": "pipeline$subexpression$1$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
-    {"name": "pipeline$subexpression$1$ebnf$2", "symbols": ["pipelineTail"], "postprocess": id},
+    {"name": "pipeline$subexpression$1", "symbols": ["expression", "pipeline$subexpression$1$subexpression$1", "_", "pipeline$subexpression$1$ebnf$1"]},
+    {"name": "pipeline$subexpression$1$ebnf$2$subexpression$1", "symbols": ["_", "verbatimCommandArgument"]},
+    {"name": "pipeline$subexpression$1$ebnf$2", "symbols": ["pipeline$subexpression$1$ebnf$2$subexpression$1"], "postprocess": id},
     {"name": "pipeline$subexpression$1$ebnf$2", "symbols": [], "postprocess": function(d) {return null;}},
-    {"name": "pipeline$subexpression$1", "symbols": ["expression", "_", "pipeline$subexpression$1$ebnf$1", "_", "pipeline$subexpression$1$ebnf$2"]},
-    {"name": "pipeline$subexpression$1$ebnf$3$subexpression$1", "symbols": ["_", "verbatimCommandArgument"]},
-    {"name": "pipeline$subexpression$1$ebnf$3", "symbols": ["pipeline$subexpression$1$ebnf$3$subexpression$1"], "postprocess": id},
+    {"name": "pipeline$subexpression$1$ebnf$3", "symbols": ["pipelineTail"], "postprocess": id},
     {"name": "pipeline$subexpression$1$ebnf$3", "symbols": [], "postprocess": function(d) {return null;}},
-    {"name": "pipeline$subexpression$1$ebnf$4", "symbols": ["pipelineTail"], "postprocess": id},
-    {"name": "pipeline$subexpression$1$ebnf$4", "symbols": [], "postprocess": function(d) {return null;}},
-    {"name": "pipeline$subexpression$1", "symbols": ["command", "pipeline$subexpression$1$ebnf$3", "_", "pipeline$subexpression$1$ebnf$4"]},
+    {"name": "pipeline$subexpression$1", "symbols": ["command", "pipeline$subexpression$1$ebnf$2", "_", "pipeline$subexpression$1$ebnf$3"]},
     {"name": "pipeline", "symbols": ["pipeline$subexpression$1"], "postprocess": 
         function(data) {
             data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
-                if (data[i] !== null && data[i] !== undefined) {
+                if (data[i] !== null && data[i] !== undefined && !Array.isArray(data[i])) {
                     out.push(data[i]);
+                }
+                if (Array.isArray(data[i])) {
+                    const arrPush = [];
+                    for (let y = 0; y < data[i].length; y++) {
+                        if (data[i][y] !== null && data[i][y] !== undefined) {
+                            arrPush.push(data[i][y]);
+                        }
+                    }
+                    if (arrPush.length > 0) {
+                        out.push(arrPush);
+                    }
                 }
             }
             if (out.length === 1) {
@@ -9556,8 +9571,33 @@ var grammar = {
     {"name": "commandName$subexpression$1", "symbols": ["genericToken"]},
     {"name": "commandName$subexpression$1", "symbols": ["genericTokenWithSubexpression"]},
     {"name": "commandName", "symbols": ["commandName$subexpression$1"], "postprocess": 
-        function(data) {
+        function(data, location, reject) {
             data = data[0];
+            const recurse = function (obj) {
+                if (obj === null || obj === undefined) {
+                    return "";
+                }
+                if (typeof obj === "string") {
+                    return obj;
+                }
+                if (Array.isArray(obj)) {
+                    let out = "";
+                    for (let i = 0; i < obj.length; i++) {
+                        out += recurse(obj[i]);
+                    }
+                    return out;
+                }
+                if (Object.prototype.hasOwnProperty.call(obj, "data")) {
+                    return recurse(obj.data);
+                }
+        
+                return "";
+            };
+        
+            if (recurse(data) === "if") {
+                return reject;
+            }
+        
             return {
                 type: "commandName",
                 data: data[0]
@@ -9636,9 +9676,12 @@ var grammar = {
             }
         }
             },
-    {"name": "verbatimCommandArgument$string$1", "symbols": [{"literal":"-"}, {"literal":"-"}, {"literal":"%"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "verbatimCommandArgument", "symbols": ["verbatimCommandArgument$string$1", "verbatimCommandArgumentChars"], "postprocess": 
+    {"name": "verbatimCommandArgument$subexpression$1$string$1", "symbols": [{"literal":"-"}, {"literal":"-"}, {"literal":"%"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "verbatimCommandArgument$subexpression$1", "symbols": ["verbatimCommandArgument$subexpression$1$string$1", "verbatimCommandArgumentChars"]},
+    {"name": "verbatimCommandArgument$subexpression$1", "symbols": ["verbatimCommandArgumentChars"]},
+    {"name": "verbatimCommandArgument", "symbols": ["verbatimCommandArgument$subexpression$1"], "postprocess": 
         function(data) {
+            data = data[0];
             return {
                 type: "verbatimCommandArgument",
                 data: data
@@ -9704,7 +9747,7 @@ var grammar = {
             }
         }
             },
-    {"name": "logicalExpression", "symbols": ["bitwiseExpression"]},
+    {"name": "logicalExpression$subexpression$1", "symbols": ["bitwiseExpression"]},
     {"name": "logicalExpression$subexpression$1$subexpression$1", "symbols": [{"literal":"-"}, /[aA]/, /[nN]/, /[dD]/], "postprocess": function(d) {return d.join(""); }},
     {"name": "logicalExpression$subexpression$1$ebnf$1$subexpression$1", "symbols": ["_", "newLines"]},
     {"name": "logicalExpression$subexpression$1$ebnf$1", "symbols": ["logicalExpression$subexpression$1$ebnf$1$subexpression$1"], "postprocess": id},
@@ -9738,7 +9781,7 @@ var grammar = {
             }
         }
             },
-    {"name": "bitwiseExpression", "symbols": ["comparisonExpression"]},
+    {"name": "bitwiseExpression$subexpression$1", "symbols": ["comparisonExpression"]},
     {"name": "bitwiseExpression$subexpression$1$string$1", "symbols": [{"literal":"-"}, {"literal":"b"}, {"literal":"a"}, {"literal":"n"}, {"literal":"d"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "bitwiseExpression$subexpression$1$ebnf$1$subexpression$1", "symbols": ["_", "newLines"]},
     {"name": "bitwiseExpression$subexpression$1$ebnf$1", "symbols": ["bitwiseExpression$subexpression$1$ebnf$1$subexpression$1"], "postprocess": id},
@@ -9772,11 +9815,12 @@ var grammar = {
             }
         }
             },
-    {"name": "comparisonExpression", "symbols": ["additiveExpression"]},
-    {"name": "comparisonExpression$ebnf$1$subexpression$1", "symbols": ["_", "newLines"]},
-    {"name": "comparisonExpression$ebnf$1", "symbols": ["comparisonExpression$ebnf$1$subexpression$1"], "postprocess": id},
-    {"name": "comparisonExpression$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
-    {"name": "comparisonExpression", "symbols": ["comparisonExpression", "_", "comparisonOperator", "comparisonExpression$ebnf$1", "_", "additiveExpression"], "postprocess": 
+    {"name": "comparisonExpression$subexpression$1", "symbols": ["additiveExpression"]},
+    {"name": "comparisonExpression$subexpression$1$ebnf$1$subexpression$1", "symbols": ["_", "newLines"]},
+    {"name": "comparisonExpression$subexpression$1$ebnf$1", "symbols": ["comparisonExpression$subexpression$1$ebnf$1$subexpression$1"], "postprocess": id},
+    {"name": "comparisonExpression$subexpression$1$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
+    {"name": "comparisonExpression$subexpression$1", "symbols": ["comparisonExpression", "_", "comparisonOperator", "comparisonExpression$subexpression$1$ebnf$1", "_", "additiveExpression"]},
+    {"name": "comparisonExpression", "symbols": ["comparisonExpression$subexpression$1"], "postprocess": 
         function(data) {
             let out = [];
             for (let i = 0; i < data.length; i++) {
@@ -9793,7 +9837,7 @@ var grammar = {
             }
         }
             },
-    {"name": "additiveExpression", "symbols": ["multiplicativeExpression"]},
+    {"name": "additiveExpression$subexpression$1", "symbols": ["multiplicativeExpression"]},
     {"name": "additiveExpression$subexpression$1$ebnf$1$subexpression$1", "symbols": ["_", "newLines"]},
     {"name": "additiveExpression$subexpression$1$ebnf$1", "symbols": ["additiveExpression$subexpression$1$ebnf$1$subexpression$1"], "postprocess": id},
     {"name": "additiveExpression$subexpression$1$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
@@ -9820,7 +9864,7 @@ var grammar = {
             }
         }
             },
-    {"name": "multiplicativeExpression", "symbols": ["formatExpression"]},
+    {"name": "multiplicativeExpression$subexpression$1", "symbols": ["formatExpression"]},
     {"name": "multiplicativeExpression$subexpression$1$ebnf$1$subexpression$1", "symbols": ["_", "newLines"]},
     {"name": "multiplicativeExpression$subexpression$1$ebnf$1", "symbols": ["multiplicativeExpression$subexpression$1$ebnf$1$subexpression$1"], "postprocess": id},
     {"name": "multiplicativeExpression$subexpression$1$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
@@ -9851,11 +9895,12 @@ var grammar = {
             }
         }
             },
-    {"name": "formatExpression", "symbols": ["rangeExpression"]},
-    {"name": "formatExpression$ebnf$1$subexpression$1", "symbols": ["_", "newLines"]},
-    {"name": "formatExpression$ebnf$1", "symbols": ["formatExpression$ebnf$1$subexpression$1"], "postprocess": id},
-    {"name": "formatExpression$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
-    {"name": "formatExpression", "symbols": ["formatExpression", "_", "formatOperator", "formatExpression$ebnf$1", "_", "rangeExpression"], "postprocess": 
+    {"name": "formatExpression$subexpression$1", "symbols": ["rangeExpression"]},
+    {"name": "formatExpression$subexpression$1$ebnf$1$subexpression$1", "symbols": ["_", "newLines"]},
+    {"name": "formatExpression$subexpression$1$ebnf$1", "symbols": ["formatExpression$subexpression$1$ebnf$1$subexpression$1"], "postprocess": id},
+    {"name": "formatExpression$subexpression$1$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
+    {"name": "formatExpression$subexpression$1", "symbols": ["formatExpression", "_", "formatOperator", "formatExpression$subexpression$1$ebnf$1", "_", "rangeExpression"]},
+    {"name": "formatExpression", "symbols": ["formatExpression$subexpression$1"], "postprocess": 
         function(data) {
             let out = [];
             for (let i = 0; i < data.length; i++) {
@@ -9872,12 +9917,13 @@ var grammar = {
             }
         }
             },
-    {"name": "rangeExpression", "symbols": ["arrayLiteralExpression"]},
-    {"name": "rangeExpression$string$1", "symbols": [{"literal":"."}, {"literal":"."}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "rangeExpression$ebnf$1$subexpression$1", "symbols": ["_", "newLines"]},
-    {"name": "rangeExpression$ebnf$1", "symbols": ["rangeExpression$ebnf$1$subexpression$1"], "postprocess": id},
-    {"name": "rangeExpression$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
-    {"name": "rangeExpression", "symbols": ["rangeExpression", "_", "rangeExpression$string$1", "rangeExpression$ebnf$1", "_", "arrayLiteralExpression"], "postprocess": 
+    {"name": "rangeExpression$subexpression$1", "symbols": ["arrayLiteralExpression"]},
+    {"name": "rangeExpression$subexpression$1$string$1", "symbols": [{"literal":"."}, {"literal":"."}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "rangeExpression$subexpression$1$ebnf$1$subexpression$1", "symbols": ["_", "newLines"]},
+    {"name": "rangeExpression$subexpression$1$ebnf$1", "symbols": ["rangeExpression$subexpression$1$ebnf$1$subexpression$1"], "postprocess": id},
+    {"name": "rangeExpression$subexpression$1$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
+    {"name": "rangeExpression$subexpression$1", "symbols": ["rangeExpression", "_", "rangeExpression$subexpression$1$string$1", "rangeExpression$subexpression$1$ebnf$1", "_", "arrayLiteralExpression"]},
+    {"name": "rangeExpression", "symbols": ["rangeExpression$subexpression$1"], "postprocess": 
         function(data) {
             let out = [];
             for (let i = 0; i < data.length; i++) {
@@ -9894,11 +9940,12 @@ var grammar = {
             }
         }
             },
-    {"name": "arrayLiteralExpression", "symbols": ["unaryExpression"]},
-    {"name": "arrayLiteralExpression$ebnf$1$subexpression$1", "symbols": ["_", "newLines"]},
-    {"name": "arrayLiteralExpression$ebnf$1", "symbols": ["arrayLiteralExpression$ebnf$1$subexpression$1"], "postprocess": id},
-    {"name": "arrayLiteralExpression$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
-    {"name": "arrayLiteralExpression", "symbols": ["unaryExpression", "_", {"literal":","}, "arrayLiteralExpression$ebnf$1", "_", "arrayLiteralExpression"], "postprocess": 
+    {"name": "arrayLiteralExpression$subexpression$1", "symbols": ["unaryExpression"]},
+    {"name": "arrayLiteralExpression$subexpression$1$ebnf$1$subexpression$1", "symbols": ["_", "newLines"]},
+    {"name": "arrayLiteralExpression$subexpression$1$ebnf$1", "symbols": ["arrayLiteralExpression$subexpression$1$ebnf$1$subexpression$1"], "postprocess": id},
+    {"name": "arrayLiteralExpression$subexpression$1$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
+    {"name": "arrayLiteralExpression$subexpression$1", "symbols": ["unaryExpression", "_", {"literal":","}, "arrayLiteralExpression$subexpression$1$ebnf$1", "_", "arrayLiteralExpression"]},
+    {"name": "arrayLiteralExpression", "symbols": ["arrayLiteralExpression$subexpression$1"], "postprocess": 
         function(data) {
             let out = [];
             for (let i = 0; i < data.length; i++) {
@@ -9915,8 +9962,9 @@ var grammar = {
             }
         }
             },
-    {"name": "unaryExpression", "symbols": ["primaryExpression"]},
-    {"name": "unaryExpression", "symbols": ["expressionWithUnaryOperator"], "postprocess": 
+    {"name": "unaryExpression$subexpression$1", "symbols": ["primaryExpression"]},
+    {"name": "unaryExpression$subexpression$1", "symbols": ["expressionWithUnaryOperator"]},
+    {"name": "unaryExpression", "symbols": ["unaryExpression$subexpression$1"], "postprocess": 
         function(data) {
             return {
                 type: "unaryExpression",
@@ -10409,7 +10457,7 @@ var grammar = {
             }
         }
             },
-    {"name": "logicalArgumentExpression", "symbols": ["bitwiseArgumentExpression"]},
+    {"name": "logicalArgumentExpression$subexpression$1", "symbols": ["bitwiseArgumentExpression"]},
     {"name": "logicalArgumentExpression$subexpression$1$subexpression$1", "symbols": [{"literal":"-"}, /[aA]/, /[nN]/, /[dD]/], "postprocess": function(d) {return d.join(""); }},
     {"name": "logicalArgumentExpression$subexpression$1$ebnf$1$subexpression$1", "symbols": ["_", "newLines"]},
     {"name": "logicalArgumentExpression$subexpression$1$ebnf$1", "symbols": ["logicalArgumentExpression$subexpression$1$ebnf$1$subexpression$1"], "postprocess": id},
@@ -10443,7 +10491,7 @@ var grammar = {
             }
         }
             },
-    {"name": "bitwiseArgumentExpression", "symbols": ["comparisonArgumentExpression"]},
+    {"name": "bitwiseArgumentExpression$subexpression$1", "symbols": ["comparisonArgumentExpression"]},
     {"name": "bitwiseArgumentExpression$subexpression$1$subexpression$1", "symbols": [{"literal":"-"}, /[bB]/, /[aA]/, /[nN]/, /[dD]/], "postprocess": function(d) {return d.join(""); }},
     {"name": "bitwiseArgumentExpression$subexpression$1$ebnf$1$subexpression$1", "symbols": ["_", "newLines"]},
     {"name": "bitwiseArgumentExpression$subexpression$1$ebnf$1", "symbols": ["bitwiseArgumentExpression$subexpression$1$ebnf$1$subexpression$1"], "postprocess": id},
@@ -10477,11 +10525,12 @@ var grammar = {
             }
         }
             },
-    {"name": "comparisonArgumentExpression", "symbols": ["additiveArgumentExpression"]},
-    {"name": "comparisonArgumentExpression$ebnf$1$subexpression$1", "symbols": ["_", "newLines"]},
-    {"name": "comparisonArgumentExpression$ebnf$1", "symbols": ["comparisonArgumentExpression$ebnf$1$subexpression$1"], "postprocess": id},
-    {"name": "comparisonArgumentExpression$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
-    {"name": "comparisonArgumentExpression", "symbols": ["comparisonArgumentExpression", "_", "comparisonOperator", "comparisonArgumentExpression$ebnf$1", "_", "additiveArgumentExpression"], "postprocess": 
+    {"name": "comparisonArgumentExpression$subexpression$1", "symbols": ["additiveArgumentExpression"]},
+    {"name": "comparisonArgumentExpression$subexpression$1$ebnf$1$subexpression$1", "symbols": ["_", "newLines"]},
+    {"name": "comparisonArgumentExpression$subexpression$1$ebnf$1", "symbols": ["comparisonArgumentExpression$subexpression$1$ebnf$1$subexpression$1"], "postprocess": id},
+    {"name": "comparisonArgumentExpression$subexpression$1$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
+    {"name": "comparisonArgumentExpression$subexpression$1", "symbols": ["comparisonArgumentExpression", "_", "comparisonOperator", "comparisonArgumentExpression$subexpression$1$ebnf$1", "_", "additiveArgumentExpression"]},
+    {"name": "comparisonArgumentExpression", "symbols": ["comparisonArgumentExpression$subexpression$1"], "postprocess": 
         function(data) {
             let out = [];
             for (let i = 0; i < data.length; i++) {
@@ -10498,7 +10547,7 @@ var grammar = {
             }
         }
             },
-    {"name": "additiveArgumentExpression", "symbols": ["multiplicativeArgumentExpression"]},
+    {"name": "additiveArgumentExpression$subexpression$1", "symbols": ["multiplicativeArgumentExpression"]},
     {"name": "additiveArgumentExpression$subexpression$1$ebnf$1$subexpression$1", "symbols": ["_", "newLines"]},
     {"name": "additiveArgumentExpression$subexpression$1$ebnf$1", "symbols": ["additiveArgumentExpression$subexpression$1$ebnf$1$subexpression$1"], "postprocess": id},
     {"name": "additiveArgumentExpression$subexpression$1$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
@@ -10525,7 +10574,7 @@ var grammar = {
             }
         }
             },
-    {"name": "multiplicativeArgumentExpression", "symbols": ["formatArgumentExpression"]},
+    {"name": "multiplicativeArgumentExpression$subexpression$1", "symbols": ["formatArgumentExpression"]},
     {"name": "multiplicativeArgumentExpression$subexpression$1$ebnf$1$subexpression$1", "symbols": ["_", "newLines"]},
     {"name": "multiplicativeArgumentExpression$subexpression$1$ebnf$1", "symbols": ["multiplicativeArgumentExpression$subexpression$1$ebnf$1$subexpression$1"], "postprocess": id},
     {"name": "multiplicativeArgumentExpression$subexpression$1$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
@@ -10556,11 +10605,12 @@ var grammar = {
             }
         }
             },
-    {"name": "formatArgumentExpression", "symbols": ["rangeArgumentExpression"]},
-    {"name": "formatArgumentExpression$ebnf$1$subexpression$1", "symbols": ["_", "newLines"]},
-    {"name": "formatArgumentExpression$ebnf$1", "symbols": ["formatArgumentExpression$ebnf$1$subexpression$1"], "postprocess": id},
-    {"name": "formatArgumentExpression$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
-    {"name": "formatArgumentExpression", "symbols": ["formatArgumentExpression", "_", "formatOperator", "formatArgumentExpression$ebnf$1", "_", "rangeArgumentExpression"], "postprocess": 
+    {"name": "formatArgumentExpression$subexpression$1", "symbols": ["rangeArgumentExpression"]},
+    {"name": "formatArgumentExpression$subexpression$1$ebnf$1$subexpression$1", "symbols": ["_", "newLines"]},
+    {"name": "formatArgumentExpression$subexpression$1$ebnf$1", "symbols": ["formatArgumentExpression$subexpression$1$ebnf$1$subexpression$1"], "postprocess": id},
+    {"name": "formatArgumentExpression$subexpression$1$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
+    {"name": "formatArgumentExpression$subexpression$1", "symbols": ["formatArgumentExpression", "_", "formatOperator", "formatArgumentExpression$subexpression$1$ebnf$1", "_", "rangeArgumentExpression"]},
+    {"name": "formatArgumentExpression", "symbols": ["formatArgumentExpression$subexpression$1"], "postprocess": 
         function(data) {
             let out = [];
             for (let i = 0; i < data.length; i++) {
@@ -10577,12 +10627,13 @@ var grammar = {
             }
         }
             },
-    {"name": "rangeArgumentExpression", "symbols": ["unaryExpression"]},
-    {"name": "rangeArgumentExpression$string$1", "symbols": [{"literal":"."}, {"literal":"."}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "rangeArgumentExpression$ebnf$1$subexpression$1", "symbols": ["_", "newLines"]},
-    {"name": "rangeArgumentExpression$ebnf$1", "symbols": ["rangeArgumentExpression$ebnf$1$subexpression$1"], "postprocess": id},
-    {"name": "rangeArgumentExpression$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
-    {"name": "rangeArgumentExpression", "symbols": ["rangeExpression", "_", "rangeArgumentExpression$string$1", "rangeArgumentExpression$ebnf$1", "_", "unaryExpression"], "postprocess": 
+    {"name": "rangeArgumentExpression$subexpression$1", "symbols": ["unaryExpression"]},
+    {"name": "rangeArgumentExpression$subexpression$1$string$1", "symbols": [{"literal":"."}, {"literal":"."}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "rangeArgumentExpression$subexpression$1$ebnf$1$subexpression$1", "symbols": ["_", "newLines"]},
+    {"name": "rangeArgumentExpression$subexpression$1$ebnf$1", "symbols": ["rangeArgumentExpression$subexpression$1$ebnf$1$subexpression$1"], "postprocess": id},
+    {"name": "rangeArgumentExpression$subexpression$1$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
+    {"name": "rangeArgumentExpression$subexpression$1", "symbols": ["rangeExpression", "_", "rangeArgumentExpression$subexpression$1$string$1", "rangeArgumentExpression$subexpression$1$ebnf$1", "_", "unaryExpression"]},
+    {"name": "rangeArgumentExpression", "symbols": ["rangeArgumentExpression$subexpression$1"], "postprocess": 
         function(data) {
             let out = [];
             for (let i = 0; i < data.length; i++) {

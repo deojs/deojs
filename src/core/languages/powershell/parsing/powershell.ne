@@ -289,7 +289,6 @@ ifStatement ->
         elseifClauses:? _ elseClause:?
     {%
         function(data) {
-            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -1021,15 +1020,26 @@ sequenceStatement ->
 
 pipeline ->
     (assignmentExpression |
-    expression _ redirections:? _ pipelineTail:? |
+    expression (_ redirections:?) _ pipelineTail:? |
     command (_ verbatimCommandArgument):? _ pipelineTail:?)
     {%
         function(data) {
             data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
-                if (data[i] !== null && data[i] !== undefined) {
+                if (data[i] !== null && data[i] !== undefined && !Array.isArray(data[i])) {
                     out.push(data[i]);
+                }
+                if (Array.isArray(data[i])) {
+                    const arrPush = [];
+                    for (let y = 0; y < data[i].length; y++) {
+                        if (data[i][y] !== null && data[i][y] !== undefined) {
+                            arrPush.push(data[i][y]);
+                        }
+                    }
+                    if (arrPush.length > 0) {
+                        out.push(arrPush);
+                    }
                 }
             }
             if (out.length === 1) {
@@ -1134,8 +1144,33 @@ commandName ->
     (genericToken |
     genericTokenWithSubexpression)
     {%
-        function(data) {
+        function(data, location, reject) {
             data = data[0];
+            const recurse = function (obj) {
+                if (obj === null || obj === undefined) {
+                    return "";
+                }
+                if (typeof obj === "string") {
+                    return obj;
+                }
+                if (Array.isArray(obj)) {
+                    let out = "";
+                    for (let i = 0; i < obj.length; i++) {
+                        out += recurse(obj[i]);
+                    }
+                    return out;
+                }
+                if (Object.prototype.hasOwnProperty.call(obj, "data")) {
+                    return recurse(obj.data);
+                }
+
+                return "";
+            };
+
+            if (recurse(data) === "if") {
+                return reject;
+            }
+
             return {
                 type: "commandName",
                 data: data[0]
@@ -1224,9 +1259,11 @@ commandArgument ->
     %}
 
 verbatimCommandArgument ->
-    "--%" verbatimCommandArgumentChars
+    ("--%" verbatimCommandArgumentChars |
+    verbatimCommandArgumentChars)
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "verbatimCommandArgument",
                 data: data
@@ -1304,8 +1341,8 @@ expression ->
     %}
 
 logicalExpression ->
-    bitwiseExpression |
-    (logicalExpression _ "-and"i (_ newLines):? _ bitwiseExpression |
+    (bitwiseExpression |
+    logicalExpression _ "-and"i (_ newLines):? _ bitwiseExpression |
     logicalExpression _ "-or"i (_ newLines):? _ bitwiseExpression |
     logicalExpression _ "-xor"i (_ newLines):? _ bitwiseExpression)
     {%
@@ -1328,8 +1365,8 @@ logicalExpression ->
     %}
 
 bitwiseExpression ->
-    comparisonExpression |
-    (bitwiseExpression _ "-band" (_ newLines):? _ comparisonExpression |
+    (comparisonExpression |
+    bitwiseExpression _ "-band" (_ newLines):? _ comparisonExpression |
     bitwiseExpression _ "-bor" (_ newLines):? _ comparisonExpression |
     bitwiseExpression _ "-bxor" (_ newLines):? _ comparisonExpression)
     {%
@@ -1352,8 +1389,8 @@ bitwiseExpression ->
     %}
 
 comparisonExpression ->
-    additiveExpression |
-    comparisonExpression _ comparisonOperator (_ newLines):? _ additiveExpression
+    (additiveExpression |
+    comparisonExpression _ comparisonOperator (_ newLines):? _ additiveExpression)
     {%
         function(data) {
             let out = [];
@@ -1373,8 +1410,8 @@ comparisonExpression ->
     %}
 
 additiveExpression ->
-    multiplicativeExpression |
-    (additiveExpression _ "+" (_ newLines):? _ multiplicativeExpression |
+    (multiplicativeExpression |
+    additiveExpression _ "+" (_ newLines):? _ multiplicativeExpression |
     additiveExpression _ dash (_ newLines):? _ multiplicativeExpression)
     {%
         function(data) {
@@ -1396,8 +1433,8 @@ additiveExpression ->
     %}
 
 multiplicativeExpression ->
-    formatExpression |
-    (multiplicativeExpression _ "*" (_ newLines):? _ formatExpression |
+    (formatExpression |
+    multiplicativeExpression _ "*" (_ newLines):? _ formatExpression |
     multiplicativeExpression _ "/" (_ newLines):? _ formatExpression |
     multiplicativeExpression _ "%" (_ newLines):? _ formatExpression)
     {%
@@ -1420,8 +1457,8 @@ multiplicativeExpression ->
     %}
 
 formatExpression ->
-    rangeExpression |
-    formatExpression _ formatOperator (_ newLines):? _ rangeExpression
+    (rangeExpression |
+    formatExpression _ formatOperator (_ newLines):? _ rangeExpression)
     {%
         function(data) {
             let out = [];
@@ -1441,8 +1478,8 @@ formatExpression ->
     %}
 
 rangeExpression ->
-    arrayLiteralExpression |
-    rangeExpression _ ".." (_ newLines):? _ arrayLiteralExpression
+    (arrayLiteralExpression |
+    rangeExpression _ ".." (_ newLines):? _ arrayLiteralExpression)
     {%
         function(data) {
             let out = [];
@@ -1462,8 +1499,8 @@ rangeExpression ->
     %}
 
 arrayLiteralExpression ->
-    unaryExpression |
-    unaryExpression _ "," (_ newLines):? _ arrayLiteralExpression
+    (unaryExpression |
+    unaryExpression _ "," (_ newLines):? _ arrayLiteralExpression)
     {%
         function(data) {
             let out = [];
@@ -1483,8 +1520,8 @@ arrayLiteralExpression ->
     %}
 
 unaryExpression ->
-    primaryExpression |
-    expressionWithUnaryOperator
+    (primaryExpression |
+    expressionWithUnaryOperator)
     {%
         function(data) {
             return {
@@ -1945,8 +1982,8 @@ argumentExpression ->
     %}
 
 logicalArgumentExpression ->
-    bitwiseArgumentExpression |
-    (logicalArgumentExpression _ "-and"i (_ newLines):? _ bitwiseArgumentExpression |
+    (bitwiseArgumentExpression |
+    logicalArgumentExpression _ "-and"i (_ newLines):? _ bitwiseArgumentExpression |
     logicalArgumentExpression _ "-or"i (_ newLines):? _ bitwiseArgumentExpression |
     logicalArgumentExpression _ "-xor"i (_ newLines):? _ bitwiseArgumentExpression)
     {%
@@ -1969,8 +2006,8 @@ logicalArgumentExpression ->
     %}
 
 bitwiseArgumentExpression ->
-    comparisonArgumentExpression |
-    (bitwiseArgumentExpression _ "-band"i (_ newLines):? _ comparisonArgumentExpression |
+    (comparisonArgumentExpression |
+    bitwiseArgumentExpression _ "-band"i (_ newLines):? _ comparisonArgumentExpression |
     bitwiseArgumentExpression _ "-bor"i (_ newLines):? _ comparisonArgumentExpression |
     bitwiseArgumentExpression _ "-bxor"i (_ newLines):? _ comparisonArgumentExpression)
     {%
@@ -1993,8 +2030,8 @@ bitwiseArgumentExpression ->
     %}
 
 comparisonArgumentExpression ->
-    additiveArgumentExpression |
-    comparisonArgumentExpression _ comparisonOperator (_ newLines):? _ additiveArgumentExpression
+    (additiveArgumentExpression |
+    comparisonArgumentExpression _ comparisonOperator (_ newLines):? _ additiveArgumentExpression)
     {%
         function(data) {
             let out = [];
@@ -2014,8 +2051,8 @@ comparisonArgumentExpression ->
     %}
 
 additiveArgumentExpression ->
-    multiplicativeArgumentExpression |
-    (additiveArgumentExpression _ "+" (_ newLines):? _ multiplicativeArgumentExpression |
+    (multiplicativeArgumentExpression |
+    additiveArgumentExpression _ "+" (_ newLines):? _ multiplicativeArgumentExpression |
     additiveArgumentExpression _ dash (_ newLines):? _ multiplicativeArgumentExpression)
     {%
         function(data) {
@@ -2037,8 +2074,8 @@ additiveArgumentExpression ->
     %}
 
 multiplicativeArgumentExpression ->
-    formatArgumentExpression |
-    (multiplicativeArgumentExpression _ "*" (_ newLines):? _ formatArgumentExpression |
+    (formatArgumentExpression |
+    multiplicativeArgumentExpression _ "*" (_ newLines):? _ formatArgumentExpression |
     multiplicativeArgumentExpression _ "/" (_ newLines):? _ formatArgumentExpression |
     multiplicativeArgumentExpression _ "%" (_ newLines):? _ formatArgumentExpression)
     {%
@@ -2061,8 +2098,8 @@ multiplicativeArgumentExpression ->
     %}
 
 formatArgumentExpression ->
-    rangeArgumentExpression |
-    formatArgumentExpression _ formatOperator (_ newLines):? _ rangeArgumentExpression
+    (rangeArgumentExpression |
+    formatArgumentExpression _ formatOperator (_ newLines):? _ rangeArgumentExpression)
     {%
         function(data) {
             let out = [];
@@ -2082,8 +2119,8 @@ formatArgumentExpression ->
     %}
 
 rangeArgumentExpression ->
-    unaryExpression |
-    rangeExpression _ ".." (_ newLines):? _ unaryExpression
+    (unaryExpression |
+    rangeExpression _ ".." (_ newLines):? _ unaryExpression)
     {%
         function(data) {
             let out = [];

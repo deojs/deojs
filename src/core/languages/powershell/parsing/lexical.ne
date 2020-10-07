@@ -1557,7 +1557,11 @@ formatOperator ->
 
 # Whitespace
 _ -> __:?
-    {% id %}
+    {%
+        function(data) {
+            return data[0];
+        }
+    %}
 __ -> whitespace:+
     {%
         function(data) {
