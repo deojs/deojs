@@ -20,10 +20,11 @@ input ->
     %}
 
 inputElements ->
-    inputElement |
-    inputElements inputElement
+    (inputElement |
+    inputElements inputElement)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -41,11 +42,12 @@ inputElements ->
     %}
 
 inputElement ->
-    whitespace |
+    (whitespace |
     comment |
-    token
+    token)
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "inputElement",
                 data: data[0]
@@ -96,10 +98,11 @@ signature ->
     %}
 
 singleLineComments ->
-    singleLineComment |
-    singleLineComments _ newLineCharacter _ singleLineComment
+    (singleLineComment |
+    singleLineComments _ newLineCharacter _ singleLineComment)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -129,11 +132,12 @@ signatureEnd ->
 
 # Line terminators
 newLineCharacter ->
-    carriageReturnCharacter |
+    (carriageReturnCharacter |
     lineFeedCharacter |
-    carriageReturnCharacter lineFeedCharacter
+    carriageReturnCharacter lineFeedCharacter)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -159,10 +163,11 @@ lineFeedCharacter ->
     {% id %}
 
 newLines ->
-    newLineCharacter |
-    newLines _ newLineCharacter
+    (newLineCharacter |
+    newLines _ newLineCharacter)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -181,11 +186,12 @@ newLines ->
 
 # Comments
 comment ->
-    singleLineComment |
+    (singleLineComment |
     requiresComment |
-    delimitedComment
+    delimitedComment)
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "comment",
                 data: data[0]
@@ -238,10 +244,10 @@ requiresComment ->
     %}
 
 dash ->
-    "\u002D" |
+    ("\u002D" |
     "\u2013" |
     "\u2014" |
-    "\u2015"
+    "\u2015")
     {% id %}
 
 dashdash ->
@@ -296,10 +302,11 @@ delimitedCommentText ->
     %}
 
 delimitedCommentSection ->
-    ">" |
-    hashes:? notGreaterThanOrHash
+    (">" |
+    hashes:? notGreaterThanOrHash)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -317,10 +324,11 @@ delimitedCommentSection ->
     %}
 
 hashes ->
-    "#" |
-    hashes "#"
+    ("#" |
+    hashes "#")
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -342,13 +350,14 @@ notGreaterThanOrHash ->
     {% id %}
 
 whitespace ->
-    [\u0009\u000B\u000C] |
+    ([\u0009\u000B\u000C] |
     Zs |
     Zl |
     Zp |
-    "\u0060" newLineCharacter
+    "\u0060" newLineCharacter)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -366,7 +375,7 @@ whitespace ->
     %}
 
 token ->
-    keyword |
+    (keyword |
     variable |
     command |
     commandParameter |
@@ -374,9 +383,10 @@ token ->
     realLiteral |
     stringLiteral |
     typeLiteral |
-    operatorOrPunctuator
+    operatorOrPunctuator)
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "token",
                 data: data[0]
@@ -385,14 +395,15 @@ token ->
     %}
 
 keyword ->
-    "begin" | "break" | "catch" | "class" | "continue" | "data" |
+    ("begin" | "break" | "catch" | "class" | "continue" | "data" |
     "define" | "do" | "dynamicparam" | "else" | "elseif" | "end" |
     "exit" | "filter" | "finally" | "for" | "foreach" | "from" |
     "function" | "if" | "in" | "inlinescript" | "parallel" | "param" |
     "process" | "return" | "switch" | "throw" | "trap" | "try" |
-    "until" | "using" | "var" | "while" | "workflow"
+    "until" | "using" | "var" | "while" | "workflow")
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "keyword",
                 data: data[0]
@@ -401,14 +412,15 @@ keyword ->
     %}
 
 variable ->
-    "$$" |
+    ("$$" |
     "$?" |
     "$^" |
     "$" variableScope:? variableCharacters |
     "@" variableScope:? variableCharacters |
-    bracedVariable
+    bracedVariable)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -446,15 +458,16 @@ bracedVariable ->
     %}
 
 variableScope ->
-    "global:" |
+    ("global:" |
     "local:" |
     "private:" |
     "script:" |
     "using:" |
     "workflow:" |
-    variableNamespace
+    variableNamespace)
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "variableScope",
                 data: data[0]
@@ -495,13 +508,14 @@ variableCharacters ->
 
 variableCharacter ->
     # This should include the unicode category 'Lo', however this has >120,000 characters so is too big
-    Llu |
+    (Llu |
     Lm |
     Nd |
     "\u005F" |
-    "?"
+    "?")
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "variableCharacter",
                 data: data[0]
@@ -530,10 +544,11 @@ bracedVariableCharacters ->
     %}
 
 bracedVariableCharacter ->
-    [^\u007D\u0060] |
-    escapedCharacter
+    ([^\u007D\u0060] |
+    escapedCharacter)
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "bracedVariableCharacter",
                 data: data[0]
@@ -594,28 +609,28 @@ genericTokenParts ->
     %}
 
 firstGenericTokenPart ->
-    expandableStringLiteral |
+    (expandableStringLiteral |
     verbatimHereStringLiteral |
     variable |
-    firstGenericTokenCharacter
+    firstGenericTokenCharacter)
     {% id %}
 
 genericTokenPart ->
-    expandableStringLiteral |
+    (expandableStringLiteral |
     verbatimHereStringLiteral |
     variable |
-    genericTokenCharacter
+    genericTokenCharacter)
     {% id %}
 
 genericTokenCharacter ->
-    [^{}();,|&$\u0060'"\r\n\s] |
-    escapedCharacter
+    ([^{}();,|&$\u0060'"\r\n\s] |
+    escapedCharacter)
     {% id %}
 
 # Don't allow a hash at the start as then it would be a comment
 firstGenericTokenCharacter ->
-    [^#{}();,|&$\u0060'"\r\n\s] |
-    escapedCharacter
+    ([^#{}();,|&$\u0060'"\r\n\s] |
+    escapedCharacter)
     {% id %}
 
 genericTokenWithSubexpressionStart ->
@@ -659,10 +674,10 @@ commandParameter ->
     %}
 
 firstParameterChar ->
-    Llu |
+    (Llu |
     Lm |
     "\u005F" |
-    "?"
+    "?")
     {% id %}
 
 parameterChars ->
@@ -694,10 +709,11 @@ colon ->
     {% id %}
 
 verbatimCommandArgumentChars ->
-    verbatimCommandArgumentPart |
-    verbatimCommandArgumentChars verbatimCommandArgumentPart
+    (verbatimCommandArgumentPart |
+    verbatimCommandArgumentChars verbatimCommandArgumentPart)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -715,11 +731,12 @@ verbatimCommandArgumentChars ->
     %}
 
 verbatimCommandArgumentPart ->
-    verbatimCommandString |
+    (verbatimCommandString |
     "&" nonAmpersandCharacter |
-    [^|\r\n]
+    [^|\r\n])
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -752,10 +769,11 @@ verbatimCommandString ->
     %}
 
 nonDoubleQuoteCharacters ->
-    nonDoubleQuoteCharacter |
-    nonDoubleQuoteCharacters nonDoubleQuoteCharacter
+    (nonDoubleQuoteCharacter |
+    nonDoubleQuoteCharacters nonDoubleQuoteCharacter)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -778,14 +796,14 @@ nonDoubleQuoteCharacter ->
 
 # Literals
 literal ->
-    integerLiteral |
+    (integerLiteral |
     realLiteral |
-    stringLiteral
+    stringLiteral)
     {% id %}
 
 integerLiteral ->
-    decimalIntegerLiteral |
-    hexadecimalIntegerLiteral
+    (decimalIntegerLiteral |
+    hexadecimalIntegerLiteral)
     {% id %}
 
 decimalIntegerLiteral ->
@@ -809,10 +827,11 @@ decimalIntegerLiteral ->
     %}
 
 decimalDigits ->
-    decimalDigit |
-    decimalDigit decimalDigits
+    (decimalDigit |
+    decimalDigit decimalDigits)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -834,10 +853,11 @@ decimalDigit ->
     {% id %}
 
 numericTypeSuffix ->
-    longTypeSuffix |
-    decimalTypeSuffix
+    (longTypeSuffix |
+    decimalTypeSuffix)
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "numericTypeSuffix",
                 data: data[0]
@@ -866,10 +886,11 @@ hexadecimalIntegerLiteral ->
     %}
 
 hexadecimalDigits ->
-    hexadecimalDigit |
-    hexadecimalDigit decimalDigits
+    (hexadecimalDigit |
+    hexadecimalDigit decimalDigits)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -902,13 +923,14 @@ longTypeSuffix ->
     %}
 
 numericMultiplier ->
-    "kb" |
+    ("kb" |
     "mb" |
     "gb" |
     "tb" |
-    "pb"
+    "pb")
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "numericMultiplier",
                 data: data[0]
@@ -917,11 +939,12 @@ numericMultiplier ->
     %}
 
 realLiteral ->
-    decimalDigits "." decimalDigits exponentPart:? decimalTypeSuffix:? numericMultiplier:? |
+    (decimalDigits "." decimalDigits exponentPart:? decimalTypeSuffix:? numericMultiplier:? |
     "." decimalDigits exponentPart:? decimalTypeSuffix:? numericMultiplier:? |
-    decimalDigits exponentPart decimalTypeSuffix:? numericMultiplier:?
+    decimalDigits exponentPart decimalTypeSuffix:? numericMultiplier:?)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -959,10 +982,11 @@ exponentPart ->
     %}
 
 sign ->
-    "+" |
-    dash
+    ("+" |
+    dash)
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "sign",
                 data: data[0]
@@ -971,10 +995,11 @@ sign ->
     %}
 
 decimalTypeSuffix ->
-    "d" |
-    "l"
+    ("d" |
+    "l")
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "decimalTypeSuffix",
                 data: data[0]
@@ -983,12 +1008,13 @@ decimalTypeSuffix ->
     %}
 
 stringLiteral ->
-    expandableStringLiteral |
+    (expandableStringLiteral |
     expandableHereStringLiteral |
     verbatimStringLiteral |
-    verbatimHereStringLiteral
+    verbatimHereStringLiteral)
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "stringLiteral",
                 data: data[0]
@@ -1017,10 +1043,10 @@ expandableStringLiteral ->
     %}
 
 doubleQuoteCharacter ->
-    "\u0022" |
+    ("\u0022" |
     "\u201C" |
     "\u201D" |
-    "\u201E"
+    "\u201E")
     {% id %}
 
 expandableStringCharacters ->
@@ -1044,14 +1070,15 @@ expandableStringCharacters ->
     %}
 
 expandableStringPart ->
-    [^$\u0022\u201C\u201D\u201E\u0060] |
+    ([^$\u0022\u201C\u201D\u201E\u0060] |
     bracedVariable |
     "$" [^({\u0022\u201C\u201D\u201E\u0060] |
     "$" escapedCharacter |
     escapedCharacter |
-    doubleQuoteCharacter doubleQuoteCharacter
+    doubleQuoteCharacter doubleQuoteCharacter)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -1120,15 +1147,16 @@ expandableHereStringCharacters ->
     %}
 
 expandableHereStringPart ->
-    [^$\r\n] |
+    ([^$\r\n] |
     bracedVariable |
     "$" [^(\r\n] |
     "$" newLineCharacter nonDoubleQuoteCharacter |
     "$" newLineCharacter doubleQuoteCharacter [^@] |
     newLineCharacter nonDoubleQuoteCharacter |
-    newLineCharacter doubleQuoteCharacter [^@]
+    newLineCharacter doubleQuoteCharacter [^@])
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -1228,11 +1256,11 @@ verbatimStringLiteral ->
     %}
 
 singleQuoteCharacter ->
-    "\u0027" |
+    ("\u0027" |
     "\u2018" |
     "\u2019" |
     "\u201A" |
-    "\u201B"
+    "\u201B")
     {% id %}
 
 nonSingleQuoteCharacter ->
@@ -1251,10 +1279,11 @@ verbatimStringCharacters ->
     %}
 
 verbatimStringPart ->
-    nonSingleQuoteCharacter |
-    singleQuoteCharacter singleQuoteCharacter
+    (nonSingleQuoteCharacter |
+    singleQuoteCharacter singleQuoteCharacter)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -1303,11 +1332,12 @@ verbatimHereStringCharacters ->
     %}
 
 verbatimHereStringPart ->
-    [^\r\n] |
+    ([^\r\n] |
     newLineCharacter nonSingleQuoteCharacter |
-    newLineCharacter singleQuoteCharacter [^@]
+    newLineCharacter singleQuoteCharacter [^@])
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -1336,9 +1366,9 @@ simpleName ->
     %}
 
 simpleNameFirstChar ->
-    Llu |
+    (Llu |
     Lm |
-    "\u005F"
+    "\u005F")
     {% id %}
 
 simpleNameChars ->
@@ -1353,17 +1383,18 @@ simpleNameChars ->
     %}
 
 simpleNameChar ->
-    Llu |
+    (Llu |
     Lm |
     Nd |
-    "\u005F"
+    "\u005F")
     {% id %}
 
 typeName ->
-    typeIdentifier |
-    typeName "." typeIdentifier
+    (typeIdentifier |
+    typeName "." typeIdentifier)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -1392,9 +1423,9 @@ typeIdentifier ->
     %}
 
 typeCharacter ->
-    Llu |
+    (Llu |
     Nd |
-    "\u005F"
+    "\u005F")
     {% id %}
 
 arrayTypeName ->
@@ -1420,7 +1451,7 @@ genericTypeName ->
     %}
 
 operatorOrPunctuator ->
-    "{" | "}" | "[" | "]" | "(" | ")" | "@(" | "@{" | "$(" | ";" |
+    ("{" | "}" | "[" | "]" | "(" | ")" | "@(" | "@{" | "$(" | ";" |
     "&&" | "||" | "&" | "|" | "," | "++" | ".." | "::" | "." | "!" |
     "*" | "/" | "%" | "+" |
     dash | dashdash | dash "and" | dash "band" | dash "bnot" |
@@ -1429,18 +1460,19 @@ operatorOrPunctuator ->
     mergingRedirectionOperator |
     fileRedirectionOperator |
     comparisonOperator |
-    formatOperator
+    formatOperator)
     {% id %}
 
 assignmentOperator ->
-    "=" |
+    ("=" |
     dash "=" |
     "+=" |
     "*=" |
     "/=" |
-    "%="
+    "%=")
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -1458,10 +1490,11 @@ assignmentOperator ->
     %}
 
 mergingRedirectionOperator ->
-    "*>&1" | "2>&1" | "3>&1" | "4>&1" | "5>&1" | "6>&1" |
-    "*>&2" | "1>&2" | "3>&2" | "4>&2" | "5>&2" | "6>&2"
+    ("*>&1" | "2>&1" | "3>&1" | "4>&1" | "5>&1" | "6>&1" |
+    "*>&2" | "1>&2" | "3>&2" | "4>&2" | "5>&2" | "6>&2")
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "mergingRedirectionOperator",
                 data: data[0]
@@ -1470,10 +1503,11 @@ mergingRedirectionOperator ->
     %}
 
 fileRedirectionOperator ->
-    ">" | ">>" | "2>" | "2>>" | "3>" | "3>>" | "4>" | "4>>" |
-    "5>" | "5>>" | "6>" | "6>>" | "*>" | "*>>" | "<"
+    (">" | ">>" | "2>" | "2>>" | "3>" | "3>>" | "4>" | "4>>" |
+    "5>" | "5>>" | "6>" | "6>>" | "*>" | "*>>" | "<")
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "fileRedirectionOperator",
                 data: data[0]
@@ -1493,15 +1527,16 @@ comparisonOperator ->
     %}
 
 comparisonKeyword ->
-    "as" | "ccontains" | "ceq" | "cge" | "cgt" | "cle" | "clike" | "clt" |
+    ("as" | "ccontains" | "ceq" | "cge" | "cgt" | "cle" | "clike" | "clt" |
     "cmatch" | "cne"| "cnotcontains" | "cnotlike" | "cnotmatch" | "contains" |
     "creplace" | "csplit" | "eq" | "ge" | "gt" | "icontains" | "ieq" | "ige" |
     "igt" | "ile" | "ilike" | "ilt" | "imatch" | "in" | "ine" | "inotcontains" |
     "inotlike" | "inotmatch" | "ireplace" | "is" | "isnot" | "isplit" |
     "join" | "le" | "like" | "lt" | "match" | "ne" | "notcontains" | "notin" |
-    "notlike" | "notmatch" | "replace" | "shl" | "shr" | "split"
+    "notlike" | "notmatch" | "replace" | "shl" | "shr" | "split")
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "comparisonKeyword",
                 data: data[0]

@@ -55,10 +55,11 @@ paramBlock ->
     %}
 
 parameterList ->
-    scriptParameter |
-    parameterList (_ newLines):? _ "," _ scriptParameter
+    (scriptParameter |
+    parameterList (_ newLines):? _ "," _ scriptParameter)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -116,10 +117,11 @@ scriptParameterDefault ->
     %}
 
 scriptBlockBody ->
-    namedBlockList |
-    statementList
+    (namedBlockList |
+    statementList)
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "scriptBlockBody",
                 data: data[0]
@@ -159,12 +161,13 @@ namedBlock ->
     %}
 
 blockName ->
-    "dynamicparam"i |
+    ("dynamicparam"i |
     "begin"i |
     "process"i |
-    "end"i
+    "end"i)
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "blockName",
                 data: data[0]
@@ -193,10 +196,11 @@ statementBlock ->
     %}
 
 statementList ->
-    statement |
-    statementList (_ newLines):? _ statement
+    (statement |
+    statementList (_ newLines):? _ statement)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -214,7 +218,7 @@ statementList ->
     %}
 
 statement ->
-    comment |
+    (comment |
     ifStatement |
     label:? labeledStatement |
     functionStatement |
@@ -225,9 +229,10 @@ statement ->
     inlinescriptStatement |
     parallelStatement |
     sequenceStatement |
-    pipeline _ statementTerminators
+    pipeline) _ statementTerminators
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -245,10 +250,11 @@ statement ->
     %}
 
 statementTerminator ->
-    ";" |
-    newLineCharacter
+    (";" |
+    newLineCharacter)
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "statementTerminator",
                 data: data[0]
@@ -257,10 +263,11 @@ statementTerminator ->
     %}
 
 statementTerminators ->
-    statementTerminator |
-    statementTerminators _ statementTerminator
+    (statementTerminator |
+    statementTerminators _ statementTerminator)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -282,6 +289,7 @@ ifStatement ->
         elseifClauses:? _ elseClause:?
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -361,13 +369,14 @@ label ->
     %}
 
 labeledStatement ->
-    switchStatement |
+    (switchStatement |
     foreachStatement |
     forStatement |
     whileStatement |
-    doStatement
+    doStatement)
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "labeledStatement",
                 data: data[0]
@@ -396,10 +405,11 @@ switchStatement ->
     %}
 
 switchParameters ->
-    switchParameter |
-    switchParameters __ switchParameter
+    (switchParameter |
+    switchParameters __ switchParameter)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -417,13 +427,14 @@ switchParameters ->
     %}
 
 switchParameter ->
-    "-regex"i |
+    ("-regex"i |
     "-wildcard"i |
     "-exact"i |
     "-casesensitive"i |
-    "-parallel"i
+    "-parallel"i)
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "switchParameter",
                 data: data[0]
@@ -453,10 +464,11 @@ switchCondition ->
     %}
 
 switchFilename ->
-    commandArgument |
-    primaryExpression
+    (commandArgument |
+    primaryExpression)
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "switchFilename",
                 data: data[0]
@@ -516,10 +528,11 @@ switchClause ->
     %}
 
 switchClauseCondition ->
-    commandArgument |
-    primaryExpression
+    (commandArgument |
+    primaryExpression)
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "switchClauseCondition",
                 data: data[0]
@@ -640,10 +653,11 @@ whileStatement ->
     %}
 
 doStatement ->
-    "do"i statementBlock (_ newLines):? _ "while"i (_ newLines):? _ "(" _ whileCondition (_ newLines):? _ ")" |
-    "do"i statementBlock (_ newLines):? _ "until"i (_ newLines):? _ "(" _ whileCondition (_ newLines):? _ ")"
+    ("do"i statementBlock (_ newLines):? _ "while"i (_ newLines):? _ "(" _ whileCondition (_ newLines):? _ ")" |
+    "do"i statementBlock (_ newLines):? _ "until"i (_ newLines):? _ "(" _ whileCondition (_ newLines):? _ ")")
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -681,11 +695,12 @@ whileCondition ->
     %}
 
 functionStatement ->
-    "function"i (_ newLines):? _ functionName _ functionParameterDeclaration:? _ "{" scriptBlock _ "}" |
+    ("function"i (_ newLines):? _ functionName _ functionParameterDeclaration:? _ "{" scriptBlock _ "}" |
     "filter"i (_ newLines):? _ functionName _ functionParameterDeclaration:? _ "{" scriptBlock _ "}" |
-    "workflow"i (_ newLines):? _ functionName _ functionParameterDeclaration:? _ "{" scriptBlock _ "}"
+    "workflow"i (_ newLines):? _ functionName _ functionParameterDeclaration:? _ "{" scriptBlock _ "}")
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -734,13 +749,14 @@ functionParameterDeclaration ->
     %}
 
 flowControlStatement ->
-    "break"i __ labelExpression:? |
+    ("break"i __ labelExpression:? |
     "continue"i __ labelExpression:? |
     "throw"i __ pipeline:? |
     "return"i __ pipeline:? |
-    "exit"i __ pipeline:?
+    "exit"i __ pipeline:?)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -758,10 +774,11 @@ flowControlStatement ->
     %}
 
 labelExpression ->
-    simpleName |
-    unaryExpression
+    (simpleName |
+    unaryExpression)
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "labelExpression",
                 data: data[0]
@@ -790,11 +807,12 @@ trapStatement ->
     %}
 
 tryStatement ->
-    "try"i _ statementBlock _ catchClauses |
+    ("try"i _ statementBlock _ catchClauses |
     "try"i _ statementBlock _ finallyClause |
-    "try"i _ statementBlock _ catchClauses _ finallyClause
+    "try"i _ statementBlock _ catchClauses _ finallyClause)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -843,10 +861,11 @@ catchClause ->
     %}
 
 catchTypeList ->
-    newLines:? _ typeLiteral |
-    catchTypeList (_ newLines):? _ "," (_ newLines):? _ typeLiteral
+    (newLines:? _ typeLiteral |
+    catchTypeList (_ newLines):? _ "," (_ newLines):? _ typeLiteral)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -935,10 +954,11 @@ dataCommandsAllowed ->
     %}
 
 dataCommandsList ->
-    newLines:? _ dataCommand |
-    dataCommandsList _ "," (_ newLines):? _ dataCommand
+    (newLines:? _ dataCommand |
+    dataCommandsList _ "," (_ newLines):? _ dataCommand)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -1000,11 +1020,12 @@ sequenceStatement ->
     %}
 
 pipeline ->
-    assignmentExpression |
+    (assignmentExpression |
     expression _ redirections:? _ pipelineTail:? |
-    command (_ verbatimCommandArgument):? _ pipelineTail:?
+    command (_ verbatimCommandArgument):? _ pipelineTail:?)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -1042,10 +1063,11 @@ assignmentExpression ->
     %}
 
 pipelineTail ->
-    "|" (_ newLines):? _ command |
-    "|" (_ newLines):? _ command _ pipelineTail
+    ("|" (_ newLines):? _ command |
+    "|" (_ newLines):? _ command _ pipelineTail)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -1063,10 +1085,11 @@ pipelineTail ->
     %}
 
 command ->
-    commandName (__ commandElements):? |
-    commandInvocationOperator (_ commandModule:?) commandNameExpression (_ commandElements):?
+    (commandName (__ commandElements):? |
+    commandInvocationOperator (_ commandModule:?) commandNameExpression (_ commandElements):?)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -1078,16 +1101,17 @@ command ->
             }
             return {
                 type: "command",
-                data: data
+                data: out
             }
         }
     %}
 
 commandInvocationOperator ->
-    "&" |
-    "."
+    ("&" |
+    ".")
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "commandInvocationOperator",
                 data: data[0]
@@ -1107,10 +1131,11 @@ commandModule ->
     %}
 
 commandName ->
-    genericToken |
-    genericTokenWithSubexpression
+    (genericToken |
+    genericTokenWithSubexpression)
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "commandName",
                 data: data[0]
@@ -1139,10 +1164,11 @@ genericTokenWithSubexpression ->
     %}
 
 commandNameExpression ->
-    commandName |
-    primaryExpression
+    (commandName |
+    primaryExpression)
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "commandNameExpression",
                 data: data[0]
@@ -1151,10 +1177,11 @@ commandNameExpression ->
     %}
 
 commandElements ->
-    commandElement |
-    commandElements (__ | _ "," _) commandElement
+    (commandElement |
+    commandElements (__ | _ "," _) commandElement)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -1172,11 +1199,12 @@ commandElements ->
     %}
 
 commandElement ->
-    commandParameter |
+    (commandParameter |
     commandArgument |
-    redirection
+    redirection)
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "commandElement",
                 data: data[0]
@@ -1207,10 +1235,11 @@ verbatimCommandArgument ->
     %}
 
 redirections ->
-    redirection |
-    redirections _ redirection
+    (redirection |
+    redirections _ redirection)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -1228,10 +1257,11 @@ redirections ->
     %}
 
 redirection ->
-    mergingRedirectionOperator |
-    fileRedirectionOperator _ redirectedFileName
+    (mergingRedirectionOperator |
+    fileRedirectionOperator _ redirectedFileName)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -1249,10 +1279,11 @@ redirection ->
     %}
 
 redirectedFileName ->
-    commandArgument |
-    primaryExpression
+    (commandArgument |
+    primaryExpression)
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "redirectedFileName",
                 data: data[0]
@@ -1274,11 +1305,12 @@ expression ->
 
 logicalExpression ->
     bitwiseExpression |
-    logicalExpression _ "-and"i (_ newLines):? _ bitwiseExpression |
+    (logicalExpression _ "-and"i (_ newLines):? _ bitwiseExpression |
     logicalExpression _ "-or"i (_ newLines):? _ bitwiseExpression |
-    logicalExpression _ "-xor"i (_ newLines):? _ bitwiseExpression
+    logicalExpression _ "-xor"i (_ newLines):? _ bitwiseExpression)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -1297,11 +1329,12 @@ logicalExpression ->
 
 bitwiseExpression ->
     comparisonExpression |
-    bitwiseExpression _ "-band" (_ newLines):? _ comparisonExpression |
+    (bitwiseExpression _ "-band" (_ newLines):? _ comparisonExpression |
     bitwiseExpression _ "-bor" (_ newLines):? _ comparisonExpression |
-    bitwiseExpression _ "-bxor" (_ newLines):? _ comparisonExpression
+    bitwiseExpression _ "-bxor" (_ newLines):? _ comparisonExpression)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -1341,10 +1374,11 @@ comparisonExpression ->
 
 additiveExpression ->
     multiplicativeExpression |
-    additiveExpression _ "+" (_ newLines):? _ multiplicativeExpression |
-    additiveExpression _ dash (_ newLines):? _ multiplicativeExpression
+    (additiveExpression _ "+" (_ newLines):? _ multiplicativeExpression |
+    additiveExpression _ dash (_ newLines):? _ multiplicativeExpression)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -1363,11 +1397,12 @@ additiveExpression ->
 
 multiplicativeExpression ->
     formatExpression |
-    multiplicativeExpression _ "*" (_ newLines):? _ formatExpression |
+    (multiplicativeExpression _ "*" (_ newLines):? _ formatExpression |
     multiplicativeExpression _ "/" (_ newLines):? _ formatExpression |
-    multiplicativeExpression _ "%" (_ newLines):? _ formatExpression
+    multiplicativeExpression _ "%" (_ newLines):? _ formatExpression)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -1460,7 +1495,7 @@ unaryExpression ->
     %}
 
 expressionWithUnaryOperator ->
-    "," (_ newLines):? _ unaryExpression |
+    ("," (_ newLines):? _ unaryExpression |
     "-not"i (_ newLines):? _ unaryExpression |
     "!" (_ newLines):? _ unaryExpression |
     "-bnot"i (_ newLines):? _ unaryExpression |
@@ -1470,9 +1505,10 @@ expressionWithUnaryOperator ->
     preDecrementExpression |
     castExpression |
     "-split"i (_ newLines):? _ unaryExpression |
-    "-join"i (_ newLines):? _ unaryExpression
+    "-join"i (_ newLines):? _ unaryExpression)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -1570,14 +1606,15 @@ attributedExpression ->
     %}
 
 primaryExpression ->
-    value |
+    (value |
     memberAccess |
     elementAccess |
     invocationExpression |
     postIncrementExpression |
-    postDecrementExpression
+    postDecrementExpression)
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "primaryExpression",
                 data: data[0]
@@ -1586,16 +1623,17 @@ primaryExpression ->
     %}
 
 value ->
-    parenthesizedExpression |
+    (parenthesizedExpression |
     subExpression |
     arrayExpression |
     scriptBlockExpression |
     hashLiteralExpression |
     literal |
     typeLiteral |
-    variable
+    variable)
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "value",
                 data: data[0]
@@ -1704,10 +1742,11 @@ hashLiteralExpression ->
     %}
 
 hashLiteralBody ->
-    hashEntry |
-    hashLiteralBody _ statementTerminators _ hashEntry
+    (hashEntry |
+    hashLiteralBody _ statementTerminators _ hashEntry)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -1745,10 +1784,11 @@ hashEntry ->
     %}
 
 keyExpression ->
-    simpleName |
-    unaryExpression
+    (simpleName |
+    unaryExpression)
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "keyExpression",
                 data: data[0]
@@ -1788,10 +1828,11 @@ postDecrementExpression ->
     %}
 
 memberAccess -> # No whitespace after primaryExpression
-    primaryExpression "." memberName |
-    primaryExpression "::" memberName
+    (primaryExpression "." memberName |
+    primaryExpression "::" memberName)
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "memberAccess",
                 data: data
@@ -1820,10 +1861,11 @@ elementAccess -> # No whitespace between primaryExpression and "["
     %}
 
 invocationExpression -> # No whitespace after primaryExpression
-    primaryExpression "." memberName _ argumentList |
-    primaryExpression "::" memberName _ argumentList
+    (primaryExpression "." memberName _ argumentList |
+    primaryExpression "::" memberName _ argumentList)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -1861,10 +1903,11 @@ argumentList ->
     %}
 
 argumentExpressionList ->
-    argumentExpression |
-    argumentExpression (_ newLines):? _ "," _ argumentExpressionList
+    (argumentExpression |
+    argumentExpression (_ newLines):? _ "," _ argumentExpressionList)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -1903,11 +1946,12 @@ argumentExpression ->
 
 logicalArgumentExpression ->
     bitwiseArgumentExpression |
-    logicalArgumentExpression _ "-and"i (_ newLines):? _ bitwiseArgumentExpression |
+    (logicalArgumentExpression _ "-and"i (_ newLines):? _ bitwiseArgumentExpression |
     logicalArgumentExpression _ "-or"i (_ newLines):? _ bitwiseArgumentExpression |
-    logicalArgumentExpression _ "-xor"i (_ newLines):? _ bitwiseArgumentExpression
+    logicalArgumentExpression _ "-xor"i (_ newLines):? _ bitwiseArgumentExpression)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -1926,11 +1970,12 @@ logicalArgumentExpression ->
 
 bitwiseArgumentExpression ->
     comparisonArgumentExpression |
-    bitwiseArgumentExpression _ "-band"i (_ newLines):? _ comparisonArgumentExpression |
+    (bitwiseArgumentExpression _ "-band"i (_ newLines):? _ comparisonArgumentExpression |
     bitwiseArgumentExpression _ "-bor"i (_ newLines):? _ comparisonArgumentExpression |
-    bitwiseArgumentExpression _ "-bxor"i (_ newLines):? _ comparisonArgumentExpression
+    bitwiseArgumentExpression _ "-bxor"i (_ newLines):? _ comparisonArgumentExpression)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -1970,10 +2015,11 @@ comparisonArgumentExpression ->
 
 additiveArgumentExpression ->
     multiplicativeArgumentExpression |
-    additiveArgumentExpression _ "+" (_ newLines):? _ multiplicativeArgumentExpression |
-    additiveArgumentExpression _ dash (_ newLines):? _ multiplicativeArgumentExpression
+    (additiveArgumentExpression _ "+" (_ newLines):? _ multiplicativeArgumentExpression |
+    additiveArgumentExpression _ dash (_ newLines):? _ multiplicativeArgumentExpression)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -1992,11 +2038,12 @@ additiveArgumentExpression ->
 
 multiplicativeArgumentExpression ->
     formatArgumentExpression |
-    multiplicativeArgumentExpression _ "*" (_ newLines):? _ formatArgumentExpression |
+    (multiplicativeArgumentExpression _ "*" (_ newLines):? _ formatArgumentExpression |
     multiplicativeArgumentExpression _ "/" (_ newLines):? _ formatArgumentExpression |
-    multiplicativeArgumentExpression _ "%" (_ newLines):? _ formatArgumentExpression
+    multiplicativeArgumentExpression _ "%" (_ newLines):? _ formatArgumentExpression)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -2056,13 +2103,14 @@ rangeArgumentExpression ->
     %}
 
 memberName ->
-    simpleName |
+    (simpleName |
     stringLiteral |
     stringLiteralWithSubexpression |
     expressionWithUnaryOperator |
-    value
+    value)
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "memberName",
                 data: data[0]
@@ -2082,10 +2130,11 @@ stringLiteralWithSubexpression ->
     %}
 
 expandableStringLiteralWithSubexpression ->
-    expandableStringWithSubexpressionStart _ statementList:? _ ")" _ expandableStringWithSubexpressionChars _ expandableStringWithSubexpressionEnd |
-    expandableHereStringWithSubexpressionStart _ statementList:? _ ")" _ expandableHereStringWithSubexpressionChars _ expandableHereStringWithSubexpressionEnd
+    (expandableStringWithSubexpressionStart _ statementList:? _ ")" _ expandableStringWithSubexpressionChars _ expandableStringWithSubexpressionEnd |
+    expandableHereStringWithSubexpressionStart _ statementList:? _ ")" _ expandableHereStringWithSubexpressionChars _ expandableHereStringWithSubexpressionEnd)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -2103,10 +2152,11 @@ expandableStringLiteralWithSubexpression ->
     %}
 
 expandableStringWithSubexpressionChars ->
-    expandableStringWithSubexpressionPart |
-    expandableStringWithSubexpressionChars expandableStringWithSubexpressionPart
+    (expandableStringWithSubexpressionPart |
+    expandableStringWithSubexpressionChars expandableStringWithSubexpressionPart)
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "expandableStringWithSubexpressionChars",
                 data: data
@@ -2115,10 +2165,11 @@ expandableStringWithSubexpressionChars ->
     %}
 
 expandableStringWithSubexpressionPart ->
-    subExpression |
-    expandableStringPart
+    (subExpression |
+    expandableStringPart)
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "expandableStringWithSubexpressionPart",
                 data: data[0]
@@ -2127,10 +2178,11 @@ expandableStringWithSubexpressionPart ->
     %}
 
 expandableHereStringWithSubexpressionChars ->
-    expandableHereStringWithSubexpressionPart |
-    expandableHereStringWithSubexpressionChars _ expandableHereStringWithSubexpressionPart
+    (expandableHereStringWithSubexpressionPart |
+    expandableHereStringWithSubexpressionChars _ expandableHereStringWithSubexpressionPart)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -2148,10 +2200,11 @@ expandableHereStringWithSubexpressionChars ->
     %}
 
 expandableHereStringWithSubexpressionPart ->
-    subExpression |
-    expandableHereStringPart
+    (subExpression |
+    expandableHereStringPart)
     {%
         function(data) {
+            data = data[0];
             return {
                 type: "expandableHereStringWithSubexpressionPart",
                 data: data[0]
@@ -2180,11 +2233,12 @@ typeLiteral ->
     %}
 
 typeSpec ->
-    arrayTypeName (_ newLines):? _ dimension:? _ "]" |
+    (arrayTypeName (_ newLines):? _ dimension:? _ "]" |
     genericTypeName (_ newLines):? _ genericTypeArguments _ "]" |
-    typeName
+    typeName)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -2202,10 +2256,11 @@ typeSpec ->
     %}
 
 dimension ->
-    "," |
-    dimension _ ","
+    ("," |
+    dimension _ ",")
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -2223,10 +2278,11 @@ dimension ->
     %}
 
 genericTypeArguments ->
-    typeSpec _ newLines:? |
-    genericTypeArguments _ "," (_ newLines):? _ typeSpec
+    (typeSpec _ newLines:? |
+    genericTypeArguments _ "," (_ newLines):? _ typeSpec)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -2245,10 +2301,11 @@ genericTypeArguments ->
 
 # Attributes
 attributeList ->
-    attribute |
-    attributeList (_ newLines):? _ attribute
+    (attribute |
+    attributeList (_ newLines):? _ attribute)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -2266,10 +2323,11 @@ attributeList ->
     %}
 
 attribute ->
-    "[" (_ newLines):? _ attributeName _ "(" _ attributeArguments (_ newLines):? _ ")" (_ newLines):? _ "]" |
-    typeLiteral
+    ("[" (_ newLines):? _ attributeName _ "(" _ attributeArguments (_ newLines):? _ ")" (_ newLines):? _ "]" |
+    typeLiteral)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -2298,10 +2356,11 @@ attributeName ->
     %}
 
 attributeArguments ->
-    attributeArgument |
-    attributeArgument (_ newLines):? _ "," _ attributeArguments
+    (attributeArgument |
+    attributeArgument (_ newLines):? _ "," _ attributeArguments)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
@@ -2319,11 +2378,12 @@ attributeArguments ->
     %}
 
 attributeArgument ->
-    newLines:? _ expression |
+    (newLines:? _ expression |
     newLines:? _ simpleName |
-    newLines:? _ simpleName _ "=" (_ newLines):? _ expression
+    newLines:? _ simpleName _ "=" (_ newLines):? _ expression)
     {%
         function(data) {
+            data = data[0];
             let out = [];
             for (let i = 0; i < data.length; i++) {
                 if (data[i] !== null && data[i] !== undefined) {
