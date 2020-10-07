@@ -14,7 +14,7 @@
 # Syntactic grammar
 # Statements
 scriptBlock ->
-    (comment:+):? newLines:? paramBlock:? _ statementTerminators:? _ scriptBlockBody:?
+    (comment:+):? newLines:? paramBlock:? (_ statementTerminators):? _ scriptBlockBody:?
     {%
         function(data) {
             let out = [];
@@ -77,7 +77,7 @@ parameterList ->
     %}
 
 scriptParameter ->
-    newLines:? _ attributeList:? (_ newLines):? _ variable __ scriptParameterDefault:?
+    newLines:? (_ attributeList):? (_ newLines):? _ variable __ scriptParameterDefault:?
     {%
         function(data) {
             let out = [];
@@ -176,7 +176,7 @@ blockName ->
     %}
 
 statementBlock ->
-    "{" (_ newLines):? _ statementList:? (_ newLines):? _ "}"
+    "{" (_ newLines):? (_ statementList):? (_ newLines):? _ "}"
     {%
         function(data) {
             let out = [];
@@ -285,8 +285,8 @@ statementTerminators ->
     %}
 
 ifStatement ->
-    "if"i (_ newLines):? _ "(" (_ newLines):? _ pipeline (_ newLines):? _ ")" (_ newLines):? _ statementBlock (_ newLines):? _
-        elseifClauses:? _ elseClause:?
+    "if"i (_ newLines):? _ "(" (_ newLines):? _ pipeline (_ newLines):? _ ")" (_ newLines):? _ statementBlock (_ newLines):? (_
+        elseifClauses):? (_ elseClause):?
     {%
         function(data) {
             let out = [];
@@ -384,7 +384,7 @@ labeledStatement ->
     %}
 
 switchStatement ->
-    "switch"i (_ newLines):? _ switchParameters:? _ switchCondition _ switchBody
+    "switch"i (_ newLines):? (_ switchParameters):? _ switchCondition _ switchBody
     {%
         function(data) {
             let out = [];
@@ -507,7 +507,7 @@ switchClauses ->
     %}
 
 switchClause ->
-    switchClauseCondition _ statementBlock _ statementTerminators:?
+    switchClauseCondition _ statementBlock (_ statementTerminators):?
     {%
         function(data) {
             let out = [];
@@ -540,7 +540,7 @@ switchClauseCondition ->
     %}
 
 foreachStatement ->
-    "foreach"i (_ newLines):? _ foreachParameter:? (_ newLines):? _
+    "foreach"i (_ newLines):? (_ foreachParameter):? (_ newLines):? _
         "(" (_ newLines):? _ variable (_ newLines):? _ "in"i (_ newLines):? _ pipeline (_ newLines):? _ ")" _ statementBlock
     {%
         function(data) {
@@ -573,12 +573,12 @@ foreachParameter ->
 
 forStatement ->
     "for"i (_ newLines):? _ (
-        "(" (_ newLines):? _ forInitializer:? _ statementTerminator _
-        newLines:? _ forCondition:? _ statementTerminator _
-        newLines:? _ forIterator:? (_ newLines):? _ ")" _ statementBlock |
-        "(" (_ newLines):? _ forInitializer:? _ statementTerminator _
-        newLines:? _ forCondition:? (_ newLines):? _ ")" _ statementBlock |
-        "(" (_ newLines):? _ forInitializer:? (_ newLines):? _ ")" _ statementBlock
+        "(" (_ newLines):? (_ forInitializer):? _ statementTerminator
+        (_ newLines):? (_ forCondition):? _ statementTerminator
+        (_ newLines):? (_ forIterator):? (_ newLines):? _ ")" _ statementBlock |
+        "(" (_ newLines):? (_ forInitializer):? _ statementTerminator
+        (_ newLines):? (_ forCondition):? (_ newLines):? _ ")" _ statementBlock |
+        "(" (_ newLines):? (_ forInitializer):? (_ newLines):? _ ")" _ statementBlock
     )
     {%
         function(data) {
@@ -786,7 +786,7 @@ labelExpression ->
     %}
 
 trapStatement ->
-    "trap"i (_ newLines):? _ typeLiteral:? (_ newLines):? _ statementBlock
+    "trap"i (_ newLines):? (_ typeLiteral):? (_ newLines):? _ statementBlock
     {%
         function(data) {
             let out = [];
@@ -840,7 +840,7 @@ catchClauses ->
     %}
 
 catchClause ->
-    (_ newLines):? _ "catch"i _ catchTypeList:? _ statementBlock
+    (_ newLines):? _ "catch"i (_ catchTypeList):? _ statementBlock
     {%
         function(data) {
             let out = [];
@@ -902,7 +902,7 @@ finallyClause ->
     %}
 
 dataStatement ->
-    "data"i (_ newLines _ | __) dataName _ dataCommandsAllowed:? _ statementBlock
+    "data"i (_ newLines _ | __) dataName (_ dataCommandsAllowed):? _ statementBlock
     {%
         function(data) {
             let out = [];
@@ -1020,8 +1020,8 @@ sequenceStatement ->
 
 pipeline ->
     (assignmentExpression |
-    expression (_ redirections:?) _ pipelineTail:? |
-    command (_ verbatimCommandArgument):? _ pipelineTail:?)
+    expression (_ redirections:?) (_ pipelineTail):? |
+    command (_ verbatimCommandArgument):? (_ pipelineTail):?)
     {%
         function(data) {
             data = data[0];
@@ -1179,7 +1179,7 @@ commandName ->
     %}
 
 genericTokenWithSubexpression ->
-    genericTokenWithSubexpressionStart _ statementList:? _ ")" commandName # No whitespace between ) and commandName!
+    genericTokenWithSubexpressionStart (_ statementList):? _ ")" commandName # No whitespace between ) and commandName!
     {%
         function(data) {
             let out = [];
@@ -1699,7 +1699,7 @@ parenthesizedExpression ->
     %}
 
 subExpression ->
-    "$(" (_ newLines):? _ statementList:? (_ newLines):? _ ")"
+    "$(" (_ newLines):? (_ statementList):? (_ newLines):? _ ")"
     {%
         function(data) {
             let out = [];
@@ -1719,7 +1719,7 @@ subExpression ->
     %}
 
 arrayExpression ->
-    "@(" (_ newLines):? _ statementList:? (_ newLines):? _ ")"
+    "@(" (_ newLines):? (_ statementList):? (_ newLines):? _ ")"
     {%
         function(data) {
             let out = [];
@@ -1759,7 +1759,7 @@ scriptBlockExpression ->
     %}
 
 hashLiteralExpression ->
-    "@{" (_ newLines):? _ hashLiteralBody:? (_ newLines):? _ "}"
+    "@{" (_ newLines):? (_ hashLiteralBody):? (_ newLines):? _ "}"
     {%
         function(data) {
             let out = [];
@@ -1920,7 +1920,7 @@ invocationExpression -> # No whitespace after primaryExpression
     %}
 
 argumentList ->
-    "(" _ argumentExpressionList:? (_ newLines):? _ ")"
+    "(" (_ argumentExpressionList):? (_ newLines):? _ ")"
     {%
         function(data) {
             let out = [];
@@ -2167,8 +2167,8 @@ stringLiteralWithSubexpression ->
     %}
 
 expandableStringLiteralWithSubexpression ->
-    (expandableStringWithSubexpressionStart _ statementList:? _ ")" _ expandableStringWithSubexpressionChars _ expandableStringWithSubexpressionEnd |
-    expandableHereStringWithSubexpressionStart _ statementList:? _ ")" _ expandableHereStringWithSubexpressionChars _ expandableHereStringWithSubexpressionEnd)
+    (expandableStringWithSubexpressionStart (_ statementList):? _ ")" _ expandableStringWithSubexpressionChars _ expandableStringWithSubexpressionEnd |
+    expandableHereStringWithSubexpressionStart (_ statementList):? _ ")" _ expandableHereStringWithSubexpressionChars _ expandableHereStringWithSubexpressionEnd)
     {%
         function(data) {
             data = data[0];
@@ -2270,7 +2270,7 @@ typeLiteral ->
     %}
 
 typeSpec ->
-    (arrayTypeName (_ newLines):? _ dimension:? _ "]" |
+    (arrayTypeName (_ newLines):? (_ dimension):? _ "]" |
     genericTypeName (_ newLines):? _ genericTypeArguments _ "]" |
     typeName)
     {%

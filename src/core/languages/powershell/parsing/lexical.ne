@@ -1,6 +1,6 @@
 # Lexical grammar
 input ->
-    inputElements:? _ signatureBlock:?
+    inputElements:? signatureBlock:?
     {%
         function(data) {
             let out = [];
@@ -133,8 +133,7 @@ signatureEnd ->
 # Line terminators
 newLineCharacter ->
     (carriageReturnCharacter |
-    lineFeedCharacter |
-    carriageReturnCharacter lineFeedCharacter)
+    lineFeedCharacter)
     {%
         function(data) {
             data = data[0];
@@ -438,7 +437,7 @@ variable ->
     %}
 
 bracedVariable ->
-    "${" _ variableScope:? _ bracedVariableCharacters _ "}"
+    "${" (_ variableScope):? _ bracedVariableCharacters _ "}"
     {%
         function(data) {
             let out = [];
