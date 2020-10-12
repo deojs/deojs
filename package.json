@@ -4,8 +4,9 @@
   "description": "De-obfuscator in JavaScript",
   "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "webpack-dev-server"
+    "test": "echo \"Error: no test specified\" && exit 0",
+    "dev": "webpack-dev-server",
+    "build": "rm dist/* && npx webpack"
   },
   "repository": {
     "type": "git",
