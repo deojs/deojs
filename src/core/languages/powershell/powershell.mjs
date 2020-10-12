@@ -18,7 +18,6 @@ class PowerShellLanguage {
         const parser = new nearley.Parser(nearley.Grammar.fromCompiled(grammar));
         const chunkSize = 100; // Characters
         const numChunks = Math.ceil(inCode.length / chunkSize);
-
         for (let i = 0; i < numChunks; i++) {
             if (progress !== undefined
                 && progress !== null
@@ -27,9 +26,9 @@ class PowerShellLanguage {
             }
             parser.feed(inCode.slice(i * 100, (i * 100) + 100));
         }
+        console.log(`Parse produced ${parser.results.length} results.`);
 
         if (parser.results.length > 0) {
-            console.log(`Parse produced ${parser.results.length} results.`);
             return parser.results[0];
         }
 

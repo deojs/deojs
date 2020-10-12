@@ -136,19 +136,9 @@ newLineCharacter ->
     lineFeedCharacter)
     {%
         function(data) {
-            data = data[0];
-            let out = [];
-            for (let i = 0; i < data.length; i++) {
-                if (data[i] !== null && data[i] !== undefined) {
-                    out.push(data[i]);
-                }
-            }
-            if (out.length === 1) {
-                out = out[0];
-            }
             return {
                 type: "newLineCharacter",
-                data: out
+                data: data[0][0]
             }
         }
     %}

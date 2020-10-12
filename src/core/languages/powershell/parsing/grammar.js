@@ -6725,19 +6725,9 @@ var grammar = {
     {"name": "newLineCharacter$subexpression$1", "symbols": ["lineFeedCharacter"]},
     {"name": "newLineCharacter", "symbols": ["newLineCharacter$subexpression$1"], "postprocess": 
         function(data) {
-            data = data[0];
-            let out = [];
-            for (let i = 0; i < data.length; i++) {
-                if (data[i] !== null && data[i] !== undefined) {
-                    out.push(data[i]);
-                }
-            }
-            if (out.length === 1) {
-                out = out[0];
-            }
             return {
                 type: "newLineCharacter",
-                data: out
+                data: data[0][0]
             }
         }
             },
@@ -8285,9 +8275,10 @@ var grammar = {
     {"name": "scriptBlock$ebnf$4$subexpression$1", "symbols": ["_", "statementTerminators"]},
     {"name": "scriptBlock$ebnf$4", "symbols": ["scriptBlock$ebnf$4$subexpression$1"], "postprocess": id},
     {"name": "scriptBlock$ebnf$4", "symbols": [], "postprocess": function(d) {return null;}},
-    {"name": "scriptBlock$ebnf$5", "symbols": ["scriptBlockBody"], "postprocess": id},
+    {"name": "scriptBlock$ebnf$5$subexpression$1", "symbols": ["_", "scriptBlockBody"]},
+    {"name": "scriptBlock$ebnf$5", "symbols": ["scriptBlock$ebnf$5$subexpression$1"], "postprocess": id},
     {"name": "scriptBlock$ebnf$5", "symbols": [], "postprocess": function(d) {return null;}},
-    {"name": "scriptBlock", "symbols": ["scriptBlock$ebnf$1", "scriptBlock$ebnf$2", "scriptBlock$ebnf$3", "scriptBlock$ebnf$4", "_", "scriptBlock$ebnf$5"], "postprocess": 
+    {"name": "scriptBlock", "symbols": ["scriptBlock$ebnf$1", "scriptBlock$ebnf$2", "scriptBlock$ebnf$3", "scriptBlock$ebnf$4", "scriptBlock$ebnf$5"], "postprocess": 
         function(data) {
             let out = [];
             for (let i = 0; i < data.length; i++) {
@@ -8528,8 +8519,8 @@ var grammar = {
     {"name": "statement$subexpression$1", "symbols": ["inlinescriptStatement"]},
     {"name": "statement$subexpression$1", "symbols": ["parallelStatement"]},
     {"name": "statement$subexpression$1", "symbols": ["sequenceStatement"]},
-    {"name": "statement$subexpression$1", "symbols": ["pipeline"]},
-    {"name": "statement", "symbols": ["statement$subexpression$1", "_", "statementTerminators"], "postprocess": 
+    {"name": "statement$subexpression$1", "symbols": ["pipeline", "_", "statementTerminators"]},
+    {"name": "statement", "symbols": ["statement$subexpression$1"], "postprocess": 
         function(data) {
             data = data[0];
             let out = [];

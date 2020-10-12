@@ -14,7 +14,7 @@
 # Syntactic grammar
 # Statements
 scriptBlock ->
-    (comment:+):? newLines:? paramBlock:? (_ statementTerminators):? _ scriptBlockBody:?
+    (comment:+):? newLines:? paramBlock:? (_ statementTerminators):? (_ scriptBlockBody):?
     {%
         function(data) {
             let out = [];
@@ -229,7 +229,7 @@ statement ->
     inlinescriptStatement |
     parallelStatement |
     sequenceStatement |
-    pipeline) _ statementTerminators
+    pipeline _ statementTerminators)
     {%
         function(data) {
             data = data[0];
