@@ -12,5 +12,6 @@ deploy:
   keep_history: true
   local_dir: dist/
   repo: deojs/deojs.github.io
+  target_branch: master
   on:
     branch: master
