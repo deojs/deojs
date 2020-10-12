@@ -58,7 +58,7 @@ self.handleOperationWorkerMessage = async function (message) {
             command: "callback",
             data: {
                 callbackid: data.data.callbackid,
-                data: await self.parse(data.data.input, data.data.language)
+                data: await self.parse(data.data.input, data.data.language, null)
             }
         });
         break;
@@ -231,10 +231,10 @@ self.updateInputParseProgress = function (current, total) {
  *
  * @param {string} input - The text to parse
  * @param {string} language - The language to parse the input with
- * @param {function} progress - A callback which is called to update the progress
+ * @param {Function} progress - A callback which is called to update the progress
  * @returns {object} - Parsed language
  */
-self.parse = async function (input, language, progress) {
+self.parse = function (input, language, progress) {
     try {
         const languageObject = self.LanguageHelper.getLanguage(language);
         return languageObject.parse(input, progress);
