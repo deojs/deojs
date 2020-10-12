@@ -150,8 +150,7 @@ class ReplaceFormatExpression {
         }.bind(this);
 
         const out = recurse(input);
-
-        return this.prettyPrint(input);
+        return this.prettyPrint(out);
     }
 }
 
