@@ -1,4 +1,6 @@
 # DeoJS - Javascript De-Obfuscator
+[![Build Status](https://travis-ci.org/deojs/deojs.svg?branch=master)](https://travis-ci.org/deojs/deojs)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ## To Install:
 ```
 npm install
