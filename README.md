@@ -1,5 +1,5 @@
 # DeoJS - Javascript De-Obfuscator
-[![Build Status](https://travis-ci.org/deojs/deojs.svg?branch=master)](https://travis-ci.org/deojs/deojs)
+[![Build Status](https://travis-ci.com/deojs/deojs.svg?branch=master)](https://travis-ci.com/deojs/deojs)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ## Online version:
 [Click here](https://deojs.github.io/) to access the online version of DeoJS.
