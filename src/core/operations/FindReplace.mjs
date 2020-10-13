@@ -6,7 +6,7 @@ class FindReplace {
         this.name = "Find / Replace";
         this.args = [
             {
-                name: "Find text",
+                name: "Find (Regex)",
                 type: "string",
                 default: ""
             },
@@ -14,6 +14,11 @@ class FindReplace {
                 name: "Replace text",
                 type: "string",
                 default: ""
+            },
+            {
+                name: "Global",
+                type: "boolean",
+                default: true
             }
         ];
         this.languages = []; // Empty array = all languages
@@ -30,7 +35,10 @@ class FindReplace {
      * @returns {string} - The modified code
      */
     run(input, args) {
-        return input.replace(args[0], args[1]);
+        let flags = "";
+        if (args[2]) flags += "g";
+        const re = new RegExp(args[0], flags);
+        return input.replace(re, args[1]);
     }
 }
 
