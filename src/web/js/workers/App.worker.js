@@ -69,6 +69,12 @@ self.handleOperationWorkerMessage = async function (message) {
             data: data.data
         });
         break;
+    case "updateOpStatus":
+        self.postMessage({
+            command: "updateOpStatus",
+            data: data.data
+        });
+        break;
     default:
         console.error(`Invalid command "${data.command}"`);
     }
@@ -118,18 +124,23 @@ self.addEventListener("message", async (e) => {
     if (!data.command) return;
 
     switch (data.command) {
-    case "run":
+    case "run": {
         // Runs the deobfuscation
+        const input = await self.InputHelper.getDecodedData(data.data.encoding);
         self.OperationWorker.postMessage({
             command: "run",
             data: {
                 operations: data.data.operations,
                 operationClasses: data.data.operationClasses,
-                input: await self.parseInput(data.data.language, data.data.encoding),
+                input: {
+                    ast: await self.parse(input, data.data.language, null),
+                    string: input
+                },
                 language: data.data.language
             }
         });
         break;
+    }
     case "loadfile":
         // Loads a new file using the InputWorker
         self.loadFile(data.data);

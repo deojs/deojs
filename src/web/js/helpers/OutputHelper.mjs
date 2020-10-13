@@ -36,6 +36,7 @@ class OutputHelper {
      * Clears the output
      */
     clearOutput() {
+        document.getElementById("outputArea").innerHTML = "";
         this.OutputWorker.terminate();
         this.OutputWorker = new OutputWorker();
         this.OutputWorker.addEventListener("message", this.handleWorkerMessage.bind(this));
@@ -67,31 +68,29 @@ class OutputHelper {
     /**
      * Updates the output stored in the OutputWorker
      *
-     * @param {string} outputValue - The new output value
-     * @param {string} outputLanguage - The language of the output
+     * @param {Array} outputValue - The new output values
      */
-    updateOutput(outputValue, outputLanguage) {
+    updateOutput(outputValue) {
         this.OutputWorker.postMessage({
             command: "updateOutput",
-            data: {
-                output: outputValue,
-                language: outputLanguage
-            }
+            data: outputValue
         });
     }
 
     /**
      * Retrieves the current output from the OutputWorker
      *
+     * @param {number} outputNum - The index of the output to get. -1 will get the final output
      * @param {boolean} highlight - If true, the returned output has syntax highlighting
      */
-    async getOutput(highlight) {
+    async getOutput(outputNum, highlight) {
         return new Promise((resolve, reject) => {
             const callbackid = this.addCallback(resolve);
             this.OutputWorker.postMessage({
                 command: "getOutput",
                 data: {
                     callbackid: callbackid,
+                    outputNum: outputNum,
                     highlight: highlight
                 }
             });

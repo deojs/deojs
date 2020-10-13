@@ -68,13 +68,16 @@ class App {
             this.AppWorkerCallbacks[data.data.callbackid](data.data.data);
             break;
         case "runcomplete":
-            this.OperationHelper.runComplete(data.data.output, data.data.language);
+            this.OperationHelper.runComplete(data.data.outputs, data.data.language);
             break;
         case "inputFileLoadProgress":
             this.UIHelper.updateInputProgress(data.data.loaded, data.data.total, "Loading");
             break;
         case "inputParseProgress":
             this.UIHelper.updateInputProgress(data.data.current, data.data.total, "Parsing");
+            break;
+        case "updateOpStatus":
+            this.OperationHelper.updateOpStatus(data.data.opIndex, data.data.opName, data.data.status);
             break;
         default:
             console.error(`Invalid command "${command}"`);

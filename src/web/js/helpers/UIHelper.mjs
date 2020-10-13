@@ -33,6 +33,21 @@ class UIHelper {
     }
 
     /**
+     * Creates the HTML for list status indicator
+     *
+     * @returns {HTMLElement} - The status indicator
+     */
+    createFunctionStatusIcon() {
+        const statusContainer = document.createElement("div");
+        statusContainer.style.textAlign = "center";
+        statusContainer.classList.add("statusIcon");
+
+        this.updateStatusIcon(statusContainer, "waiting");
+
+        return statusContainer;
+    }
+
+    /**
      * Creates the HTML for list arrow
      *
      * @returns {HTMLElement} - The arrow and container
@@ -43,24 +58,17 @@ class UIHelper {
 
         const arrow = document.createElementNS("http://www.w3.org/2000/svg", "svg");
         arrow.classList.add("bi");
-        arrow.classList.add("bi-arrow-down");
-        arrow.setAttribute("width", "2em");
-        arrow.setAttribute("height", "2em");
+        arrow.classList.add("bi-chevron-compact-down");
+        arrow.setAttribute("width", "1.2em");
+        arrow.setAttribute("height", "1.2em");
         arrow.setAttribute("viewBox", "0 0 16 16");
         arrow.setAttribute("fill", "#777777");
 
         const firstPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
         firstPath.setAttribute("fill-rule", "evenodd");
-        firstPath.setAttribute("d", "M4.646 9.646a.5.5 0 01.708 0L8 12.293l2.646-2.647a.5.5 0 01.708.708l-3 3a.5.5 0 01-.708 0l-3-3a.5.5 0 010-.708z");
-        firstPath.setAttribute("clip-rule", "evenodd");
-
-        const secondPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        secondPath.setAttribute("fill-rule", "evenodd");
-        secondPath.setAttribute("d", "M8 2.5a.5.5 0 01.5.5v9a.5.5 0 01-1 0V3a.5.5 0 01.5-.5z");
-        secondPath.setAttribute("clip-rule", "evenodd");
+        firstPath.setAttribute("d", "M1.553 6.776a.5.5 0 0 1 .67-.223L8 9.44l5.776-2.888a.5.5 0 1 1 .448.894l-6 3a.5.5 0 0 1-.448 0l-6-3a.5.5 0 0 1-.223-.67z");
 
         arrow.appendChild(firstPath);
-        arrow.appendChild(secondPath);
 
         arrowContainer.appendChild(arrow);
 
@@ -78,10 +86,10 @@ class UIHelper {
         const opDetails = this.App.OperationHelper.getOperationDetails(event.item.getAttribute("opname"));
         const opHtml = this.App.OperationHelper.createOperationHtml(opDetails);
 
-
         opContainer.innerText = itemElement.innerText;
         itemElement.innerText = "";
 
+        itemElement.appendChild(this.createFunctionStatusIcon());
         itemElement.appendChild(this.createFunctionArrow());
 
         opContainer.classList.add("flowItem");
@@ -282,39 +290,7 @@ class UIHelper {
         document.getElementById("inputFileSha1").innerText = `SHA1: ${hashes.sha1}`;
         document.getElementById("inputFileSha256").innerText = `SHA256: ${hashes.sha256}`;
 
-        const parsed = await new Promise((resolve, reject) => {
-            this.App.AppWorker.postMessage({
-                command: "parseInput",
-                data: {
-                    callbackid: this.App.addAppWorkerCallback(resolve),
-                    language: "powershell",
-                    encoding: "utf-8"
-                }
-            });
-        });
-
-        if (Array.isArray(parsed) && parsed.length === 0) {
-            document.getElementById("inputErrorText").innerText = "An error occurred parsing the input file. Check the console for more information.";
-            document.getElementById("inputErrorAlert").classList.remove("hidden");
-            document.getElementById("inputProgress").style.display = "none";
-            return;
-        }
-
-        const prettyPrinted = await new Promise((resolve, reject) => {
-            this.App.AppWorker.postMessage({
-                command: "prettyPrint",
-                data: {
-                    callbackid: this.App.addAppWorkerCallback(resolve),
-                    language: "powershell",
-                    ast: parsed
-                }
-            });
-        });
-
-        this.App.OutputHelper.updateOutput(prettyPrinted, "powershell");
-
-        const output = await this.App.OutputHelper.getOutput(true);
-        document.getElementById("outputArea").innerHTML = output;
+        this.App.OperationHelper.run();
 
         document.getElementById("inputProgress").style.display = "none";
     }
@@ -333,6 +309,39 @@ class UIHelper {
 
         progressBar.style.width = `${loadedPercent}%`;
         progressBar.innerText = `${progressType} (${loadedPercent}%)`;
+    }
+
+    /**
+     * Updates a status icon
+     *
+     * @param {Element} icon - The element to update
+     * @param {string} status - The status type (loading|success|error)
+     */
+    updateStatusIcon(icon, status) {
+        icon.classList.remove("text-success");
+        icon.classList.remove("text-danger");
+        icon.classList.remove("text-secondary");
+        switch (status) {
+        case "loading":
+            icon.classList.add("text-secondary");
+            icon.innerHTML = "<svg width=\"1.2em\" height=\"1.2em\" viewBox=\"0 0 16 16\" class=\"bi bi-dash-circle-fill\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\"><path fill-rule=\"evenodd\" d=\"M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM4.5 7.5a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7z\"/></svg>";
+            icon.firstElementChild.classList.add("spinner");
+            break;
+        case "waiting":
+            icon.classList.add("text-secondary");
+            icon.innerHTML = "<svg width=\"1.2em\" height=\"1.2em\" viewBox=\"0 0 16 16\" class=\"bi bi-dash-circle-fill\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\"><path fill-rule=\"evenodd\" d=\"M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM4.5 7.5a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7z\"/></svg>";
+            break;
+        case "success":
+            icon.classList.add("text-success");
+            icon.innerHTML = "<svg width=\"1.2em\" height=\"1.2em\" viewBox=\"0 0 16 16\" class=\"bi bi-check-circle-fill\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\"><path fill-rule=\"evenodd\" d=\"M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z\"/></svg>";
+            break;
+        case "error":
+            icon.classList.add("text-danger");
+            icon.innerHTML = "<svg width=\"1.2em\" height=\"1.2em\" viewBox=\"0 0 16 16\" class=\"bi bi-x-circle-fill\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\"><path fill-rule=\"evenodd\" d=\"M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z\"/></svg>";
+            break;
+        default:
+            break;
+        }
     }
 }
 

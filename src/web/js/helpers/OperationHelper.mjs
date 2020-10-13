@@ -165,6 +165,15 @@ class OperationHelper {
      * Runs the operations by sending them to the operationWorker
      */
     async run() {
+        // Disable run button
+        const runButton = document.getElementById("runFlowButton");
+        runButton.innerText = "Running...";
+        runButton.setAttribute("disabled", "true");
+
+        // Change output status icon to a rotating dash
+        const outputIcon = document.getElementById("outputStatusIcon");
+        this.App.UIHelper.updateStatusIcon(outputIcon, "loading");
+
         // Create a list of operations to run
         const operationList = document.getElementById("flowList");
         const operationElements = operationList.children;
@@ -225,8 +234,39 @@ class OperationHelper {
     async runComplete(output, language) {
         this.App.OutputHelper.updateOutput(output, language);
 
-        const outputData = await this.App.OutputHelper.getOutput(true);
-        document.getElementById("outputArea").innerHTML = outputData;
+        const outputData = await this.App.OutputHelper.getOutput(-1, true);
+        document.getElementById("outputArea").innerHTML = outputData.output;
+
+        // Enable run button
+        const runButton = document.getElementById("runFlowButton");
+        runButton.innerText = "Run";
+        runButton.removeAttribute("disabled");
+
+        // Set output status icon
+        const outputIcon = document.getElementById("outputStatusIcon");
+        if (outputData.parses) {
+            this.App.UIHelper.updateStatusIcon(outputIcon, "success");
+        } else {
+            this.App.UIHelper.updateStatusIcon(outputIcon, "error");
+        }
+    }
+
+    /**
+     * Updates the status indicator for an operation
+     *
+     * @param {number} opIndex - The index of the operation in the flow list
+     * @param {string} opName - The name of the operation
+     * @param {string} status - The status to update the icon to
+     */
+    updateOpStatus(opIndex, opName, status) {
+        const opList = document.getElementById("flowList");
+        const ops = opList.children;
+        if (ops.length <= opIndex) return;
+
+        if (ops[opIndex].getAttribute("opName") === opName) {
+            const icon = ops[opIndex].getElementsByClassName("statusIcon")[0];
+            this.App.UIHelper.updateStatusIcon(icon, status);
+        }
     }
 }
 
