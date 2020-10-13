@@ -89,9 +89,9 @@ class UIHelper {
         opContainer.innerText = itemElement.innerText;
         itemElement.innerText = "";
 
-        itemElement.appendChild(this.createFunctionStatusIcon());
         itemElement.appendChild(this.createFunctionArrow());
 
+        opContainer.appendChild(this.createFunctionStatusIcon());
         opContainer.classList.add("flowItem");
         opContainer.appendChild(opHtml);
         itemElement.appendChild(opContainer);

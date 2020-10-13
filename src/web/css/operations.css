@@ -10,3 +10,7 @@
     padding: 2px;
     margin-right: 10px;
 }
+
+.statusIcon {
+    float: right;
+}
