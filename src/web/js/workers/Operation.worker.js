@@ -116,7 +116,7 @@ self.run = async function (input, language, operations) {
         let status = "success";
         // Update status of operation
         if (!Object.prototype.hasOwnProperty.call(opOutputAST, "data")) {
-            status = "error";
+            status = "warning";
         }
         self.postMessage({
             command: "updateOpStatus",

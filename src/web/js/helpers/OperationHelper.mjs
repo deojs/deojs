@@ -247,7 +247,7 @@ class OperationHelper {
         if (outputData.parses) {
             this.App.UIHelper.updateStatusIcon(outputIcon, "success");
         } else {
-            this.App.UIHelper.updateStatusIcon(outputIcon, "error");
+            this.App.UIHelper.updateStatusIcon(outputIcon, "warning");
         }
     }
 
