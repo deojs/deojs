@@ -4,14 +4,15 @@
 class FindReplace {
     constructor() {
         this.name = "Find / Replace";
+        this.description = "Replaces occurences of the first string/regex with the second string.";
         this.args = [
             {
-                name: "Find (Regex)",
+                name: "Find",
                 type: "string",
                 default: ""
             },
             {
-                name: "Replace text",
+                name: "Replace",
                 type: "string",
                 default: ""
             },
@@ -19,6 +20,15 @@ class FindReplace {
                 name: "Global",
                 type: "boolean",
                 default: true
+            },
+            {
+                name: "Mode",
+                type: "dropdown",
+                default: "Regular expression",
+                options: [
+                    "Regular expression",
+                    "Text"
+                ]
             }
         ];
         this.languages = []; // Empty array = all languages
@@ -35,10 +45,14 @@ class FindReplace {
      * @returns {string} - The modified code
      */
     run(input, args) {
-        let flags = "";
-        if (args[2]) flags += "g";
-        const re = new RegExp(args[0], flags);
-        return input.replace(re, args[1]);
+        if (args[3] === "Regular expression") {
+            let flags = "";
+            if (args[2]) flags += "g";
+            const re = new RegExp(args[0], flags);
+            return input.replace(re, args[1]);
+        }
+
+        return input.replace(args[0], args[1]);
     }
 }
 

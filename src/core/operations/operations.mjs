@@ -58,6 +58,7 @@ class Operations {
             languages: op.languages,
             inputType: op.inputType,
             outputType: op.outputType,
+            description: op.description,
             progress: op.progress
         };
     }

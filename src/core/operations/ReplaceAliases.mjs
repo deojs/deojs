@@ -76,6 +76,7 @@ class ReplaceAliases {
         };
 
         this.name = "Replace Aliases";
+        this.description = "Replaces commonly used aliases for commands with the full command name.\n\nA custom alias and command name can also be specified.";
         this.args = [
             {
                 name: "Alias Name",

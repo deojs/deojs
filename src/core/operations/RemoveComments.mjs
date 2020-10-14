@@ -4,6 +4,7 @@
 class RemoveComments {
     constructor() {
         this.name = "Remove Comments";
+        this.description = "Removes single line and delimited comments from the code.";
         this.args = [];
         this.languages = ["powershell"];
         this.inputType = "ast";

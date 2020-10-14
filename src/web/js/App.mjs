@@ -77,7 +77,7 @@ class App {
             this.UIHelper.updateInputProgress(data.data.current, data.data.total, "Parsing");
             break;
         case "updateOpStatus":
-            this.OperationHelper.updateOpStatus(data.data.opIndex, data.data.opName, data.data.status);
+            this.OperationHelper.updateOpStatus(data.data.opIndex, data.data.opName, data.data.status, data.data.tooltipText);
             break;
         default:
             console.error(`Invalid command "${command}"`);

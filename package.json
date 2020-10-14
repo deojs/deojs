@@ -43,7 +43,7 @@
     "bootstrap": "^4.4.1",
     "crypto-js": "^4.0.0",
     "highlight.js": "^9.18.1",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.1",
     "moo": "^0.5.1",
     "nearley": "^2.19.1",
     "popper.js": "^1.16.1",

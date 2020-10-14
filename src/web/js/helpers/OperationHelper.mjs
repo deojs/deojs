@@ -95,6 +95,9 @@ class OperationHelper {
         const operationElement = document.createElement("li");
         operationElement.innerText = operation.displayName;
         operationElement.setAttribute("opName", operation.name);
+        operationElement.setAttribute("data-toggle", "tooltip");
+        operationElement.setAttribute("data-placement", "right");
+        operationElement.setAttribute("title", operation.description);
         return operationElement;
     }
 
@@ -184,6 +187,9 @@ class OperationHelper {
             const opElement = operationElements.item(i);
             operationsUsed[opElement.getAttribute("opName")] = true;
 
+            // Update the status indicator for the operation
+            this.updateOpStatus(i, opElement.getAttribute("opName"), "waiting", "Operation is waiting to be executed");
+
             const args = [];
             const argElements = opElement.getElementsByClassName("operationArgument");
             for (let x = 0; x < argElements.length; x++) {
@@ -245,9 +251,9 @@ class OperationHelper {
         // Set output status icon
         const outputIcon = document.getElementById("outputStatusIcon");
         if (outputData.parses) {
-            this.App.UIHelper.updateStatusIcon(outputIcon, "success");
+            this.App.UIHelper.updateStatusIcon(outputIcon, "success", "All operations have completed execution and the result parses");
         } else {
-            this.App.UIHelper.updateStatusIcon(outputIcon, "warning");
+            this.App.UIHelper.updateStatusIcon(outputIcon, "warning", "All operations have completed execution, but the result does not parse");
         }
     }
 
@@ -257,15 +263,16 @@ class OperationHelper {
      * @param {number} opIndex - The index of the operation in the flow list
      * @param {string} opName - The name of the operation
      * @param {string} status - The status to update the icon to
+     * @param {string} tooltipText - The text to set the icon tooltip text to
      */
-    updateOpStatus(opIndex, opName, status) {
+    updateOpStatus(opIndex, opName, status, tooltipText) {
         const opList = document.getElementById("flowList");
         const ops = opList.children;
         if (ops.length <= opIndex) return;
 
         if (ops[opIndex].getAttribute("opName") === opName) {
             const icon = ops[opIndex].getElementsByClassName("statusIcon")[0];
-            this.App.UIHelper.updateStatusIcon(icon, status);
+            this.App.UIHelper.updateStatusIcon(icon, status, tooltipText);
         }
     }
 }

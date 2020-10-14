@@ -28,17 +28,6 @@ self.run = async function (input, language, operations) {
     });
 
     for (let i = 0; i < operations.length; i++) {
-        self.postMessage({
-            command: "updateOpStatus",
-            data: {
-                opIndex: [i],
-                opName: operations[i].name,
-                status: "waiting"
-            }
-        });
-    }
-
-    for (let i = 0; i < operations.length; i++) {
         console.log(`Running operation ${i} (${operations[i].displayName})`);
 
         // Update status of operation
@@ -47,7 +36,8 @@ self.run = async function (input, language, operations) {
             data: {
                 opIndex: i,
                 opName: operations[i].name,
-                status: "loading"
+                status: "loading",
+                tooltipText: "Operation is executing"
             }
         });
 
@@ -114,16 +104,19 @@ self.run = async function (input, language, operations) {
         }
 
         let status = "success";
+        let tooltipText = "Operation execution has completed and the result parses successfully.";
         // Update status of operation
         if (!Object.prototype.hasOwnProperty.call(opOutputAST, "data")) {
             status = "warning";
+            tooltipText = "Operation execution has completed, but the result does not parse";
         }
         self.postMessage({
             command: "updateOpStatus",
             data: {
                 opIndex: i,
                 opName: operations[i].name,
-                status: status
+                status: status,
+                tooltipText: tooltipText
             }
         });
     }

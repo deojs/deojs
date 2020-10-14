@@ -1,4 +1,5 @@
 import "bootstrap";
+import $ from "jquery";
 import Split from "split.js";
 import "../../css/css.js";
 import Sortable from "sortablejs";
@@ -42,7 +43,7 @@ class UIHelper {
         statusContainer.style.textAlign = "center";
         statusContainer.classList.add("statusIcon");
 
-        this.updateStatusIcon(statusContainer, "waiting");
+        this.updateStatusIcon(statusContainer, "waiting", "Operation has not been executed");
 
         return statusContainer;
     }
@@ -82,7 +83,12 @@ class UIHelper {
      */
     onFunctionAdded(event) {
         const itemElement = event.item;
+        console.log(event);
         const opContainer = document.createElement("div");
+        $(() => {
+            $(itemElement).tooltip("dispose");
+            $(event.clone).tooltip(); // Recreate tooltip on original item
+        });
         const opDetails = this.App.OperationHelper.getOperationDetails(event.item.getAttribute("opname"));
         const opHtml = this.App.OperationHelper.createOperationHtml(opDetails);
 
@@ -122,7 +128,6 @@ class UIHelper {
             group: {
                 name: "operationsGroup",
                 pull: "clone"
-                // put: false
             },
             delay: 0
         });
@@ -164,6 +169,7 @@ class UIHelper {
         this.addEventListeners();
 
         this.refreshOperationsList();
+        this.enableTooltips();
     }
 
     /**
@@ -172,6 +178,15 @@ class UIHelper {
     refreshOperationsList() {
         this.App.OperationHelper.clearOperationsList();
         this.App.OperationHelper.populateOperationsList(document.getElementById("debugOpsCheckbox").checked);
+    }
+
+    /**
+     *
+     */
+    enableTooltips() {
+        $(() => {
+            $("[data-toggle='tooltip']").tooltip();
+        });
     }
 
     /**
@@ -316,8 +331,9 @@ class UIHelper {
      *
      * @param {Element} icon - The element to update
      * @param {string} status - The status type (loading|success|error)
+     * @param {string} tooltipText - The text to set as the tooltip
      */
-    updateStatusIcon(icon, status) {
+    updateStatusIcon(icon, status, tooltipText) {
         icon.classList.remove("text-success");
         icon.classList.remove("text-danger");
         icon.classList.remove("text-secondary");
@@ -346,6 +362,22 @@ class UIHelper {
             break;
         default:
             break;
+        }
+
+        console.log(tooltipText);
+        if (tooltipText !== null
+            && tooltipText !== undefined) {
+            icon.setAttribute("data-toggle", "tooltip");
+            icon.setAttribute("data-placement", "bottom");
+            icon.setAttribute("title", tooltipText);
+            $(() => {
+                $(icon).tooltip("dispose");
+                $(icon).tooltip("enable");
+            });
+        } else {
+            $(() => {
+                $(icon).tooltip("dispose");
+            });
         }
     }
 }

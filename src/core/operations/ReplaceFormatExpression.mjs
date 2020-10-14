@@ -4,6 +4,7 @@
 class ReplaceFormatExpression {
     constructor() {
         this.name = "Replace Format Expressions";
+        this.description = "Finds format expressions which are rearranging strings and replaces them with the assembled string.";
         this.args = [];
         this.languages = ["powershell"];
         this.inputType = "ast";
