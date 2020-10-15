@@ -7,7 +7,7 @@
 }
 
 #operationsList li {
-    border-bottom: 1px solid #B3E5FC;
+    border-bottom: 1px solid #3b9aff;
     padding: 8px;
     background-color: #E1F5FE;
 }
@@ -28,9 +28,10 @@
     margin-bottom: 5px;
     width: 70%;
     background-color: #E1F5FE;
-    border: 1px solid #B3E5FC;
+    border: 1px solid #3b9aff;
     padding: 10px;
-    box-shadow: 2px 2px 2px #DDDDDD;
+    box-shadow: 2px 2px 2px #DADADA;
+    border-radius: 3px;
 }
 
 #inputContainer {
