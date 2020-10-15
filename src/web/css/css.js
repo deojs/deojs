@@ -7,3 +7,4 @@ import "./panes.css";
 import "./lists.css";
 import "./operations.css";
 import "./output.css";
+import "./modal.css";

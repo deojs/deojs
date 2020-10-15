@@ -13,4 +13,15 @@
 
 .statusIcon {
     float: right;
+    margin-left: 5px;
+}
+
+.viewCodeButton {
+    float: right;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.viewCodeButton:hover {
+    color: #3b9aff
 }

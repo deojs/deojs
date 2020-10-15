@@ -93,7 +93,10 @@ class OperationHelper {
      */
     createOperationListHtml(operation) {
         const operationElement = document.createElement("li");
-        operationElement.innerText = operation.displayName;
+        const titleElement = document.createElement("span");
+        titleElement.innerText = operation.displayName;
+        operationElement.appendChild(titleElement);
+
         operationElement.setAttribute("opName", operation.name);
         operationElement.setAttribute("data-toggle", "tooltip");
         operationElement.setAttribute("data-placement", "right");

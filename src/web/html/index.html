@@ -22,6 +22,8 @@
                     </div>
                     <div id="flowContainer">
                         <div id="inputContainer" class="flowItem">
+                            <div class="statusIcon" id="inputStatusIcon"></div>
+                            <div class="viewCodeButton" id="inputViewCodeButton"></div>
                             <h3>Input</h3>
                             <div id="inputErrorAlert" class="alert alert-danger hidden" role="alert">
                                 <span id="inputErrorText"></span>
@@ -55,6 +57,15 @@
                         <span id="outputStatusIcon"></span>
                     </div>
                     <pre id="outputArea">
+                    </pre>
+                </div>
+            </div>
+        </div>
+        <div id="viewCodeModal" class="modal fade" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-xl">
+                <div id="viewCodeModalContent" class="modal-content">
+                    <h1>View Code</h1>
+                    <pre id="viewCodeModalArea">
                     </pre>
                 </div>
             </div>

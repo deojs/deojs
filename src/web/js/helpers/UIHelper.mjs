@@ -34,13 +34,36 @@ class UIHelper {
     }
 
     /**
+     * Creates the HTML for the view code button for an operation
+     *
+     * @returns {HTMLElement} - The view code button
+     */
+    createFunctionViewCodeButton() {
+        const viewCodeButton = document.createElement("div");
+        viewCodeButton.classList.add("viewCodeButton");
+
+        viewCodeButton.innerHTML = "<svg width=\"1.2em\" height=\"1.2em\" viewBox=\"0 0 16 16\" class=\"bi bi-code\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\"><path fill-rule=\"evenodd\" d=\"M5.854 4.146a.5.5 0 0 1 0 .708L2.707 8l3.147 3.146a.5.5 0 0 1-.708.708l-3.5-3.5a.5.5 0 0 1 0-.708l3.5-3.5a.5.5 0 0 1 .708 0zm4.292 0a.5.5 0 0 0 0 .708L13.293 8l-3.147 3.146a.5.5 0 0 0 .708.708l3.5-3.5a.5.5 0 0 0 0-.708l-3.5-3.5a.5.5 0 0 0-.708 0z\"/></svg>"
+
+        viewCodeButton.setAttribute("data-toggle", "tooltip");
+        viewCodeButton.setAttribute("data-placement", "bottom");
+        viewCodeButton.setAttribute("title", "View code");
+
+        viewCodeButton.addEventListener("click", this.showViewCodeModal.bind(this));
+
+        $(() => {
+            $(viewCodeButton).tooltip();
+        });
+
+        return viewCodeButton;
+    }
+
+    /**
      * Creates the HTML for list status indicator
      *
      * @returns {HTMLElement} - The status indicator
      */
     createFunctionStatusIcon() {
         const statusContainer = document.createElement("div");
-        statusContainer.style.textAlign = "center";
         statusContainer.classList.add("statusIcon");
 
         this.updateStatusIcon(statusContainer, "waiting", "Operation has not been executed");
@@ -92,12 +115,15 @@ class UIHelper {
         const opDetails = this.App.OperationHelper.getOperationDetails(event.item.getAttribute("opname"));
         const opHtml = this.App.OperationHelper.createOperationHtml(opDetails);
 
-        opContainer.innerText = itemElement.innerText;
+        const titleElement = document.createElement("span");
+        titleElement.innerText = itemElement.innerText;
+        opContainer.appendChild(titleElement);
         itemElement.innerText = "";
 
         itemElement.appendChild(this.createFunctionArrow());
 
         opContainer.appendChild(this.createFunctionStatusIcon());
+        opContainer.appendChild(this.createFunctionViewCodeButton());
         opContainer.classList.add("flowItem");
         opContainer.appendChild(opHtml);
         itemElement.appendChild(opContainer);
@@ -170,6 +196,12 @@ class UIHelper {
 
         this.refreshOperationsList();
         this.enableTooltips();
+
+        this.updateStatusIcon(document.getElementById("inputStatusIcon"), "waiting", "Input has not been loaded");
+
+        const codeIcon = this.createFunctionViewCodeButton();
+        codeIcon.id = "inputViewCodeButton";
+        document.getElementById("inputViewCodeButton").replaceWith(codeIcon);
     }
 
     /**
@@ -195,10 +227,11 @@ class UIHelper {
      * @param {Event} event - Input event
      */
     async loadFiles(event) {
-        this.App.OutputHelper.clearOutput();
-
         const element = event.target;
         if (element.files.length > 0) {
+            this.App.OutputHelper.clearOutput();
+            this.updateStatusIcon(document.getElementById("inputStatusIcon"), "loading", "Loading input");
+
             document.getElementById("inputFileName").innerText = "loading...";
             document.getElementById("inputFileButton").setAttribute("disabled", true);
             document.getElementById("inputProgress").style.display = "";
@@ -276,11 +309,14 @@ class UIHelper {
         this.updateInputProgress(100, 100, "Loading");
 
         if (error) {
+            this.updateStatusIcon(document.getElementById("inputStatusIcon"), "error", "Error loading input");
             document.getElementById("inputErrorText").innerText = "An error occurred loading the input file. Check the console for more information.";
             document.getElementById("inputErrorAlert").classList.remove("hidden");
             document.getElementById("inputProgress").style.display = "none";
             return;
         }
+
+        this.updateStatusIcon(document.getElementById("inputStatusIcon"), "loading", "Processing input");
 
         const file = data.file.file;
         document.getElementById("inputFileName").innerText = file.name;
@@ -307,15 +343,16 @@ class UIHelper {
 
         this.App.OperationHelper.run();
 
+        this.updateStatusIcon(document.getElementById("inputStatusIcon"), "success", "Input finished loading successfully");
         document.getElementById("inputProgress").style.display = "none";
     }
 
     /**
      * Updates input load progress
      *
-     * @param {number} loaded
-     * @param {number} total
-     * @param {string} progressType
+     * @param {number} loaded - The number of input chunks loaded
+     * @param {number} total - The total number of input chunks
+     * @param {string} progressType - The current input task
      */
     updateInputProgress(loaded, total, progressType) {
         const progress = document.getElementById("inputProgress");
@@ -364,7 +401,6 @@ class UIHelper {
             break;
         }
 
-        console.log(tooltipText);
         if (tooltipText !== null
             && tooltipText !== undefined) {
             icon.setAttribute("data-toggle", "tooltip");
@@ -379,6 +415,45 @@ class UIHelper {
                 $(icon).tooltip("dispose");
             });
         }
+    }
+
+    /**
+     * Displays the view code modal with the selected output code displayed
+     *
+     * @param {Event} event - The event which triggered the modal
+     */
+    async showViewCodeModal(event) {
+        // Finds the parent flowItem element
+        const recurse = function (element) {
+            if (element.classList.contains("flowItem")) {
+                return element;
+            }
+            return recurse(element.parentElement);
+        };
+
+        const flowItem = recurse(event.target);
+        let opNum;
+        let opName;
+
+        if (flowItem.id === "inputContainer") {
+            opNum = 0;
+            opName = "Input";
+        } else {
+            const liElement = flowItem.parentElement;
+            const ulElement = document.getElementById("flowList");
+            const elements = Array.from(ulElement.children);
+
+            opNum = elements.indexOf(liElement) + 1;
+            opName = flowItem.firstElementChild.innerText;
+        }
+
+        const contentElement = document.getElementById("viewCodeModalContent");
+        contentElement.firstElementChild.innerText = `View Code - ${opName}`;
+
+        const outputData = await this.App.OutputHelper.getOutput(opNum, true);
+        document.getElementById("viewCodeModalArea").innerHTML = outputData.output;
+
+        $("#viewCodeModal").modal();
     }
 }
 
