@@ -2,9 +2,14 @@
  * Worker to handle storage and processing of the input file
  */
 import CryptoJS from "crypto-js";
+import HashWorker from "./Hash.worker.js";
 
 // Object containing the input file and data
 self.input = null;
+
+// Object containing hash worker callbacks
+self.hashCallbacks = {};
+self.hashCallbackId = 0;
 
 /**
  * Handle messages sent by the main thread
@@ -132,22 +137,86 @@ self.scanInput = async function () {
     }
 };
 
+self.handleHashWorkerMessage = function (message) {
+    if (!message.data) return;
+    const data = message.data;
+
+    if (!data.command) return;
+    switch (data.command) {
+    case "callback":
+        self.hashCallbacks[data.data.callbackid](data.data.data);
+        break;
+    default:
+        console.error(`Unknown command "${data.command}"`);
+    }
+};
+
+self.addHashWorkerCallback = function (callback) {
+    const id = self.hashCallbackId++;
+    self.hashCallbacks[id] = callback;
+    return id;
+};
+
 /**
  * Calculates hashes for the input file
  *
  * @returns {object} - Object containing MD5, SHA1 and SHA256 hashes
  */
-self.calculateHashes = function () {
+self.calculateHashes = async function () {
     const data = self.getRawData();
-    const arrayData = CryptoJS.lib.WordArray.create(data);
 
-    const md5 = CryptoJS.MD5(arrayData);
-    const sha1 = CryptoJS.SHA1(arrayData);
-    const sha256 = CryptoJS.SHA256(arrayData);
+    const md5Worker = new HashWorker();
+    const sha1Worker = new HashWorker();
+    const sha256Worker = new HashWorker();
+    md5Worker.addEventListener("message", self.handleHashWorkerMessage.bind(self));
+    sha1Worker.addEventListener("message", self.handleHashWorkerMessage.bind(self));
+    sha256Worker.addEventListener("message", self.handleHashWorkerMessage.bind(self));
+
+    const md5 = new Promise((resolve, reject) => {
+        md5Worker.postMessage({
+            command: "hashArrayBuffer",
+            data: {
+                callbackId: self.addHashWorkerCallback(resolve),
+                data: data,
+                algorithm: "md5"
+            }
+        });
+    });
+    const sha1 = new Promise((resolve, reject) => {
+        sha1Worker.postMessage({
+            command: "hashArrayBuffer",
+            data: {
+                callbackId: self.addHashWorkerCallback(resolve),
+                data: data,
+                algorithm: "sha1"
+            }
+        });
+    });
+    const sha256 = new Promise((resolve, reject) => {
+        sha256Worker.postMessage({
+            command: "hashArrayBuffer",
+            data: {
+                callbackId: self.addHashWorkerCallback(resolve),
+                data: data,
+                algorithm: "sha256"
+            }
+        });
+    });
+
+    let md5String;
+    let sha1String;
+    let sha256String;
+
+    await Promise.all([md5, sha1, sha256]).then((values) => {
+        console.log(values);
+        md5String = values[0];
+        sha1String = values[1];
+        sha256String = values[2];
+    });
 
     return {
-        md5: md5.toString(),
-        sha1: sha1.toString(),
-        sha256: sha256.toString()
+        md5: md5String,
+        sha1: sha1String,
+        sha256: sha256String
     };
 };
