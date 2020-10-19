@@ -47,6 +47,10 @@
     margin-left: inherit;
 }
 
+.form-check-label {
+    user-select: none;
+}
+
 .spinner {
     animation: spin 2s linear infinite;
 }
