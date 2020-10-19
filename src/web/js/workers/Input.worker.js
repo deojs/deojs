@@ -121,12 +121,22 @@ self.scanInput = async function () {
     try {
         const proxyUrl = "http://localhost:8000/";
         const rawData = self.getRawData();
-        const arrayData = CryptoJS.lib.WordArray.create(rawData);
-        const hash = CryptoJS.SHA256(arrayData).toString();
+
+        const sha256Worker = new HashWorker();
+        sha256Worker.addEventListener("message", self.handleHashWorkerMessage.bind(self));
+        const sha256 = await new Promise((resolve, reject) => {
+            sha256Worker.postMessage({
+                command: "hashArrayBuffer",
+                data: {
+                    callbackId: self.addHashWorkerCallback(resolve),
+                    data: rawData,
+                    algorithm: "sha256"
+                }
+            });
+        });
 
         const apikey = "";
-
-        const response = await fetch(`${proxyUrl}https://www.virustotal.com/vtapi/v2/file/report?apikey=${apikey}&resource=${hash}`, {
+        const response = await fetch(`${proxyUrl}https://www.virustotal.com/vtapi/v2/file/report?apikey=${apikey}&resource=${sha256}`, {
             method: "GET"
         });
 
@@ -208,7 +218,6 @@ self.calculateHashes = async function () {
     let sha256String;
 
     await Promise.all([md5, sha1, sha256]).then((values) => {
-        console.log(values);
         md5String = values[0];
         sha1String = values[1];
         sha256String = values[2];
