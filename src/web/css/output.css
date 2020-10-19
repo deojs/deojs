@@ -9,3 +9,28 @@
     height: calc(100% - 2.8em - 5px);
     overflow: auto;
 }
+
+.line-numbers {
+    counter-reset: line;
+}
+
+.line-numbers code {
+    counter-increment: line;
+}
+
+.line-numbers code::before {
+    content: "00" counter(line);
+    user-select: none;
+    font-weight: bold;
+    color: #888888;
+    margin-right: 5px;
+    margin-top: -1px;
+}
+
+.line-numbers code:nth-child(n+10)::before {
+    content: "0" counter(line);
+}
+
+.line-numbers code:nth-child(n+100)::before {
+    content: "0" counter(line);
+}

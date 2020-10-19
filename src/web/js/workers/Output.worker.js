@@ -63,8 +63,15 @@ self.getOutput = function (outputNum, highlight) {
         if (!Object.prototype.hasOwnProperty.call(self.outputs[outputNum].opOutputAST, "data")) {
             parses = false;
         }
+        const highlighted = hljs.highlight(self.outputs[outputNum].language, self.outputs[outputNum].opOutputString).value;
+        const lines = highlighted.split("\n");
+        let out = "";
+        for (let i = 0; i < lines.length; i++) {
+            out += `<code>${lines[i]}</code>`;
+            if (i !== lines.length - 1) out += "\n";
+        }
         return {
-            output: hljs.highlight(self.outputs[outputNum].language, self.outputs[outputNum].opOutputString).value,
+            output: out,
             parses: parses
         };
     }

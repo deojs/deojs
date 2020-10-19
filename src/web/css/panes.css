@@ -29,14 +29,22 @@
 }
 
 
-#debugOpsCheckbox {
+#debugOpsCheckbox,
+#outputLineNumbersCheckbox {
     position: relative;
     margin-right: 5px;
     float: right;
 }
 
-#debugOpsCheckboxLabel {
+#debugOpsCheckboxLabel,
+#outputLineNumbersCheckboxLabel {
     float: right;
+}
+
+#viewCodeLineNumbersCheckbox,
+#viewCodeLineNumbersCheckboxLabel {
+    position: relative;
+    margin-left: inherit;
 }
 
 .spinner {

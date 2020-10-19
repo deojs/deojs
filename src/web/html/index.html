@@ -59,6 +59,8 @@
                     <div class="paneHeader" id="outputPaneHeader">
                         <h2>Output</h2>
                         <span id="outputStatusIcon"></span>
+                        <label class="form-check-label" for="outputLineNumbersCheckbox" id="outputLineNumbersCheckboxLabel">Show line numbers</label>
+                        <input type="checkbox" class="form-check-input" id="outputLineNumbersCheckbox">
                     </div>
                     <pre id="outputArea">
                     </pre>
@@ -69,6 +71,10 @@
             <div class="modal-dialog modal-xl">
                 <div id="viewCodeModalContent" class="modal-content">
                     <h1>View Code</h1>
+                    <div>
+                        <input type="checkbox" class="form-check-input" id="viewCodeLineNumbersCheckbox">
+                        <label class="form-check-label" for="viewCodeLineNumbersCheckbox" id="viewCodeLineNumbersCheckboxLabel">Show line numbers</label>
+                    </div>
                     <pre id="viewCodeModalArea">
                     </pre>
                 </div>

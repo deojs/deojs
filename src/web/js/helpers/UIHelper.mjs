@@ -184,6 +184,8 @@ class UIHelper {
 
         // Operations
         document.getElementById("debugOpsCheckbox").addEventListener("change", this.refreshOperationsList.bind(this));
+        document.getElementById("outputLineNumbersCheckbox").addEventListener("change", this.toggleOutputLineNumbers.bind(this));
+        document.getElementById("viewCodeLineNumbersCheckbox").addEventListener("change", this.toggleViewCodeLineNumbers.bind(this));
     }
 
     /**
@@ -454,6 +456,30 @@ class UIHelper {
         document.getElementById("viewCodeModalArea").innerHTML = outputData.output;
 
         $("#viewCodeModal").modal();
+    }
+
+    /**
+     * Toggles displaying line numbers on the output pane
+     */
+    toggleOutputLineNumbers() {
+        const show = document.getElementById("outputLineNumbersCheckbox").checked;
+        if (show) {
+            document.getElementById("outputArea").classList.add("line-numbers");
+        } else {
+            document.getElementById("outputArea").classList.remove("line-numbers");
+        }
+    }
+
+    /**
+     * Toggles displaying line numbers on the view code pane
+     */
+    toggleViewCodeLineNumbers() {
+        const show = document.getElementById("viewCodeLineNumbersCheckbox").checked;
+        if (show) {
+            document.getElementById("viewCodeModalArea").classList.add("line-numbers");
+        } else {
+            document.getElementById("viewCodeModalArea").classList.remove("line-numbers");
+        }
     }
 }
 
