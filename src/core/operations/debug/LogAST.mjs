@@ -14,9 +14,9 @@ class LogAST {
     /**
      * Run function
      *
-     * @param {Object} input - The input code
+     * @param {object} input - The input code
      * @param {Array} args - The operation arguments
-     * @returns {Object} - The unmodified code
+     * @returns {object} - The unmodified code
      */
     run(input, args) {
         console.log(input);
