@@ -1705,7 +1705,6 @@ primaryExpression ->
     postDecrementExpression)
     {%
         function(data) {
-            data = data[0];
             return {
                 type: "primaryExpression",
                 data: data[0]

@@ -10181,7 +10181,6 @@ var grammar = {
     {"name": "primaryExpression$subexpression$1", "symbols": ["postDecrementExpression"]},
     {"name": "primaryExpression", "symbols": ["primaryExpression$subexpression$1"], "postprocess": 
         function(data) {
-            data = data[0];
             return {
                 type: "primaryExpression",
                 data: data[0]

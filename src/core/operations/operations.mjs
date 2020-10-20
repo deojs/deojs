@@ -7,6 +7,7 @@ import FindReplace from "./FindReplace.mjs";
 import RemoveComments from "./RemoveComments.mjs";
 import ReplaceAliases from "./ReplaceAliases.mjs";
 import ReplaceFormatExpression from "./ReplaceFormatExpression.mjs";
+import ConcatenateStrings from "./ConcatenateStrings.mjs";
 
 // Debug operation imports
 import LogAST from "./debug/LogAST.mjs";
@@ -18,6 +19,7 @@ class Operations {
 
         // Create an object containing all operations so we can refer
         // to them by name (filename)
+        this.operations.concatenatestrings = ConcatenateStrings;
         this.operations.findreplace = FindReplace;
         this.operations.removecomments = RemoveComments;
         this.operations.replacealiases = ReplaceAliases;
