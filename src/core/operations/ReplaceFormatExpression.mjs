@@ -136,8 +136,8 @@ class ReplaceFormatExpression {
                 }
                 return out;
             }
-            if (Object.prototype.hasOwnProperty.call(obj, "type") &&
-                Object.prototype.hasOwnProperty.call(obj, "data")) {
+            if (Object.prototype.hasOwnProperty.call(obj, "type")
+                && Object.prototype.hasOwnProperty.call(obj, "data")) {
                 if (obj.type === "formatExpression") {
                     return this.replaceFormatExpression(obj.data);
                 }
