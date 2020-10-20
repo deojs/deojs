@@ -11,6 +11,7 @@ import ConcatenateStrings from "./ConcatenateStrings.mjs";
 
 // Debug operation imports
 import LogAST from "./debug/LogAST.mjs";
+import ThrowError from "./debug/ThrowError.mjs";
 
 class Operations {
     constructor() {
@@ -26,6 +27,7 @@ class Operations {
         this.operations.replaceformatexpression = ReplaceFormatExpression;
 
         this.debugoperations.logast = LogAST;
+        this.debugoperations.throwerror = ThrowError;
     }
 
     /**
