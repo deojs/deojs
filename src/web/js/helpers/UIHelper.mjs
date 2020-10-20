@@ -106,7 +106,6 @@ class UIHelper {
      */
     onFunctionAdded(event) {
         const itemElement = event.item;
-        console.log(event);
         const opContainer = document.createElement("div");
         $(() => {
             $(itemElement).tooltip("dispose");
