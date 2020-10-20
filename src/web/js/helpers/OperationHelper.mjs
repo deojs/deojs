@@ -239,8 +239,9 @@ class OperationHelper {
      *
      * @param {object} output - The output data
      * @param {string} language - The output language
+     * @param {boolean} error - True if there was an error during execution
      */
-    async runComplete(output, language) {
+    async runComplete(output, language, error) {
         this.App.OutputHelper.updateOutput(output, language);
 
         const outputData = await this.App.OutputHelper.getOutput(-1, true);
@@ -253,7 +254,9 @@ class OperationHelper {
 
         // Set output status icon
         const outputIcon = document.getElementById("outputStatusIcon");
-        if (outputData.parses) {
+        if (error) {
+            this.App.UIHelper.updateStatusIcon(outputIcon, "error", "An error occurred during operation");
+        } else if (outputData.parses) {
             this.App.UIHelper.updateStatusIcon(outputIcon, "success", "All operations have completed execution and the result parses");
         } else {
             this.App.UIHelper.updateStatusIcon(outputIcon, "warning", "All operations have completed execution, but the result does not parse");

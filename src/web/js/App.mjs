@@ -68,7 +68,7 @@ class App {
             this.AppWorkerCallbacks[data.data.callbackid](data.data.data);
             break;
         case "runcomplete":
-            this.OperationHelper.runComplete(data.data.outputs, data.data.language);
+            this.OperationHelper.runComplete(data.data.outputs, data.data.language, data.data.error);
             break;
         case "inputFileLoadProgress":
             this.UIHelper.updateInputProgress(data.data.loaded, data.data.total, "Loading");

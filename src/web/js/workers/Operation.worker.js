@@ -17,6 +17,7 @@ self.addCallback = function (callback) {
 
 self.run = async function (input, language, operations) {
     let currentInput = input.ast;
+    let error = false;
     const outputs = [];
 
     outputs.push({
@@ -29,7 +30,6 @@ self.run = async function (input, language, operations) {
 
     for (let i = 0; i < operations.length; i++) {
         console.log(`Running operation ${i} (${operations[i].displayName})`);
-
         // Update status of operation
         self.postMessage({
             command: "updateOpStatus",
@@ -59,7 +59,24 @@ self.run = async function (input, language, operations) {
         }
 
         // Run the operation
-        const opOutput = opClass.run(opInput, operations[i].args);
+        let opOutput;
+        try {
+            opOutput = opClass.run(opInput, operations[i].args);
+        } catch (e) {
+            console.error(e);
+            error = true;
+            self.postMessage({
+                command: "updateOpStatus",
+                data: {
+                    opIndex: i,
+                    opName: operations[i].name,
+                    status: "error",
+                    tooltipText: e.toString()
+                }
+            });
+            break;
+        }
+
         let opOutputAST = opOutput;
         let opOutputString = opOutput;
 
@@ -125,7 +142,8 @@ self.run = async function (input, language, operations) {
         command: "complete",
         data: {
             language: language,
-            outputs: outputs
+            outputs: outputs,
+            error: error
         }
     });
 };
