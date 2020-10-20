@@ -8,16 +8,17 @@ class ConcatenateStrings {
         this.name = "Concatenate Strings";
         this.description = "Performs string concatenation on strings which have been split apart.";
         this.args = [];
-        this.languages = []; // Empty array = all languages
-        this.inputType = "ast"; // Input is a string (not an AST object)
-        this.outputType = "ast"; // Output is a string (not an AST object)
+        this.languages = ["powershell"]; // Empty array = all languages
+        this.inputType = "ast"; // Input is an AST object
+        this.outputType = "string"; // Output is a string (not an AST object)
         this.progress = false; // Don't pass this operation a progress function
     }
 
     /**
      *
      * @param {object} ast - The AST segment to search for additive expressions
-     * @returns {string} - An array of strings to concatenate
+     * @returns {string} - The concatenated string
+     * @throws {CustomError} - Throws when an expression does not concatenate only strings
      */
     concatenateExpressionStrings(ast) {
         const recurse = function (obj) {
@@ -97,7 +98,7 @@ class ConcatenateStrings {
      * Searches an additive expression to make sure it only uses strings (or other additive expressions)
      *
      * @param {object} expression - The additive expression to process
-     * @returns {object} - The modified expression
+     * @returns {string} - The concatenated string expression
      */
     processExpression(expression) {
         try {
@@ -107,10 +108,10 @@ class ConcatenateStrings {
             if (error instanceof CustomError) {
                 // Use error handling to reject expressions which
                 // aren't just strings
-                return expression;
+                return this.prettyPrint(expression);
             }
             console.error(error);
-            return expression;
+            return this.prettyPrint(expression);
         }
     }
 
@@ -178,7 +179,7 @@ class ConcatenateStrings {
         }.bind(this);
 
         const out = recurse(input);
-        return out;
+        return this.prettyPrint(out);
     }
 }
 
