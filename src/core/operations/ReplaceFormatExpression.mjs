@@ -27,7 +27,7 @@ class ReplaceFormatExpression {
                 return null;
             }
             if (Object.prototype.hasOwnProperty.call(obj, "type")
-            && Object.prototype.hasOwnProperty.call(obj, "data")) {
+                && Object.prototype.hasOwnProperty.call(obj, "data")) {
                 if (obj.type === "verbatimStringLiteral") {
                     // Only pretty print the string characters
                     return this.prettyPrint(obj.data[1]);
